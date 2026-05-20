@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QRAttend — Hệ thống điểm danh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════ -->
+<aside class="sb">
+  <!-- Logo -->
+  <div class="sb-logo">
+    <div class="sb-logo-ic">📡</div>
+    <div>
+      <div class="sb-logo-tx">QRAttend</div>
+      <div class="sb-logo-su">Hệ thống điểm danh QR</div>
+    </div>
+  </div>
+
+  <!-- User info -->
+  <div class="sb-user">
+    <div class="sb-av" id="sbAv">NM</div>
+    <div>
+      <div class="sb-un" id="sbNm">Nguyễn Minh</div>
+      <div class="sb-ur" id="sbRl">Giảng viên · Khoa CNTT</div>
+    </div>
+  </div>
+
+  <!-- Role toggle -->
+  <div style="padding:0 7px">
+    <div class="sb-toggle" style="margin-top:10px">
+      <button class="sb-tb on" onclick="role('gv',this)">Giảng viên</button>
+      <button class="sb-tb"    onclick="role('admin',this)">Admin</button>
+    </div>
+  </div>
+
+  <!-- Giảng viên navigation -->
+  <div id="nav-gv">
+    <div class="sb-sec">Tổng quan</div>
+    <div class="sb-it on" onclick="go('dashboard',this)"><span class="dot"></span>Dashboard</div>
+    <div class="sb-it"    onclick="go('sessions',this)"><span class="dot"></span>Buổi học</div>
+
+    <div class="sb-sec">Điểm danh</div>
+    <div class="sb-it" onclick="go('qr',this)"><span class="dot"></span>Mở QR điểm danh</div>
+    <div class="sb-it" onclick="go('attendance',this)"><span class="dot"></span>Danh sách điểm danh</div>
+
+    <div class="sb-sec">Báo cáo</div>
+    <div class="sb-it" onclick="go('report',this)"><span class="dot"></span>Báo cáo lớp</div>
+  </div>
+
+  <!-- Admin navigation -->
+  <div id="nav-admin" style="display:none">
+    <div class="sb-sec">Tổng quan</div>
+    <div class="sb-it" onclick="go('adash',this)"><span class="dot"></span>Dashboard Admin</div>
+
+    <div class="sb-sec">Quản lý danh mục</div>
+    <div class="sb-it" onclick="go('atkb',this)"><span class="dot"></span>Nhập TKB</div>
+    <div class="sb-it" onclick="go('ausers',this)"><span class="dot"></span>Tài khoản</div>
+    <div class="sb-it" onclick="go('arooms',this)"><span class="dot"></span>Phòng học</div>
+    <div class="sb-it" onclick="go('asubjects',this)"><span class="dot"></span>Môn học</div>
+    <div class="sb-it" onclick="go('asemesters',this)"><span class="dot"></span>Học kỳ</div>
+
+    <div class="sb-sec">Báo cáo</div>
+    <div class="sb-it" onclick="go('areport',this)"><span class="dot"></span>Báo cáo toàn trường</div>
+  </div>
+
+  <div class="sb-foot">
+    <button class="sb-out">⎋ &nbsp;Đăng xuất</button>
+  </div>
+</aside>
+
+<!-- ════════════════════════════════════════
+     MAIN AREA
+════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="pgTitle">Dashboard</div>
+      <div class="tb-sub"   id="pgSub">Thứ 3, 02/09/2025 · HK1-2024-2025</div>
+    </div>
+    <div class="tb-acts">
+      <div class="srch"><span class="srch-ic">🔍</span><input placeholder="Tìm kiếm..."></div>
+      <button class="btn btn-s" style="padding:7px 10px">🔔</button>
+    </div>
+  </div>
+
+  <!-- Page content -->
+  <div class="content">
+
+    <!-- ══════════════════════════════════
+         GV — DASHBOARD
+    ══════════════════════════════════ -->
+    <div class="page active" id="p-dashboard">
+      <div class="sg">
+        <div class="sc gr"><div class="sc-ic">📅</div><div class="sc-lb">Buổi hôm nay</div><div class="sc-vl gr">2</div><div class="sc-su">1 đang mở · 1 sắp tới</div></div>
+        <div class="sc bl"><div class="sc-ic">📚</div><div class="sc-lb">Tuần này</div><div class="sc-vl bl">5</div><div class="sc-su">3 môn khác nhau</div></div>
+        <div class="sc am"><div class="sc-ic">📊</div><div class="sc-lb">Học kỳ này</div><div class="sc-vl am">48</div><div class="sc-su">12 xong · 36 còn lại</div></div>
+        <div class="sc pu"><div class="sc-ic">🎯</div><div class="sc-lb">Chuyên cần TB</div><div class="sc-vl pu">87%</div><div class="sc-su">Toàn bộ lớp</div></div>
+      </div>
+
+      <div class="g2">
+        <div>
+          <!-- Today's sessions -->
+          <div class="card">
+            <div class="card-h">
+              <div><div class="card-t">Buổi học hôm nay</div><div class="card-su">02/09/2025 · Thứ 3</div></div>
+            </div>
+            <div style="padding:8px;display:flex;flex-direction:column;gap:8px">
+              <div style="background:var(--bg3);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Cấu trúc dữ liệu</div>
+                    <div style="font-size:11px;color:var(--tx3)">CNTT-K22A · Tiết 1–3 · B201 · Buổi 5/15</div>
+                  </div>
+                  <span class="bdg b-op">Đang mở</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="pb" style="flex:1"><div class="pf gr" style="width:55%"></div></div>
+                  <span style="font-size:12px;font-weight:600;color:var(--gr);font-family:var(--mo)">22/40</span>
+                  <button class="btn btn-s btn-sm" onclick="go('qr',null)">Xem QR</button>
+                </div>
+              </div>
+              <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Lập trình Web</div>
+                    <div style="font-size:11px;color:var(--tx3)">CNTT-K23B · Tiết 7–9 · A105 · Buổi 3/15</div>
+                  </div>
+                  <span class="bdg b-sc">Sắp tới</span>
+                </div>
+                <button class="btn btn-p" style="width:100%;font-size:12px" onclick="go('qr',null)">▶ Bắt đầu buổi học</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Semester progress -->
+          <div class="card">
+            <div class="card-h"><div class="card-t">Tiến độ học kỳ</div></div>
+            <div style="padding:12px 14px;display:flex;flex-direction:column;gap:11px">
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Cấu trúc dữ liệu</span><span style="color:var(--tx3);font-family:var(--mo)">5/15</span></div><div class="pb"><div class="pf gr" style="width:33%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Lập trình Web</span><span style="color:var(--tx3);font-family:var(--mo)">3/15</span></div><div class="pb"><div class="pf gr" style="width:20%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">Mạng máy tính</span><span style="color:var(--tx3);font-family:var(--mo)">4/15</span></div><div class="pb"><div class="pf gr" style="width:27%"></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Weekly schedule -->
+          <div class="card">
+            <div class="card-h"><div class="card-t">Lịch tuần này</div></div>
+            <table class="tbl">
+              <tbody>
+                <tr><td style="color:var(--tx3);font-size:11px">T2</td><td>CTDL · K22A · B201 · T.1–3</td><td><span class="bdg b-cl">Xong</span></td></tr>
+                <tr><td style="color:var(--gr);font-size:11px;font-weight:600">T3</td><td style="font-weight:500">CTDL · K22A · B201 · T.1–3</td><td><span class="bdg b-op">Hôm nay</span></td></tr>
+                <tr><td style="color:var(--tx3);font-size:11px">T3</td><td>LT Web · K23B · A105 · T.7–9</td><td><span class="bdg b-sc">Sắp tới</span></td></tr>
+                <tr><td style="color:var(--tx3);font-size:11px">T5</td><td>Mạng MT · K22B · C301 · T.4–6</td><td><span class="bdg b-sc">Sắp tới</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /dashboard -->
+
+    <!-- ══════════════════════════════════
+         GV — QR ĐIỂM DANH
+    ══════════════════════════════════ -->
+    <div class="page" id="p-qr">
+      <div class="qr-screen" style="height:calc(100vh - 114px)">
+        <div class="qr-panel">
+          <div style="text-align:center">
+            <div style="font-size:15px;font-weight:700;margin-bottom:2px">Cấu trúc dữ liệu · CNTT-K22A</div>
+            <div style="font-size:11px;color:var(--tx3)">Tiết 1–3 · Phòng B201 · Buổi 5/15 · 02/09/2025</div>
+          </div>
+
+          <div class="qr-box">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" fill="white"/>
+              <rect x="8"  y="8"  width="26" height="26" rx="3" fill="#111"/><rect x="13" y="13" width="16" height="16" rx="2" fill="white"/><rect x="16" y="16" width="10" height="10" rx="1" fill="#111"/>
+              <rect x="66" y="8"  width="26" height="26" rx="3" fill="#111"/><rect x="71" y="13" width="16" height="16" rx="2" fill="white"/><rect x="74" y="16" width="10" height="10" rx="1" fill="#111"/>
+              <rect x="8"  y="66" width="26" height="26" rx="3" fill="#111"/><rect x="13" y="71" width="16" height="16" rx="2" fill="white"/><rect x="16" y="74" width="10" height="10" rx="1" fill="#111"/>
+              <rect x="40" y="8"  width="4" height="4" fill="#111"/><rect x="46" y="8"  width="4" height="4" fill="#111"/><rect x="52" y="8"  width="4" height="4" fill="#111"/>
+              <rect x="40" y="14" width="4" height="4" fill="#111"/><rect x="52" y="14" width="4" height="4" fill="#111"/>
+              <rect x="44" y="20" width="4" height="4" fill="#111"/><rect x="50" y="20" width="4" height="4" fill="#111"/>
+              <rect x="8"  y="40" width="4" height="4" fill="#111"/><rect x="14" y="40" width="4" height="4" fill="#111"/><rect x="20" y="40" width="4" height="4" fill="#111"/>
+              <rect x="8"  y="46" width="4" height="4" fill="#111"/><rect x="20" y="46" width="4" height="4" fill="#111"/>
+              <rect x="8"  y="52" width="4" height="4" fill="#111"/><rect x="14" y="52" width="4" height="4" fill="#111"/>
+              <rect x="40" y="40" width="4" height="4" fill="#111"/><rect x="48" y="40" width="4" height="4" fill="#111"/><rect x="56" y="40" width="4" height="4" fill="#111"/><rect x="64" y="40" width="4" height="4" fill="#111"/>
+              <rect x="44" y="44" width="4" height="4" fill="#111"/><rect x="52" y="44" width="4" height="4" fill="#111"/><rect x="60" y="44" width="4" height="4" fill="#111"/>
+              <rect x="40" y="48" width="4" height="4" fill="#111"/><rect x="56" y="48" width="4" height="4" fill="#111"/>
+              <rect x="44" y="52" width="4" height="4" fill="#111"/><rect x="48" y="52" width="4" height="4" fill="#111"/><rect x="64" y="52" width="4" height="4" fill="#111"/>
+              <rect x="68" y="40" width="4" height="4" fill="#111"/><rect x="80" y="40" width="4" height="4" fill="#111"/>
+              <rect x="74" y="46" width="4" height="4" fill="#111"/><rect x="86" y="46" width="4" height="4" fill="#111"/>
+              <rect x="68" y="52" width="4" height="4" fill="#111"/><rect x="76" y="52" width="4" height="4" fill="#111"/>
+              <rect x="40" y="66" width="4" height="4" fill="#111"/><rect x="48" y="66" width="4" height="4" fill="#111"/><rect x="56" y="66" width="4" height="4" fill="#111"/>
+              <rect x="44" y="72" width="4" height="4" fill="#111"/><rect x="60" y="72" width="4" height="4" fill="#111"/>
+              <rect x="40" y="78" width="4" height="4" fill="#111"/><rect x="52" y="78" width="4" height="4" fill="#111"/><rect x="64" y="78" width="4" height="4" fill="#111"/>
+              <rect x="68" y="66" width="4" height="4" fill="#111"/><rect x="80" y="66" width="4" height="4" fill="#111"/>
+              <rect x="72" y="72" width="4" height="4" fill="#111"/><rect x="84" y="72" width="4" height="4" fill="#111"/>
+              <rect x="68" y="78" width="4" height="4" fill="#111"/><rect x="76" y="78" width="4" height="4" fill="#111"/><rect x="88" y="78" width="4" height="4" fill="#111"/>
+            </svg>
+          </div>
+
+          <div class="timer-wrap">
+            <div class="timer-ring">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="24" fill="none" stroke="#1E2535" stroke-width="4"/>
+                <circle cx="28" cy="28" r="24" fill="none" stroke="#22C55E" stroke-width="4"
+                        stroke-dasharray="151" stroke-dashoffset="38" stroke-linecap="round"
+                        id="tcircle"/>
+              </svg>
+              <div class="timer-num" id="tnum">42</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:600">Làm mới sau <span id="tdisp" style="color:var(--gr);font-family:var(--mo)">42s</span></div>
+              <div style="font-size:10px;color:var(--tx3)">Token tự động đổi mỗi 60s</div>
+            </div>
+          </div>
+
+          <div class="qr-stat"><div class="pulse"></div>Buổi học đang diễn ra</div>
+
+          <div style="display:flex;gap:8px;width:100%">
+            <button class="btn btn-a" style="flex:1;font-size:12px" onclick="openCheckoutModal()">⚡ Yêu cầu Check-out</button>
+            <button class="btn btn-d" style="flex:1;font-size:12px">⏹ Kết thúc buổi</button>
+          </div>
+        </div>
+
+        <!-- Live attendance panel -->
+        <div class="att-panel">
+          <div class="att-head">
+            <div>
+              <div style="font-size:11px;color:var(--tx3);margin-bottom:1px">Đã điểm danh</div>
+              <div><span class="att-cnt" id="attCnt">22</span><span style="color:var(--tx3);font-size:13px"> / 40</span></div>
+            </div>
+            <div style="display:flex;gap:5px;flex-direction:column;align-items:flex-end">
+              <span class="bdg b-pr">✓ Đúng giờ: 18</span>
+              <span class="bdg b-lt">⏰ Muộn: 4</span>
+            </div>
+          </div>
+          <div class="att-body" id="attBody"></div>
+        </div>
+      </div>
+    </div><!-- /qr -->
+
+    <!-- ══════════════════════════════════
+         GV — BUỔI HỌC
+    ══════════════════════════════════ -->
+    <div class="page" id="p-sessions">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <select class="fi" style="width:230px">
+          <option>Cấu trúc dữ liệu · K22A</option>
+          <option>Lập trình Web · K23B</option>
+          <option>Mạng máy tính · K22B</option>
+        </select>
+        <span style="color:var(--tx3);font-size:12px">15 buổi · 5 đã xong · 10 còn lại</span>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead>
+            <tr><th>Buổi</th><th>Ngày</th><th>Tiết</th><th>Phòng</th><th>Có mặt</th><th>Muộn</th><th>Trạng thái</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="font-family:var(--mo);font-weight:600">1/15</td><td>19/08</td><td>1–3</td><td>B201</td><td><span style="color:var(--gr);font-weight:600">38/40</span> <span style="color:var(--tx3)">95%</span></td><td style="color:var(--tx3)">2</td><td><span class="bdg b-cl">Đã xong</span></td><td><button class="btn btn-s btn-sm" onclick="go('attendance',null)">Xem</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">2/15</td><td>26/08</td><td>1–3</td><td>B201</td><td><span style="color:var(--gr);font-weight:600">35/40</span> <span style="color:var(--tx3)">87%</span></td><td style="color:var(--tx3)">5</td><td><span class="bdg b-cl">Đã xong</span></td><td><button class="btn btn-s btn-sm" onclick="go('attendance',null)">Xem</button></td></tr>
+            <tr style="background:rgba(34,197,94,.02)"><td style="font-family:var(--mo);font-weight:600;color:var(--gr)">5/15</td><td style="color:var(--gr)">02/09</td><td>1–3</td><td>B201</td><td><span style="color:var(--gr);font-weight:600">22/40</span> <span style="color:var(--am)">55%</span></td><td style="color:var(--am)">4</td><td><span class="bdg b-op">Đang mở</span></td><td><button class="btn btn-p btn-sm" onclick="go('qr',null)">Xem QR</button></td></tr>
+            <tr><td style="font-family:var(--mo);color:var(--tx3)">6/15</td><td style="color:var(--tx3)">09/09</td><td>1–3</td><td>B201</td><td style="color:var(--tx3)">—</td><td style="color:var(--tx3)">—</td><td><span class="bdg b-sc">Sắp tới</span></td><td><button class="btn btn-p btn-sm">▶ Bắt đầu</button></td></tr>
+            <tr><td style="font-family:var(--mo);color:var(--tx3)">7/15</td><td style="color:var(--tx3)">16/09</td><td>1–3</td><td>B201</td><td style="color:var(--tx3)">—</td><td style="color:var(--tx3)">—</td><td><span class="bdg b-sc">Sắp tới</span></td><td><button class="btn btn-s btn-sm">Bắt đầu</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /sessions -->
+
+    <!-- ══════════════════════════════════
+         GV — DANH SÁCH ĐIỂM DANH
+    ══════════════════════════════════ -->
+    <div class="page" id="p-attendance">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <div class="srch"><span class="srch-ic">🔍</span><input placeholder="Tìm theo tên, MSSV..."></div>
+        <select class="fi" style="width:170px">
+          <option>Tất cả</option><option>Có mặt</option><option>Vắng</option><option>Có phép</option><option>Muộn</option>
+        </select>
+        <span style="color:var(--tx3);font-size:11px">Buổi 5/15 · 02/09/2025 · CTDL · 22/40</span>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead>
+            <tr><th>MSSV</th><th>Họ tên</th><th>Check-in</th><th>Phút muộn</th><th>GPS</th><th>Check-out</th><th>Về sớm</th><th>Trạng thái</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="font-family:var(--mo)">2251012345</td><td style="font-weight:500">Nguyễn Văn An</td><td style="font-family:var(--mo);color:var(--tx3)">07:02</td><td style="color:var(--gr);font-size:11px">Đúng giờ</td><td style="color:var(--gr);font-size:11px">✓ 12m</td><td style="font-family:var(--mo);font-size:11px;color:var(--gr)">09:24</td><td style="color:var(--gr);font-size:11px">—</td><td><span class="bdg b-pr">Có mặt</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo)">2251012346</td><td style="font-weight:500">Trần Thị Bình</td><td style="font-family:var(--mo);color:var(--tx3)">07:08</td><td style="color:var(--gr);font-size:11px">Đúng giờ</td><td style="color:var(--gr);font-size:11px">✓ 8m</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td><span class="bdg b-pr">Có mặt</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo)">2251012347</td><td style="font-weight:500">Lê Minh Cường</td><td style="font-family:var(--mo);color:var(--am)">07:19</td><td style="color:var(--am);font-size:11px">+19 phút</td><td style="color:var(--gr);font-size:11px">✓ 6m</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td><span class="bdg b-lt">Muộn</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo)">2251012350</td><td style="font-weight:500">Vũ Thị Hoa</td><td style="font-family:var(--mo);color:var(--tx3)">07:05</td><td style="color:var(--gr);font-size:11px">Đúng giờ</td><td style="color:var(--rd);font-size:11px">✗ 78m</td><td style="color:var(--tx3);font-size:11px">Không quét</td><td><span style="color:var(--rd);font-size:11px;font-weight:600">Về sớm</span></td><td><span class="bdg b-pr">Có mặt</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo)">2251012348</td><td style="font-weight:500">Phạm Thu Dung</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td><span class="bdg b-ab">Vắng</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo)">2251012349</td><td style="font-weight:500">Hoàng Văn Em</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td style="color:var(--tx3);font-size:11px">—</td><td><span class="bdg b-ex">Có phép</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /attendance -->
+
+    <!-- ══════════════════════════════════
+         GV — BÁO CÁO LỚP
+    ══════════════════════════════════ -->
+    <div class="page" id="p-report">
+      <div style="display:flex;gap:10px;margin-bottom:18px;align-items:center">
+        <select class="fi" style="width:220px"><option>Cấu trúc dữ liệu · K22A</option></select>
+        <select class="fi" style="width:160px"><option>HK1-2024-2025</option></select>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-s btn-sm">📥 Excel</button>
+          <button class="btn btn-s btn-sm">📄 PDF</button>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sc gr"><div class="sc-lb">Tổng SV</div><div class="sc-vl">40</div></div>
+        <div class="sc gr"><div class="sc-lb">Tb có mặt</div><div class="sc-vl gr">87%</div></div>
+        <div class="sc am"><div class="sc-lb">Dưới ngưỡng</div><div class="sc-vl am">3</div><div class="sc-su">Vắng ≥ 20%</div></div>
+        <div class="sc bl"><div class="sc-lb">Buổi đã xong</div><div class="sc-vl bl">5/15</div></div>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>MSSV</th><th>Họ tên</th><th>Có mặt</th><th>Vắng</th><th>Có phép</th><th>Muộn</th><th>Về sớm</th><th>Tỉ lệ</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mo)">2251012345</td><td>Nguyễn Văn An</td><td>5</td><td>0</td><td>0</td><td>0</td><td>0</td><td><span style="color:var(--gr);font-weight:700;font-family:var(--mo)">100%</span></td></tr>
+            <tr><td style="font-family:var(--mo)">2251012347</td><td>Lê Minh Cường</td><td>3</td><td>2</td><td>0</td><td>3</td><td>0</td><td><span style="color:var(--am);font-weight:700;font-family:var(--mo)">60%</span></td></tr>
+            <tr style="background:rgba(239,68,68,.04)"><td style="font-family:var(--mo)">2251012350</td><td>Vũ Thị Hoa</td><td>2</td><td>2</td><td>1</td><td>1</td><td>2</td><td><span style="color:var(--rd);font-weight:700;font-family:var(--mo)">40%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /report -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — DASHBOARD
+    ══════════════════════════════════ -->
+    <div class="page" id="p-adash">
+      <div class="adm-bar">
+        <div class="adm-ic">🛡️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700">Quản trị hệ thống</div>
+          <div style="font-size:11px;color:var(--tx3)">HK1-2024-2025 · 62 lớp · 2,450 sinh viên · 128 giảng viên</div>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sc bl"><div class="sc-ic">👥</div><div class="sc-lb">Sinh viên</div><div class="sc-vl bl">2,450</div></div>
+        <div class="sc gr"><div class="sc-ic">👨‍🏫</div><div class="sc-lb">Giảng viên</div><div class="sc-vl gr">128</div></div>
+        <div class="sc am"><div class="sc-ic">🏫</div><div class="sc-lb">Lớp HC</div><div class="sc-vl am">62</div></div>
+        <div class="sc pu"><div class="sc-ic">📊</div><div class="sc-lb">Tb chuyên cần</div><div class="sc-vl pu">83%</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-h"><div class="card-t">Buổi học hôm nay</div></div>
+          <table class="tbl">
+            <thead><tr><th>Giảng viên</th><th>Môn · Lớp</th><th>Phòng</th><th>Tiết</th><th>TT</th></tr></thead>
+            <tbody>
+              <tr><td>Nguyễn Minh</td><td style="font-size:11px">CTDL · K22A</td><td style="font-family:var(--mo);font-size:11px">B201</td><td style="font-size:11px">1–3</td><td><span class="bdg b-op">Đang mở</span></td></tr>
+              <tr><td>Trần Hương</td><td style="font-size:11px">Giải tích · K23A</td><td style="font-family:var(--mo);font-size:11px">A101</td><td style="font-size:11px">4–6</td><td><span class="bdg b-sc">Sắp tới</span></td></tr>
+              <tr><td>Lê Quốc</td><td style="font-size:11px">Vật lý · K23C</td><td style="font-family:var(--mo);font-size:11px">C201</td><td style="font-size:11px">1–3</td><td><span class="bdg b-cl">Xong</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-t">Hoạt động gần đây</div></div>
+          <div style="padding:10px 14px">
+            <div class="tl-item"><div class="tl-dot"></div><div><div style="font-size:12px;font-weight:500">GV Nguyễn Minh mở buổi CTDL</div><div style="font-size:11px;color:var(--tx3)">07:01 · Phòng B201 · 22/40 SV đã điểm danh</div></div></div>
+            <div class="tl-item"><div class="tl-dot" style="background:var(--bl)"></div><div><div style="font-size:12px;font-weight:500">Admin nhập TKB HK1-2024-2025</div><div style="font-size:11px;color:var(--tx3)">12/08 · 142 dòng · 1,840 buổi học</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /adash -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — NHẬP TKB
+    ══════════════════════════════════ -->
+    <div class="page" id="p-atkb">
+      <div class="g2">
+        <div class="card">
+          <div class="card-h"><div class="card-t">Upload file TKB</div></div>
+          <div style="padding:14px">
+            <div class="fg">
+              <label class="fl">Học kỳ</label>
+              <select class="fi"><option>HK1-2024-2025</option><option>HK2-2024-2025</option></select>
+            </div>
+            <div class="upz">
+              <div style="font-size:28px;margin-bottom:8px">📁</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px">Kéo thả file Excel / CSV</div>
+              <div style="font-size:11px;color:var(--tx3)">hoặc nhấn để chọn · .xlsx · .csv · ≤ 10MB</div>
+            </div>
+            <button class="btn btn-s" style="width:100%;margin-top:10px;font-size:12px">🔗 Đồng bộ từ hệ thống trường</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">
+            <div><div class="card-t">Preview TKB đã parse</div><div class="card-su">142 dòng · <span style="color:var(--rd)">2 lỗi</span></div></div>
+            <button class="btn btn-p btn-sm">Xác nhận → sinh 1,840 buổi</button>
+          </div>
+          <table class="tbl" style="font-size:11px">
+            <thead><tr><th>Lớp</th><th>Môn</th><th>GV</th><th>Phòng</th><th>Thứ</th><th>Tuần</th><th>Buổi</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>CNTT-K22A</td><td>CTDL</td><td>Ng.Minh</td><td>B201</td><td>3</td><td>1–15</td><td style="color:var(--gr);font-weight:700">15</td><td style="color:var(--gr)">✓</td></tr>
+              <tr><td>CNTT-K23B</td><td>LT Web</td><td>Ng.Minh</td><td>A105</td><td>3</td><td>1–15</td><td style="color:var(--gr);font-weight:700">15</td><td style="color:var(--gr)">✓</td></tr>
+              <tr style="background:rgba(239,68,68,.06)"><td style="color:var(--rd)">KT-K22A</td><td>KT vĩ mô</td><td>Tr.Hương</td><td>D401</td><td>2</td><td>2–14</td><td style="color:var(--rd)">!</td><td style="color:var(--rd);font-size:10px">Phòng không tồn tại</td></tr>
+              <tr style="background:rgba(239,68,68,.06)"><td style="color:var(--rd)">KT-K23A</td><td>Tài chính</td><td>—</td><td>C201</td><td>4</td><td>1–14</td><td style="color:var(--rd)">!</td><td style="color:var(--rd);font-size:10px">GV không tồn tại</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /atkb -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — TÀI KHOẢN
+    ══════════════════════════════════ -->
+    <div class="page" id="p-ausers">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <div class="srch"><span class="srch-ic">🔍</span><input placeholder="Tên, email, mã..."></div>
+        <select class="fi" style="width:160px"><option>Tất cả vai trò</option><option>Admin</option><option>Giảng viên</option><option>Sinh viên</option></select>
+        <div style="margin-left:auto"><button class="btn btn-p btn-sm">+ Thêm tài khoản</button></div>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Khoa / Lớp</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">NM</div><span style="font-weight:500">Nguyễn Minh</span></div></td><td style="font-size:11px;color:var(--tx3)">nguyenminh@uni.edu.vn</td><td><span class="bdg b-gv">Giảng viên</span></td><td style="font-size:11px">Khoa CNTT</td><td><span class="bdg b-op">Hoạt động</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gr),var(--tl));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">VA</div><span style="font-weight:500">Nguyễn Văn An</span></div></td><td style="font-size:11px;color:var(--tx3)">2251012345@uni.edu.vn</td><td><span class="bdg b-sv">Sinh viên</span></td><td style="font-size:11px">CNTT-K22A</td><td><span class="bdg b-op">Hoạt động</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6B7280,#4B5563);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">TH</div><span style="font-weight:500">Trần Hương</span></div></td><td style="font-size:11px;color:var(--tx3)">tranhung@uni.edu.vn</td><td><span class="bdg b-gv">Giảng viên</span></td><td style="font-size:11px">Khoa Toán</td><td><span class="bdg b-ca">Khoá</span></td><td><button class="btn btn-s btn-sm">Mở khoá</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--am),#D97706);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">QT</div><span style="font-weight:500">Quản trị viên</span></div></td><td style="font-size:11px;color:var(--tx3)">admin@uni.edu.vn</td><td><span class="bdg b-ad">Admin</span></td><td style="font-size:11px">—</td><td><span class="bdg b-op">Hoạt động</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /ausers -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — PHÒNG HỌC
+    ══════════════════════════════════ -->
+    <div class="page" id="p-arooms">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <div class="srch"><span class="srch-ic">🔍</span><input placeholder="Tìm phòng..."></div>
+        <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-s btn-sm">📥 Import</button><button class="btn btn-p btn-sm">+ Thêm phòng</button></div>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Mã phòng</th><th>Toà nhà</th><th>Sức chứa</th><th>GPS</th><th>Bán kính</th><th></th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mo);font-weight:600">B201</td><td>Nhà B – Tầng 2</td><td>45</td><td><span style="color:var(--gr);font-size:11px">✓ 10.7621°, 106.6821°</span></td><td style="font-family:var(--mo);font-size:11px">50m</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">A105</td><td>Nhà A – Tầng 1</td><td>60</td><td><span style="color:var(--gr);font-size:11px">✓ 10.7618°, 106.6819°</span></td><td style="font-family:var(--mo);font-size:11px">50m</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">C301</td><td>Nhà C – Tầng 3</td><td>40</td><td><span style="color:var(--gr);font-size:11px">✓ 10.7615°, 106.6816°</span></td><td style="font-family:var(--mo);font-size:11px">50m</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">D401</td><td>Nhà D – Tầng 4 (Hội trường)</td><td>120</td><td><span style="color:var(--am);font-size:11px">⚠ Chưa nhập GPS</span></td><td style="font-family:var(--mo);font-size:11px;color:var(--tx3)">—</td><td><button class="btn btn-a btn-sm">Nhập GPS</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /arooms -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — MÔN HỌC
+    ══════════════════════════════════ -->
+    <div class="page" id="p-asubjects">
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div class="srch"><span class="srch-ic">🔍</span><input placeholder="Tìm môn học..."></div>
+        <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-s btn-sm">📥 Import Excel</button><button class="btn btn-p btn-sm">+ Thêm môn</button></div>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Mã môn</th><th>Tên môn học</th><th>Tín chỉ</th><th>Số lớp HK này</th><th></th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mo);font-weight:600">CS301</td><td>Cấu trúc dữ liệu và Giải thuật</td><td>3</td><td>8</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">CS204</td><td>Lập trình Web</td><td>3</td><td>6</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">CS305</td><td>Mạng máy tính</td><td>3</td><td>4</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td style="font-family:var(--mo);font-weight:600">MATH201</td><td>Giải tích 2</td><td>4</td><td>10</td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /asubjects -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — HỌC KỲ
+    ══════════════════════════════════ -->
+    <div class="page" id="p-asemesters">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn btn-p btn-sm">+ Thêm học kỳ</button>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Tên học kỳ</th><th>Ngày bắt đầu</th><th>Ngày kết thúc</th><th>Dòng TKB</th><th>Buổi học</th><th>Trạng thái</th><th></th></tr></thead>
+          <tbody>
+            <tr style="background:rgba(34,197,94,.02)"><td style="font-weight:600">HK1-2024-2025</td><td style="font-family:var(--mo);font-size:11px">18/08/2025</td><td style="font-family:var(--mo);font-size:11px">15/12/2025</td><td>142</td><td style="color:var(--gr);font-weight:600">1,840</td><td><span class="bdg b-op">Active</span></td><td><button class="btn btn-s btn-sm">Sửa</button></td></tr>
+            <tr><td>HK2-2023-2024</td><td style="font-family:var(--mo);font-size:11px">12/02/2024</td><td style="font-family:var(--mo);font-size:11px">15/06/2024</td><td>138</td><td>1,760</td><td><span class="bdg b-cl">Kết thúc</span></td><td><button class="btn btn-s btn-sm">Xem</button></td></tr>
+            <tr><td>HK1-2023-2024</td><td style="font-family:var(--mo);font-size:11px">14/08/2023</td><td style="font-family:var(--mo);font-size:11px">10/12/2023</td><td>135</td><td>1,720</td><td><span class="bdg b-cl">Kết thúc</span></td><td><button class="btn btn-s btn-sm">Xem</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /asemesters -->
+
+    <!-- ══════════════════════════════════
+         ADMIN — BÁO CÁO TOÀN TRƯỜNG
+    ══════════════════════════════════ -->
+    <div class="page" id="p-areport">
+      <div style="display:flex;gap:10px;margin-bottom:18px;align-items:center">
+        <select class="fi" style="width:190px"><option>Toàn trường</option><option>Theo khoa</option><option>Theo lớp</option></select>
+        <select class="fi" style="width:170px"><option>HK1-2024-2025</option></select>
+        <div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-s btn-sm">📥 Excel</button><button class="btn btn-s btn-sm">📄 PDF</button></div>
+      </div>
+      <div class="sg">
+        <div class="sc bl"><div class="sc-lb">Tổng buổi học</div><div class="sc-vl bl">3,240</div><div class="sc-su">Học kỳ này</div></div>
+        <div class="sc gr"><div class="sc-lb">Tb chuyên cần</div><div class="sc-vl gr">83%</div></div>
+        <div class="sc am"><div class="sc-lb">SV dưới ngưỡng</div><div class="sc-vl am">47</div><div class="sc-su">Vắng ≥ 20%</div></div>
+        <div class="sc pu"><div class="sc-lb">Buổi đã hoàn thành</div><div class="sc-vl pu">2,810</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="card-t">Thống kê theo khoa</div></div>
+        <table class="tbl">
+          <thead><tr><th>Khoa</th><th>Sinh viên</th><th>Tb có mặt</th><th>Dưới ngưỡng</th><th>Chuyên cần</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500">Khoa CNTT</td><td>620</td><td>86%</td><td style="color:var(--am)">12</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pb"><div class="pf gr" style="width:86%"></div></div><span style="font-size:11px;font-weight:600;color:var(--gr)">86%</span></div></td></tr>
+            <tr><td style="font-weight:500">Khoa Kinh tế</td><td>840</td><td>81%</td><td style="color:var(--am)">18</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pb"><div class="pf am" style="width:81%"></div></div><span style="font-size:11px;font-weight:600;color:var(--am)">81%</span></div></td></tr>
+            <tr><td style="font-weight:500">Khoa Cơ khí</td><td>440</td><td>79%</td><td style="color:var(--rd)">17</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pb"><div class="pf rd" style="width:79%"></div></div><span style="font-size:11px;font-weight:600;color:var(--rd)">79%</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /areport -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ════════════════════════════════════════
+     MODAL — CHECK-OUT
+════════════════════════════════════════ -->
+<div class="mo-ov" id="coModal">
+  <div class="mo">
+    <div class="mo-t">⚡ Yêu cầu Check-out tức thời</div>
+    <div class="mo-su">Kích hoạt khi nghi ngờ có SV về sớm. Buổi học vẫn tiếp tục bình thường sau khi check-out đóng.</div>
+    <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--am);margin-bottom:14px">
+      ⚠️ SV không quét trong thời gian cho phép → <strong>left_early = 1</strong>. Trạng thái vẫn là "Có mặt".
+    </div>
+    <div class="fg"><label class="fl">Thời gian cho SV quét (phút)</label><input type="number" class="fi" value="5" min="2" max="15"></div>
+    <div class="fg"><label class="fl">Ghi chú lý do (tuỳ chọn)</label><input type="text" class="fi" placeholder="VD: Nghi ngờ SV về sớm tiết 3..."></div>
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--tx3);margin-bottom:14px">
+      22 SV đã check-in · SV không quét trong 5 phút → <span style="color:var(--rd)">left_early = 1</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-s" style="flex:1" onclick="closeCheckoutModal()">Huỷ</button>
+      <button class="btn" style="flex:1;background:var(--am);color:#000;font-family:var(--fn);font-size:12px;font-weight:600" onclick="closeCheckoutModal()">⚡ Kích hoạt</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>

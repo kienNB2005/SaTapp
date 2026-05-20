@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/HTDiemDanhSinhVienTest
+    username: root
+    password: 157359
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# Cấu hình Google tập trung
+google:
+  client-id-web: "1053516508108-d32l6qi3ie8fk671bg2iv4cf7m9kve8l.apps.googleusercontent.com"
+  client-id-android: "1053516508108-1aklcp3mlid1t8cc118ba1sms98ne7no.apps.googleusercontent.com"
+  client-id-ios: "1053516508108-ohim4esohnhne8087lm2ch200vl9h5c3.apps.googleusercontent.com"
+
+app:
+  sse:
+    timeout-ms: 3600000 # 1 hour
+    heartbeat-interval-ms: 25000 # 25 seconds
+
+jwt:
+  secret-key: nCWy4cAzYWL6hbmIMfXcidkla34AQTiZkHYcyV+i0i4yg+EowUa9+krhatkqpDH2
