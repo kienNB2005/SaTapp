@@ -67,7 +67,11 @@ public enum ErrorCode {
     DEPARTMENT_EXISTED (1130, "Ngành đã tồn tại", HttpStatus.BAD_REQUEST),
     FACULTY_EXISTED (1131, "Khoa đã tồn tại", HttpStatus.BAD_REQUEST),
     SUBJECT_EXISTED (1132, "Môn học đã tồn tại", HttpStatus.BAD_REQUEST),
-    ROOM_EXISTED (1133, "Phòng đã tồn tại", HttpStatus.BAD_REQUEST);
+    ROOM_EXISTED (1133, "Phòng đã tồn tại", HttpStatus.BAD_REQUEST),
+    STUDENT_NOT_EXIST (1134, "Sinh viên không tồn tại", HttpStatus.NOT_FOUND),
+    LECTURER_EXISTED (1135, "Giảng viên đã tồn tại", HttpStatus.BAD_REQUEST),
+    STUDENT_EXISTED (1136, "Sinh viên đã tồn tại", HttpStatus.BAD_REQUEST),
+
     private final int code;
     private final String message;
     private final HttpStatus httpStatus; // Thêm trường này

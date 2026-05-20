@@ -1,4 +1,6 @@
 package ken.example.dekiru.security.service;
+import ken.example.dekiru.common.exception.AppException;
+import ken.example.dekiru.common.exception.ErrorCode;
 import ken.example.dekiru.student.dto.CreateStudentRequest;
 import ken.example.dekiru.academic.dto.CreateLecturerRequest;
 import ken.example.dekiru.student.dto.StudentExcelDTO;
@@ -360,12 +362,12 @@ public class UserService  {
     @Transactional
     public StudentResponse updateStudent(Long studentId, UpdateStudentRequest request) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sinh viên"));
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
         User user = student.getUser();
         // Check if email changed and already exists
         if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         userMapper.updateUserFromStudentRequest(request, user);
@@ -377,14 +379,14 @@ public class UserService  {
     @Transactional
     public StudentResponse createStudent(CreateStudentRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         if (studentRepository.findByStudentCode(request.getStudentCode()).isPresent()) {
-            throw new RuntimeException("Mã sinh viên đã tồn tại");
+            throw new AppException(ErrorCode.STUDENT_EXISTED);
         }
 
         AdministrativeClass adminClass = administrativeClassRepository.findById(request.getAdminClassId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lớp hành chính"));
+                .orElseThrow(() -> new AppException(ErrorCode.ADMINISTRATIVE_CLASS_NOT_EXISTED));
 
         User user = User.builder()
                 .email(request.getEmail())
@@ -407,11 +409,11 @@ public class UserService  {
     @Transactional
     public LecturerResponse updateLecturer(Long lecturerId, UpdateLecturerRequest request) {
         Lecturer lecturer = lecturerRepository.findById(lecturerId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên"));
+                .orElseThrow(() -> new AppException(ErrorCode.LECTURER_NOT_EXISTED));
 
         User user = lecturer.getUser();
         if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         userMapper.updateUserFromLecturerRequest(request, user);
@@ -419,7 +421,7 @@ public class UserService  {
 
         if (!lecturer.getFaculty().getId().equals(request.getFacultyId())) {
             Faculty faculty = facultyRepository.findById(request.getFacultyId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khoa"));
+                    .orElseThrow(() -> new AppException(ErrorCode.FACULTY_NOT_EXISTED));
             lecturer.setFaculty(faculty);
             lecturerRepository.save(lecturer);
         }
@@ -430,14 +432,14 @@ public class UserService  {
     @Transactional
     public LecturerResponse createLecturer(CreateLecturerRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         if (lecturerRepository.findByLecturerCode(request.getLecturerCode()).isPresent()) {
-            throw new RuntimeException("Mã giảng viên đã tồn tại");
+            throw new AppException(ErrorCode.LECTURER_EXISTED);
         }
 
         Faculty faculty = facultyRepository.findById(request.getFacultyId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khoa"));
+                .orElseThrow(() -> new AppException(ErrorCode.FACULTY_NOT_EXISTED));
 
         User user = User.builder()
                 .email(request.getEmail())
