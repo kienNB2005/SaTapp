@@ -13,4 +13,8 @@ public class CreateLecturerRequest {
     String email;
     String lecturerCode;
     Long facultyId;
+    String phoneNumber;
+    String gender;
+    java.time.LocalDate birthday;
+    String birthPlace;
 }

@@ -30,5 +30,15 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
     Page<Student> findAll(@Nullable Specification<Student> spec, @NonNull Pageable pageable); // Khẳng định pageable không null
 
     Optional<Student> findByUserId(Long userId);
+
+    @EntityGraph(attributePaths = {
+            "user",
+            "adminClass",
+            "adminClass.department",
+            "adminClass.department.faculty",
+            "adminClass.homeroomTeacher",
+            "adminClass.homeroomTeacher.user"
+    })
+    Optional<Student> findProfileById(Long id);
 }
 

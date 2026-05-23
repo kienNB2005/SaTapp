@@ -13,4 +13,8 @@ public class CreateStudentRequest {
     String email;
     String studentCode;
     Long adminClassId;
+    String phoneNumber;
+    String gender;
+    java.time.LocalDate birthday;
+    String birthPlace;
 }

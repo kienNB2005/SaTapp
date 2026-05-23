@@ -1,5 +1,6 @@
 package ken.example.dekiru.security.mapper;
 
+import ken.example.dekiru.student.dto.StudentProfileResponse;
 import ken.example.dekiru.academic.dto.UpdateLecturerRequest;
 import ken.example.dekiru.student.dto.UpdateStudentRequest;
 import ken.example.dekiru.academic.dto.LecturerResponse;
@@ -19,17 +20,39 @@ public interface UserMapper {
     @Mapping(source = "user.fullName", target = "fullName")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.isActive", target = "isActive")
+    @Mapping(source = "user.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "user.gender", target = "gender")
+    @Mapping(source = "user.birthday", target = "birthday")
+    @Mapping(source = "user.birthPlace", target = "birthPlace")
     @Mapping(source = "adminClass.code", target = "adminClassCode")
     @Mapping(source = "adminClass.name", target = "adminClassName")
     StudentResponse toStudentResponse(Student student);
 
     List<StudentResponse> toStudentResponseList(List<Student> students);
 
+    // --- STUDENT PROFILE MAPPING ---
+    @Mapping(source = "user.fullName", target = "fullName")
+    @Mapping(source = "user.email", target = "email")
+    @Mapping(source = "user.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "user.gender", target = "gender")
+    @Mapping(source = "user.birthday", target = "birthday")
+    @Mapping(source = "user.birthPlace", target = "birthPlace")
+    @Mapping(source = "adminClass.name", target = "adminClassName")
+    @Mapping(source = "adminClass.cohortYear", target = "cohortYear")
+    @Mapping(source = "adminClass.department.name", target = "departmentName")
+    @Mapping(source = "adminClass.department.faculty.name", target = "facultyName")
+    @Mapping(source = "adminClass.homeroomTeacher.user.fullName", target = "homeroomTeacherName")
+    StudentProfileResponse toStudentProfileResponse(Student student);
+
 
     // --- LECTURER MAPPING ---
     @Mapping(source = "user.fullName", target = "fullName")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.isActive", target = "isActive")
+    @Mapping(source = "user.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "user.gender", target = "gender")
+    @Mapping(source = "user.birthday", target = "birthday")
+    @Mapping(source = "user.birthPlace", target = "birthPlace")
     @Mapping(source = "faculty.code", target = "facultyCode")
     @Mapping(source = "faculty.name", target = "facultyName")
     LecturerResponse toLecturerResponse(Lecturer lecturer);

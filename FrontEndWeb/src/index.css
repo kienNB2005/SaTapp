@@ -490,3 +490,28 @@ select.fi {
 /* ── DATEPICKER ── */
 .dp-wrapper .react-datepicker-wrapper { width: 100%; display: block; }
 .react-datepicker-popper { z-index: 9999 !important; }
+
+/* ── SUGGESTED SLOTS ── */
+.suggest-list {
+  max-height: 380px;
+  overflow-y: auto;
+}
+.suggest-card {
+  background: var(--bg3);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.suggest-card:hover {
+  border-color: var(--bl);
+  background: var(--blL);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
+}
+.suggest-card.active {
+  background: var(--grL);
+  border-color: var(--gr);
+}
+

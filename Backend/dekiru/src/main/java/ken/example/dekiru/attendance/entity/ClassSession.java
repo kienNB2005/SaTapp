@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @Table(
         name = "class_session",
         uniqueConstraints = @UniqueConstraint(
-                name = "uq_session_schedule_date",
-                columnNames = {"schedule_id", "session_date"}
+                name = "uq_session_schedule_date_period",
+                columnNames = {"schedule_id", "session_date", "actual_period_start"}
         )
 )
 @Getter @Setter
@@ -52,6 +52,12 @@ public class ClassSession {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "actual_lecturer_id", nullable = false)
     private Lecturer actualLecturer;
+
+    @Column(name = "actual_period_start", nullable = false)
+    private Byte actualPeriodStart;
+
+    @Column(name = "actual_period_end", nullable = false)
+    private Byte actualPeriodEnd;
 
     @Column(name = "session_date", nullable = false)
     private LocalDate sessionDate;

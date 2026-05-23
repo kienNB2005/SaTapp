@@ -24,5 +24,8 @@ public class ClassSessionListDto {
     private Long totalCount;
     private Long lateCount;
     private ClassSession.Status status;
+    private Long makeupForId;
+    private Long activeMakeupCount;
+    private LocalDate semesterEndDate;
 }
 

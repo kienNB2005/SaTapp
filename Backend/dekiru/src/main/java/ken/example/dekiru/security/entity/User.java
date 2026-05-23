@@ -6,7 +6,9 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import ken.example.dekiru.common.enums.Gender;
 
 @Entity
 @Table(name = "user")
@@ -56,5 +58,17 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", columnDefinition = "ENUM('male', 'female', 'other')")
+    private Gender gender;
+
+    @Column(name = "birthday")
+    private LocalDate birthday;
+
+    @Column(name = "birth_place", length = 150)
+    private String birthPlace;
 
 }

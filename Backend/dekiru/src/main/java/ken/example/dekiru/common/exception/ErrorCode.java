@@ -31,6 +31,16 @@ public enum ErrorCode {
     FILE_IS_EMPTY(1006, "File tải lên đang trống", HttpStatus.BAD_REQUEST),
     FILE_PROCESSING_ERROR(1007, "Lỗi khi đọc hoặc xử lý file Excel", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_FILE_FORMAT(1008, "Định dạng file không hợp lệ, vui lòng dùng file .xlsx", HttpStatus.BAD_REQUEST),
+
+    CANCEL_REASON_REQUIRED(1227, "Lý do hủy buổi học là bắt buộc", HttpStatus.BAD_REQUEST),
+    MAKEUP_ALREADY_EXISTS(1228, "Buổi học này đã có lịch dạy bù đang hoạt động", HttpStatus.CONFLICT),
+    INVALID_PERIOD(1229, "Tiết học thực tế không hợp lệ", HttpStatus.BAD_REQUEST),
+    CLASS_CONFLICT(1230, "Lớp hành chính đã có lịch học khác trong khoảng thời gian này", HttpStatus.CONFLICT),
+    ROOM_CONFLICT(1231, "Phòng học đã được sử dụng cho lớp khác trong khoảng thời gian này", HttpStatus.CONFLICT),
+    LECTURER_CONFLICT(1232, "Bạn đã có lịch giảng dạy lớp khác trong khoảng thời gian này", HttpStatus.CONFLICT),
+    SESSION_NOT_CANCELLED(1233, "Chỉ có thể lên lịch dạy bù cho buổi học đã bị hủy", HttpStatus.BAD_REQUEST),
+    FORBIDDEN_ACTION(1234, "Bạn không có quyền thực hiện thao tác này trên buổi học", HttpStatus.FORBIDDEN),
+
     SEMESTER_HAS_UNFINISHED_SESSIONS(1126, "Không thể xóa học kỳ vì có buổi học chưa hoàn thành", HttpStatus.CONFLICT),
     SEMESTER_HAS_SCHEDULES(1127, "Không thể xóa học kỳ vì có lịch biểu", HttpStatus.CONFLICT),
     ROOM_IN_USE(1128, "Không thể xóa phòng đang được sử dụng trong lịch biểu hoặc buổi học", HttpStatus.CONFLICT),
@@ -70,7 +80,10 @@ public enum ErrorCode {
     ROOM_EXISTED (1133, "Phòng đã tồn tại", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_EXIST (1134, "Sinh viên không tồn tại", HttpStatus.NOT_FOUND),
     LECTURER_EXISTED (1135, "Giảng viên đã tồn tại", HttpStatus.BAD_REQUEST),
-    STUDENT_EXISTED (1136, "Sinh viên đã tồn tại", HttpStatus.BAD_REQUEST);
+    STUDENT_EXISTED (1136, "Sinh viên đã tồn tại", HttpStatus.BAD_REQUEST),
+    MAKEUP_DATE_BEFORE_ORIGINAL(1235, "Ngày dạy bù phải diễn ra từ ngày có buổi học gốc trở đi", HttpStatus.BAD_REQUEST),
+    MAKEUP_DATE_AFTER_SEMESTER(1236, "Ngày dạy bù phải diễn ra trước ngày kết thúc học kỳ", HttpStatus.BAD_REQUEST),
+    DUPLICATE_SESSION_DATE(1237, "Môn học này đã có buổi học diễn ra vào cùng ngày và tiết học được chọn", HttpStatus.CONFLICT);
 
     private final int code;
     private final String message;

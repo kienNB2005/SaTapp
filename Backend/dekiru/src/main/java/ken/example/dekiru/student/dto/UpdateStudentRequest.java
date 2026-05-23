@@ -18,5 +18,10 @@ public class UpdateStudentRequest {
 
     @NotNull(message = "Trạng thái không được để trống")
     private Boolean isActive;
+
+    private String phoneNumber;
+    private String gender;
+    private java.time.LocalDate birthday;
+    private String birthPlace;
 }
 

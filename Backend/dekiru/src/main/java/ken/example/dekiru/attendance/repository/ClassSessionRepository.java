@@ -37,13 +37,16 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
         cs.sessionNumber,
         s.totalSessions,
         cs.sessionDate,
-        s.periodStart,
-        s.periodEnd,
+        cs.actualPeriodStart,
+        cs.actualPeriodEnd,
         r.code,
         SUM(CASE WHEN a.status = ken.example.dekiru.attendance.entity.Attendance.Status.present THEN 1L ELSE 0L END),
         COUNT(a.id),
         SUM(CASE WHEN a.isLate = true THEN 1L ELSE 0L END),
-        cs.status
+        cs.status,
+        cs.makeupFor.id,
+        (SELECT COUNT(m.id) FROM ClassSession m WHERE m.makeupFor.id = cs.id AND m.status <> ken.example.dekiru.attendance.entity.ClassSession.Status.cancelled),
+        s.semester.endDate
     )
     FROM ClassSession cs
     JOIN cs.schedule s
@@ -53,13 +56,72 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
       AND s.subject.id = :subjectId
       AND cs.actualLecturer.id = :lecturerId
       AND s.semester.isActive = true
+      AND NOT (cs.status = ken.example.dekiru.attendance.entity.ClassSession.Status.cancelled AND cs.makeupFor.id IS NOT NULL)
     GROUP BY cs.id, cs.sessionNumber, s.totalSessions,
-             cs.sessionDate, s.periodStart, s.periodEnd, r.code, cs.status
-    ORDER BY cs.sessionNumber ASC
+             cs.sessionDate, cs.actualPeriodStart, cs.actualPeriodEnd, r.code, cs.status, cs.makeupFor.id, s.semester.endDate
+    ORDER BY cs.sessionDate ASC, cs.actualPeriodStart ASC
 """)
     List<ClassSessionListDto> findClassSessionsListForAdminClassAndSubject(
             @Param("adminClassId") Long adminClassId, 
             @Param("subjectId") Long subjectId,
             @Param("lecturerId") Long lecturerId
+    );
+
+    boolean existsByMakeupFor_IdAndStatusNot(Long originalSessionId, ClassSession.Status status);
+
+    boolean existsByScheduleIdAndSessionDateAndActualPeriodStart(Long scheduleId, java.time.LocalDate sessionDate, Byte actualPeriodStart);
+
+    List<ClassSession> findBySchedule_AdminClass_IdAndSessionDateBetweenAndStatusNot(Long adminClassId, java.time.LocalDate startDate, java.time.LocalDate endDate, ClassSession.Status status);
+
+    List<ClassSession> findByActualLecturer_IdAndSessionDateBetweenAndStatusNot(Long lecturerId, java.time.LocalDate startDate, java.time.LocalDate endDate, ClassSession.Status status);
+
+    List<ClassSession> findBySchedule_IdAndSessionDateBetween(Long scheduleId, java.time.LocalDate startDate, java.time.LocalDate endDate);
+
+    @Query("""
+        SELECT COUNT(cs.id)
+        FROM ClassSession cs 
+        WHERE cs.status <> ken.example.dekiru.attendance.entity.ClassSession.Status.cancelled
+          AND cs.sessionDate = :sessionDate
+          AND cs.actualPeriodStart <= :periodEnd
+          AND cs.actualPeriodEnd >= :periodStart
+          AND cs.schedule.adminClass.id = :adminClassId
+    """)
+    long countConflictForClass(
+        @Param("sessionDate") java.time.LocalDate sessionDate,
+        @Param("periodStart") Byte periodStart,
+        @Param("periodEnd") Byte periodEnd,
+        @Param("adminClassId") Long adminClassId
+    );
+
+    @Query("""
+        SELECT COUNT(cs.id)
+        FROM ClassSession cs
+        WHERE cs.status <> ken.example.dekiru.attendance.entity.ClassSession.Status.cancelled
+          AND cs.sessionDate = :sessionDate
+          AND cs.actualPeriodStart <= :periodEnd
+          AND cs.actualPeriodEnd >= :periodStart
+          AND cs.actualRoom.id = :roomId
+    """)
+    long countConflictForRoom(
+        @Param("sessionDate") java.time.LocalDate sessionDate,
+        @Param("periodStart") Byte periodStart,
+        @Param("periodEnd") Byte periodEnd,
+        @Param("roomId") Long roomId
+    );
+
+    @Query("""
+        SELECT COUNT(cs.id)
+        FROM ClassSession cs
+        WHERE cs.status <> ken.example.dekiru.attendance.entity.ClassSession.Status.cancelled
+          AND cs.sessionDate = :sessionDate
+          AND cs.actualPeriodStart <= :periodEnd
+          AND cs.actualPeriodEnd >= :periodStart
+          AND cs.actualLecturer.id = :lecturerId
+    """)
+    long countConflictForLecturer(
+        @Param("sessionDate") java.time.LocalDate sessionDate,
+        @Param("periodStart") Byte periodStart,
+        @Param("periodEnd") Byte periodEnd,
+        @Param("lecturerId") Long lecturerId
     );
 }

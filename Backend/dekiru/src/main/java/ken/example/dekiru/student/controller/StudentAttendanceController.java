@@ -1,5 +1,9 @@
 package ken.example.dekiru.student.controller;
 
+import ken.example.dekiru.academic.dto.SemesterResponse;
+import ken.example.dekiru.academic.entity.Semester;
+import ken.example.dekiru.academic.mapper.SemesterMapper;
+import ken.example.dekiru.academic.service.SemesterService;
 import ken.example.dekiru.common.response.ApiResponse;
 import ken.example.dekiru.student.dto.AttendanceScreenResponse;
 import ken.example.dekiru.student.dto.AttendanceSubjectResponse;
@@ -9,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,7 +25,17 @@ import java.util.List;
 public class StudentAttendanceController {
 
       StudentAttendanceService studentAttendanceService;
+      SemesterMapper semesterMapper;
+      SemesterService semesterService;
 
+
+    @GetMapping("/attendance/semesters")
+    public ApiResponse<List<SemesterResponse>> getStudentSemesters() {
+        return ApiResponse.success(
+                studentAttendanceService.getSemestersForFilter(),
+                "Lấy danh sách bộ lọc học kỳ thành công"
+        );
+    }
     /**
      * GET /student/attendance
      *
@@ -71,9 +86,10 @@ public class StudentAttendanceController {
      * }
      */
     @GetMapping("/attendance")
-    public ApiResponse<AttendanceScreenResponse> getAttendanceScreen() {
+    public ApiResponse<AttendanceScreenResponse> getAttendanceScreen(
+            @RequestParam(required = false) Long semesterId) {
         return ApiResponse.success(
-                studentAttendanceService.getAttendanceScreen()
+                studentAttendanceService.getAttendanceScreen(semesterId)
         );
     }
 

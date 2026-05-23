@@ -25,13 +25,13 @@ export default function AdminStudents() {
 
   // --- ADD STATE ---
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-  const [addForm, setAddForm] = useState({ fullName: '', email: '', studentCode: '', adminClassId: '' });
+  const [addForm, setAddForm] = useState({ fullName: '', email: '', studentCode: '', adminClassId: '', phoneNumber: '', gender: '', birthday: '', birthPlace: '' });
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState('');
 
   // --- EDIT STATE ---
   const [editingStudent, setEditingStudent] = useState(null);
-  const [editForm, setEditForm] = useState({ fullName: '', email: '', isActive: true });
+  const [editForm, setEditForm] = useState({ fullName: '', email: '', isActive: true, phoneNumber: '', gender: '', birthday: '', birthPlace: '' });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -112,14 +112,18 @@ export default function AdminStudents() {
     setEditForm({
       fullName: student.fullName || '',
       email: student.email || '',
-      isActive: student.isActive !== false // default true unless explicitly false
+      isActive: student.isActive !== false, // default true unless explicitly false
+      phoneNumber: student.phoneNumber || '',
+      gender: student.gender || '',
+      birthday: student.birthday || '',
+      birthPlace: student.birthPlace || ''
     });
     setEditError('');
   };
 
   const handleAddStudentClick = () => {
     setIsAddingStudent(true);
-    setAddForm({ fullName: '', email: '', studentCode: '', adminClassId: '' });
+    setAddForm({ fullName: '', email: '', studentCode: '', adminClassId: '', phoneNumber: '', gender: '', birthday: '', birthPlace: '' });
     setAddError('');
   };
 
@@ -574,6 +578,8 @@ export default function AdminStudents() {
                       <th>Mã SV</th>
                       <th>Họ tên</th>
                       <th>Email</th>
+                      <th>SĐT</th>
+                      <th>Giới tính</th>
                       <th>Lớp HC</th>
                       <th>Trạng thái</th>
                       <th></th>
@@ -598,6 +604,10 @@ export default function AdminStudents() {
                           </div>
                         </td>
                         <td style={{ fontSize: '12px', color: 'var(--tx3)' }}>{student.email}</td>
+                        <td style={{ fontSize: '12px', color: 'var(--tx3)' }}>{student.phoneNumber || '—'}</td>
+                        <td style={{ fontSize: '12px' }}>
+                          {student.gender === 'male' ? 'Nam' : student.gender === 'female' ? 'Nữ' : student.gender === 'other' ? 'Khác' : '—'}
+                        </td>
                         <td>
                           <div style={{ fontSize: '12px', fontWeight: '500' }}>{student.adminClassCode || '—'}</div>
                           <div style={{ fontSize: '11px', color: 'var(--tx3)' }}>{student.adminClassName}</div>
@@ -696,6 +706,54 @@ export default function AdminStudents() {
               />
             </div>
 
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Số điện thoại</label>
+                <input
+                  type="text"
+                  value={editForm.phoneNumber}
+                  onChange={e => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                  placeholder="SĐT"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Giới tính</label>
+                <select
+                  value={editForm.gender}
+                  onChange={e => setEditForm({ ...editForm, gender: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                >
+                  <option value="">-- Chọn --</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Ngày sinh</label>
+                <input
+                  type="date"
+                  value={editForm.birthday}
+                  onChange={e => setEditForm({ ...editForm, birthday: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Nơi sinh</label>
+                <input
+                  type="text"
+                  value={editForm.birthPlace}
+                  onChange={e => setEditForm({ ...editForm, birthPlace: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                  placeholder="Nơi sinh"
+                />
+              </div>
+            </div>
+
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Trạng thái tài khoản</label>
               <select
@@ -773,6 +831,54 @@ export default function AdminStudents() {
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
                 placeholder="Nhập email"
               />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Số điện thoại</label>
+                <input
+                  type="text"
+                  value={addForm.phoneNumber}
+                  onChange={e => setAddForm({ ...addForm, phoneNumber: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                  placeholder="SĐT"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Giới tính</label>
+                <select
+                  value={addForm.gender}
+                  onChange={e => setAddForm({ ...addForm, gender: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                >
+                  <option value="">-- Chọn --</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Ngày sinh</label>
+                <input
+                  type="date"
+                  value={addForm.birthday}
+                  onChange={e => setAddForm({ ...addForm, birthday: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Nơi sinh</label>
+                <input
+                  type="text"
+                  value={addForm.birthPlace}
+                  onChange={e => setAddForm({ ...addForm, birthPlace: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd)', outline: 'none' }}
+                  placeholder="Nơi sinh"
+                />
+              </div>
             </div>
 
             <div style={{ marginBottom: '24px' }}>

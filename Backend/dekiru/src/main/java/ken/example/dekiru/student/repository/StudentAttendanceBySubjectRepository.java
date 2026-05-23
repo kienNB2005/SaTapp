@@ -16,15 +16,18 @@ public interface StudentAttendanceBySubjectRepository
      * Frontend nhận list đã sort sẵn, không cần sort thêm.
      */
     @Query(value = """
-            SELECT *
-            FROM v_student_attendance_by_subject
-            WHERE student_id = :studentId
-            ORDER BY
-                FIELD(attendance_status, 'danger', 'warning', 'safe'),
-                subject_name
-            """, nativeQuery = true)
-    List<StudentAttendanceBySubject> findByStudentId(
-            @Param("studentId") Long studentId);
+        SELECT *
+        FROM v_student_attendance_by_subject
+        WHERE student_id = :studentId
+          AND (:semesterId IS NULL OR semester_id = :semesterId)
+          AND (:semesterId IS NOT NULL OR semester_id = (SELECT id FROM semester WHERE is_active = 1 LIMIT 1))
+        ORDER BY
+            FIELD(attendance_status, 'danger', 'warning', 'safe'),
+            subject_name
+        """, nativeQuery = true)
+    List<StudentAttendanceBySubject> findByStudentIdAndSemesterId(
+            @Param("studentId") Long studentId,
+            @Param("semesterId") Long semesterId);
 
     /**
      * Lọc riêng các môn đang trong ngưỡng nguy hiểm (cảnh báo cấm thi).

@@ -20,5 +20,9 @@ public class LecturerResponse {
     String facultyCode;
     String facultyName;
     Boolean isActive;
+    String phoneNumber;
+    String gender;
+    java.time.LocalDate birthday;
+    String birthPlace;
 }
 

@@ -175,7 +175,7 @@ function PgBtn({ label, onClick, disabled, active }) {
 }
 
 // Component cho một dòng sinh viên
-function StudentRow({ row, idx, pendingData, onUpdate }) {
+function StudentRow({ row, idx, pendingData, onUpdate, isSelected, onToggleSelect }) {
   const data = { ...row, ...pendingData };
   const isEdited = !!pendingData;
   const isLate = data.uiStatus === 'LATE';
@@ -201,6 +201,16 @@ function StudentRow({ row, idx, pendingData, onUpdate }) {
       className={`att-table-row${isEdited ? ' edit-pending' : ''}`}
       style={{ animationDelay: `${Math.min(idx, 15) * 18}ms` }}
     >
+      {/* 0. Checkbox chọn */}
+      <td style={{ width: 40, textAlign: 'center' }}>
+        <input 
+          type="checkbox" 
+          checked={isSelected}
+          onChange={onToggleSelect}
+          style={{ cursor: 'pointer', width: 16, height: 16, accentColor: 'var(--bl)' }}
+        />
+      </td>
+
       {/* 1. Mã SV */}
       <td style={{ fontFamily: 'var(--mo)', fontSize: 13, color: 'var(--tx2)', fontWeight: 600, whiteSpace: 'nowrap' }}>
         {row.studentCode}
@@ -315,6 +325,9 @@ export default function Attendance() {
   const [pendingChanges, setPendingChanges] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
+  // Bulk actions: Mảng các attendanceId được tick
+  const [selectedIds, setSelectedIds] = useState([]);
+
   // Debounce search
   const searchTimer = useRef(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -350,6 +363,7 @@ export default function Attendance() {
       .then(({ data }) => {
         const res = data.result ?? data;
         setPageData(res);
+        setSelectedIds([]); // Reset chọn hàng loạt mỗi khi load lại danh sách
         
         // Cập nhật thống kê nếu đang lấy toàn bộ danh sách (không có bộ lọc)
         if (!debouncedSearch && !uiStatus && res.content) {
@@ -404,6 +418,40 @@ export default function Attendance() {
       }
       return nextState;
     });
+  };
+
+  // Áp dụng trạng thái cho nhiều sinh viên được chọn
+  const handleBulkUpdate = (status) => {
+    if (selectedIds.length === 0) return;
+    
+    setPendingChanges(prev => {
+      const nextState = { ...prev };
+      selectedIds.forEach(id => {
+        const originalRow = pageData.content.find(i => i.attendanceId === id) || {};
+        const currentPending = nextState[id] || {};
+        const newPending = { ...currentPending, uiStatus: status };
+        
+        if (status !== 'LATE') newPending.lateMinutes = null;
+        
+        let hasRealChange = false;
+        const cleanPending = {};
+        for (const key of ['uiStatus', 'lateMinutes', 'leftEarly', 'note']) {
+          const val = newPending[key] !== undefined ? newPending[key] : originalRow[key];
+          if (val !== originalRow[key]) {
+             hasRealChange = true;
+             cleanPending[key] = val;
+          }
+        }
+        
+        if (hasRealChange) {
+          nextState[id] = cleanPending;
+        } else {
+          delete nextState[id];
+        }
+      });
+      return nextState;
+    });
+    setSelectedIds([]); // Bỏ chọn sau khi áp dụng xong
   };
 
   // Lưu tất cả lên server
@@ -465,6 +513,18 @@ export default function Attendance() {
   const totalPages = pageData?.totalPages ?? 0;
   const totalItems = pageData?.totalElements ?? 0;
   const si = sessionInfo;
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) setSelectedIds(items.map(i => i.attendanceId));
+    else setSelectedIds([]);
+  };
+  const isAllSelected = items.length > 0 && selectedIds.length === items.length;
+
+  const bulkBtnStyle = (color) => ({
+    padding: '5px 12px', borderRadius: 14, border: 'none',
+    background: '#fff', color: color, fontSize: 12, fontWeight: 700,
+    cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  });
 
   return (
     <>
@@ -615,6 +675,28 @@ export default function Attendance() {
           </div>
         )}
 
+        {/* Bulk Action Bar */}
+        {selectedIds.length > 0 && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14,
+            padding: '12px 18px', background: 'var(--bl)', borderRadius: 10, color: '#fff',
+            animation: 'att-fadeIn 0.2s ease', boxShadow: '0 4px 15px rgba(59,130,246,0.3)'
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>Đã chọn {selectedIds.length}</span>
+            <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.4)', margin: '0 4px' }} />
+            <button onClick={() => handleBulkUpdate('PRESENT')} style={bulkBtnStyle('#22C55E')}>Có mặt</button>
+            <button onClick={() => handleBulkUpdate('LATE')} style={bulkBtnStyle('#F59E0B')}>Muộn</button>
+            <button onClick={() => handleBulkUpdate('ABSENT')} style={bulkBtnStyle('#EF4444')}>Vắng</button>
+            <button onClick={() => handleBulkUpdate('EXCUSED')} style={bulkBtnStyle('#3B82F6')}>Có phép</button>
+            <button 
+              onClick={() => setSelectedIds([])} 
+              style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#fff', fontSize: 12, cursor: 'pointer', textDecoration: 'underline', fontWeight: 500 }}
+            >
+              Hủy chọn
+            </button>
+          </div>
+        )}
+
         {/* ── Main table ── */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
@@ -653,6 +735,14 @@ export default function Attendance() {
               <table className="tbl" style={{ minWidth: 780, width: '100%' }}>
                 <thead>
                   <tr>
+                    <th style={{ width: 40, textAlign: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={isAllSelected}
+                        onChange={handleSelectAll}
+                        style={{ cursor: 'pointer', width: 16, height: 16, accentColor: 'var(--bl)' }}
+                      />
+                    </th>
                     <th style={{ width: 85, whiteSpace: 'nowrap' }}>Mã SV</th>
                     <th>Họ và tên</th>
                     <th style={{ width: 60, textAlign: 'center', whiteSpace: 'nowrap' }}>Đi học</th>
@@ -665,12 +755,20 @@ export default function Attendance() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((row, idx) => (
+                   {items.map((row, idx) => (
                     <StudentRow 
                        key={row.attendanceId} 
                        row={row} 
                        idx={idx} 
                        pendingData={pendingChanges[row.attendanceId]} 
+                       isSelected={selectedIds.includes(row.attendanceId)}
+                       onToggleSelect={() => {
+                          setSelectedIds(prev => 
+                             prev.includes(row.attendanceId) 
+                                ? prev.filter(id => id !== row.attendanceId)
+                                : [...prev, row.attendanceId]
+                          );
+                       }}
                        onUpdate={(updates) => handleUpdate(row.attendanceId, updates)} 
                     />
                   ))}

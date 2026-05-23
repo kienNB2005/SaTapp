@@ -6,7 +6,7 @@ import api from "../utils/api";
 
 function dayLabel(dow) {
   // dow: 1=Mon … 7=Sun (ISO) hoặc 2=Mon … 8=Sun tùy DB
-  const map = { 1: "CN", 2: "T2", 3: "T3", 4: "T4", 5: "T5", 6: "T6", 7: "T7" };
+  const map = { 1: "CN", 2: "T2", 3: "T3", 4: "T4", 5: "T5", 6: "T6", 7: "T7", 8: "CN" };
   return map[dow] ?? "?";
 }
 
@@ -160,6 +160,7 @@ function TodaySessions({ sessions, loading, navigate }) {
           sessions.map((s) => {
             const isOpen = s.status?.toLowerCase() === "open";
             const isClosed = s.status?.toLowerCase() === "closed";
+            const isCancelled = s.status?.toLowerCase() === "cancelled";
             const borderColor = isOpen ? "rgba(34,197,94,.2)" : "var(--bd)";
             const present = s.presentCount ?? 0;
             const late = s.lateCount ?? 0;
@@ -197,7 +198,11 @@ function TodaySessions({ sessions, loading, navigate }) {
                   {statusBadge(s.status)}
                 </div>
 
-                {isOpen ? (
+                {isCancelled ? (
+                  <div style={{ padding: "6px", textAlign: "center", background: "var(--bg2)", borderRadius: 6, color: "var(--tx3)", fontSize: 12, border: "1px dashed var(--bd)" }}>
+                    Đã hủy buổi học
+                  </div>
+                ) : isOpen ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <ProgressBar value={attended} max={total} />
                     <span

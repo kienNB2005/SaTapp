@@ -31,5 +31,10 @@ public class StudentExcelDTO {
 
     @NotBlank(message = "Mã lớp hành chính không được để trống")
     String adminClassCode;
+
+    String phoneNumber;
+    String gender;
+    java.time.LocalDate birthday;
+    String birthPlace;
 }
 

@@ -57,4 +57,7 @@ public class StudentSchedule {
 
     @Column(name = "scanned_at")
     private LocalDateTime scannedAt;
+
+    @Column(name = "original_session_date")
+    private LocalDate originalSessionDate;
 }

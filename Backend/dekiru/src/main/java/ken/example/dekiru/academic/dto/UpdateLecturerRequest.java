@@ -21,5 +21,10 @@ public class UpdateLecturerRequest {
 
     @NotNull(message = "Khoa không được để trống")
     private Long facultyId;
+
+    private String phoneNumber;
+    private String gender;
+    private java.time.LocalDate birthday;
+    private String birthPlace;
 }
 

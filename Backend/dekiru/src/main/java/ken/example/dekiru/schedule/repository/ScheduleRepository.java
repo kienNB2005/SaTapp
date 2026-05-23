@@ -54,6 +54,62 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, JpaSp
     """)
     List<Subject> findDistinctSubjectsByLecturer(@Param("lecturerId") Long lecturerId);
 
+    @Query("""
+        SELECT DISTINCT s.semester
+        FROM Schedule s
+        WHERE s.lecturer.id = :lecturerId
+        ORDER BY s.semester.startDate DESC
+    """)
+    List<ken.example.dekiru.academic.entity.Semester> findDistinctSemestersByLecturer(@Param("lecturerId") Long lecturerId);
+
+    @Query("""
+        SELECT DISTINCT s.adminClass
+        FROM Schedule s
+        WHERE s.lecturer.id = :lecturerId
+          AND s.semester.id = :semesterId
+        ORDER BY s.adminClass.code ASC
+    """)
+    List<AdministrativeClass> findDistinctAdminClassesByLecturerAndSemester(
+            @Param("lecturerId") Long lecturerId,
+            @Param("semesterId") Long semesterId
+    );
+
+    @Query("""
+        SELECT DISTINCT s.subject
+        FROM Schedule s
+        WHERE s.lecturer.id = :lecturerId
+          AND s.adminClass.id = :adminClassId
+          AND s.semester.id = :semesterId
+        ORDER BY s.subject.code ASC
+    """)
+    List<Subject> findDistinctSubjectsByLecturerAndClassAndSemester(
+            @Param("lecturerId") Long lecturerId,
+            @Param("adminClassId") Long adminClassId,
+            @Param("semesterId") Long semesterId
+    );
+
+    boolean existsBySemester_IdAndSubject_IdAndAdminClass_IdAndLecturer_Id(Long semesterId, Long subjectId, Long adminClassId, Long lecturerId);
+
+    @Query("""
+        SELECT DISTINCT s.semester
+        FROM Schedule s
+        WHERE s.adminClass.id = :adminClassId
+        ORDER BY s.semester.startDate DESC
+    """)
+    List<ken.example.dekiru.academic.entity.Semester> findDistinctSemestersByAdminClassId(@Param("adminClassId") Long adminClassId);
+
+    @Query("""
+        SELECT DISTINCT s.subject
+        FROM Schedule s
+        WHERE s.adminClass.id = :adminClassId
+          AND s.semester.id = :semesterId
+        ORDER BY s.subject.code ASC
+    """)
+    List<Subject> findDistinctSubjectsByAdminClassIdAndSemesterId(
+            @Param("adminClassId") Long adminClassId,
+            @Param("semesterId") Long semesterId
+    );
+
     /**
      * Gọi stored procedure sinh ClassSession cho 1 Schedule.
      * Procedure đã có sẵn trong MySQL: generate_sessions_for_schedule(p_schedule_id)

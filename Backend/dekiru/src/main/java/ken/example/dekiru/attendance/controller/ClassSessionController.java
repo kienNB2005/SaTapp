@@ -57,6 +57,40 @@ public class ClassSessionController {
         return ApiResponse.success(null, "Đóng buổi học thành công");
     }
 
+    @PostMapping("/{id}/cancel")
+    public ApiResponse<Void> cancelSession(@PathVariable Long id, @RequestBody java.util.Map<String, String> request) {
+        String reason = request.get("reason");
+        classSessionService.cancelClassSession(id, reason);
+        return ApiResponse.success(null, "Hủy buổi học thành công");
+    }
+
+    @PostMapping("/{id}/makeup")
+    public ApiResponse<ken.example.dekiru.attendance.entity.ClassSession> createMakeupSession(
+            @PathVariable Long id, 
+            @RequestBody MakeupSessionRequest request) {
+        ken.example.dekiru.attendance.entity.ClassSession makeupSession = classSessionService.createMakeupSession(id, request);
+        return ApiResponse.success(makeupSession, "Lên lịch dạy bù thành công");
+    }
+
+//    @GetMapping("/{id}/suggested-slots")
+//    public ApiResponse<List<SuggestedSlotDto>> getSuggestedSlots(
+//            @PathVariable Long id,
+//            @RequestParam(required = false, defaultValue = "2") Integer weeks) {
+//        List<SuggestedSlotDto> suggestions = classSessionService.getSuggestedSlots(id, weeks);
+//        return ApiResponse.success(suggestions, "Lấy danh sách slot gợi ý thành công");
+//    }
+
+    @GetMapping("/available-rooms")
+    public ApiResponse<List<DropdownOption>> getAvailableRooms(
+            @RequestParam java.time.LocalDate sessionDate,
+            @RequestParam Byte periodStart,
+            @RequestParam Byte periodEnd) {
+        List<ken.example.dekiru.academic.entity.Room> rooms = classSessionService.findAvailableRooms(sessionDate, periodStart, periodEnd);
+        List<DropdownOption> options = rooms.stream()
+                .map(r -> new DropdownOption(r.getId(), r.getCode(), r.getCode() + (r.getBuilding() != null ? " - " + r.getBuilding() : "")))
+                .collect(java.util.stream.Collectors.toList());
+        return ApiResponse.success(options, "Lấy danh sách phòng trống thành công");
+    }
 
     /**
      * GV subscribe SSE để nhận danh sách điểm danh real-time.

@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 export default function Tkb() {
   const [viewMode, setViewMode] = useState('week'); // 'today' | 'week'
 
-  const allDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+  const allDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   
   // Calculate today's "Thứ"
   const currentDayNum = new Date().getDay(); // 0 is Sunday, 1 is Monday
-  const todayStr = currentDayNum === 0 ? 'Thứ 2' : `Thứ ${currentDayNum + 1}`;
+  const todayStr = currentDayNum === 0 ? 'Chủ Nhật' : `Thứ ${currentDayNum + 1}`;
   
   const displayDays = viewMode === 'today' ? [todayStr] : allDays;
 

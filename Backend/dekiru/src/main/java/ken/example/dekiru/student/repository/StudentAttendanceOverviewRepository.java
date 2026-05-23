@@ -15,10 +15,13 @@ public interface StudentAttendanceOverviewRepository
      * View đã tự filter is_active = 1 nên chỉ cần truyền studentId.
      */
     @Query(value = """
-            SELECT *
-            FROM v_student_attendance_overview
-            WHERE student_id = :studentId
-            """, nativeQuery = true)
-    Optional<StudentAttendanceOverview> findByStudentId(
-            @Param("studentId") Long studentId);
+        SELECT *
+        FROM v_student_attendance_overview
+        WHERE student_id = :studentId
+          AND (:semesterId IS NULL OR semester_id = :semesterId)
+          AND (:semesterId IS NOT NULL OR semester_id = (SELECT id FROM semester WHERE is_active = 1 LIMIT 1))
+        """, nativeQuery = true)
+    Optional<StudentAttendanceOverview> findByStudentIdAndSemesterId(
+            @Param("studentId") Long studentId,
+            @Param("semesterId") Long semesterId);
 }

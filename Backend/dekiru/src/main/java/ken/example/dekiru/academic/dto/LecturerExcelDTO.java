@@ -31,5 +31,10 @@ public class LecturerExcelDTO {
 
     @NotBlank(message = "Mã khoa không được để trống")
     String facultyCode;
+
+    String phoneNumber;
+    String gender;
+    java.time.LocalDate birthday;
+    String birthPlace;
 }
 

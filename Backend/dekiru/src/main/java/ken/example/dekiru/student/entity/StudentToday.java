@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -51,4 +52,7 @@ public class StudentToday {
 
     @Column(name = "scanned_at")
     private LocalDateTime scannedAt;
+
+    @Column(name = "original_session_date")
+    private LocalDate originalSessionDate;
 }

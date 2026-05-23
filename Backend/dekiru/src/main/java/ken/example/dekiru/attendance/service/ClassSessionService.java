@@ -52,6 +52,7 @@ public class ClassSessionService {
     ScheduleRepository scheduleRepository;
     AdministrativeClassMapper administrativeClassMapper;
     SubjectMapper subjectMapper;
+    ken.example.dekiru.academic.repository.RoomRepository roomRepository;
     // ==========================================
     // PRIVATE HELPER METHODS
     // ==========================================
@@ -104,7 +105,7 @@ public class ClassSessionService {
 
     private void validateSessionOpenTime(ClassSession session) {
         // Lấy thời gian bắt đầu buổi học
-        PeriodTime periodTime = periodTimeRepository.findById(session.getSchedule().getPeriodStart())
+        PeriodTime periodTime = periodTimeRepository.findById(session.getActualPeriodStart())
                 .orElseThrow(() -> new AppException(ErrorCode.PERIOD_TIME_NOT_FOUND));
         
         LocalDateTime sessionStartTime = LocalDateTime.of(session.getSessionDate(), periodTime.getStartTime());
@@ -324,7 +325,7 @@ public class ClassSessionService {
             }
 
             // Xử lý đi muộn
-            PeriodTime periodTime = periodTimeRepository.findById(session.getSchedule().getPeriodStart())
+            PeriodTime periodTime = periodTimeRepository.findById(session.getActualPeriodStart())
                     .orElseThrow(() -> new AppException(ErrorCode.PERIOD_TIME_NOT_FOUND));
 
             LocalDateTime scheduledStartTime = LocalDateTime.of(session.getSessionDate(), periodTime.getStartTime());
@@ -397,9 +398,9 @@ public class ClassSessionService {
         long total = classSessionRepository.countByScheduleId(schedule.getId());
 
         // Lấy giờ bắt đầu/kết thúc từ PeriodTime
-        PeriodTime startPeriod = periodTimeRepository.findById(schedule.getPeriodStart())
+        PeriodTime startPeriod = periodTimeRepository.findById(session.getActualPeriodStart())
                 .orElse(null);
-        PeriodTime endPeriod = periodTimeRepository.findById(schedule.getPeriodEnd())
+        PeriodTime endPeriod = periodTimeRepository.findById(session.getActualPeriodEnd())
                 .orElse(null);
 
         // Tái sử dụng logic lấy trạng thái form helper đã viết
@@ -418,8 +419,8 @@ public class ClassSessionService {
                 .className(schedule.getAdminClass().getCode())
                 .roomCode(room.getCode())
                 .building(room.getBuilding())
-                .periodStart(schedule.getPeriodStart())
-                .periodEnd(schedule.getPeriodEnd())
+                .periodStart(session.getActualPeriodStart())
+                .periodEnd(session.getActualPeriodEnd())
                 .periodStartTime(startPeriod != null ? startPeriod.getStartTime() : null)
                 .periodEndTime(endPeriod != null ? endPeriod.getEndTime() : null)
                 .sessionNumber(session.getSessionNumber() != null ? session.getSessionNumber().intValue() : null)
@@ -452,4 +453,208 @@ public class ClassSessionService {
         Long lecturerId = securityUtils.getCurrentLecturerId();
         return subjectMapper.toDropdownOptionList(scheduleRepository.findDistinctSubjectsByLecturer(lecturerId));
     }
+
+    @Transactional
+    public void cancelClassSession(Long sessionId, String reason) {
+        ClassSession session = getAndValidateLecturerSession(sessionId, true);
+        if (session.getStatus() != ClassSession.Status.scheduled) {
+            throw new AppException(ErrorCode.INVALID_SESSION_STATUS);
+        }
+        if (reason == null || reason.trim().length() < 5) {
+            throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
+        }
+        
+        if (session.getMakeupFor() != null) {
+            classSessionRepository.delete(session);
+        } else {
+            session.setStatus(ClassSession.Status.cancelled);
+            session.setCancelReason(reason);
+            session.setCancelledBy(session.getActualLecturer().getUser());
+            session.setCancelledAt(LocalDateTime.now());
+        }
+    }
+
+    @Transactional
+    public ClassSession createMakeupSession(Long originalSessionId, MakeupSessionRequest request) {
+        ClassSession originalSession = getAndValidateLecturerSession(originalSessionId, true);
+        
+        if (originalSession.getStatus() != ClassSession.Status.cancelled) {
+            throw new AppException(ErrorCode.SESSION_NOT_CANCELLED);
+        }
+        
+        if (classSessionRepository.existsByMakeupFor_IdAndStatusNot(originalSessionId, ClassSession.Status.cancelled)) {
+            throw new AppException(ErrorCode.MAKEUP_ALREADY_EXISTS);
+        }
+
+        java.time.LocalDate makeupDate = request.getSessionDate();
+        java.time.LocalDate originalDate = originalSession.getSessionDate();
+        java.time.LocalDate semesterEndDate = originalSession.getSchedule().getSemester().getEndDate();
+
+        if (makeupDate.isBefore(originalDate)) {
+            throw new AppException(ErrorCode.MAKEUP_DATE_BEFORE_ORIGINAL);
+        }
+
+        if (!makeupDate.isBefore(semesterEndDate)) {
+            throw new AppException(ErrorCode.MAKEUP_DATE_AFTER_SEMESTER);
+        }
+
+        if (request.getPeriodStart() > request.getPeriodEnd() || request.getPeriodStart() < 1 || request.getPeriodEnd() > 15) {
+            throw new AppException(ErrorCode.INVALID_PERIOD);
+        }
+
+        if (classSessionRepository.existsByScheduleIdAndSessionDateAndActualPeriodStart(originalSession.getSchedule().getId(), request.getSessionDate(), request.getPeriodStart())) {
+            throw new AppException(ErrorCode.DUPLICATE_SESSION_DATE);
+        }
+
+        if (classSessionRepository.countConflictForClass(request.getSessionDate(), request.getPeriodStart(), request.getPeriodEnd(), originalSession.getSchedule().getAdminClass().getId()) > 0) {
+            throw new AppException(ErrorCode.CLASS_CONFLICT);
+        }
+
+        if (classSessionRepository.countConflictForRoom(request.getSessionDate(), request.getPeriodStart(), request.getPeriodEnd(), request.getRoomId()) > 0) {
+            throw new AppException(ErrorCode.ROOM_CONFLICT);
+        }
+
+        if (classSessionRepository.countConflictForLecturer(request.getSessionDate(), request.getPeriodStart(), request.getPeriodEnd(), originalSession.getActualLecturer().getId()) > 0) {
+            throw new AppException(ErrorCode.LECTURER_CONFLICT);
+        }
+
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
+
+        ClassSession makeupSession = ClassSession.builder()
+                .schedule(originalSession.getSchedule())
+                .actualRoom(room)
+                .actualLecturer(originalSession.getActualLecturer())
+                .actualPeriodStart(request.getPeriodStart())
+                .actualPeriodEnd(request.getPeriodEnd())
+                .sessionDate(request.getSessionDate())
+                .sessionNumber(originalSession.getSessionNumber()) // Vẫn giữ số thứ tự của buổi gốc
+                .status(ClassSession.Status.scheduled)
+                .gpsEnabled(originalSession.getGpsEnabled())
+                .makeupFor(originalSession)
+                .build();
+
+        return classSessionRepository.save(makeupSession);
+    }
+
+    public List<Room> findAvailableRooms(java.time.LocalDate sessionDate, Byte periodStart, Byte periodEnd) {
+        if (periodStart > periodEnd || periodStart < 1 || periodEnd > 15) {
+            throw new AppException(ErrorCode.INVALID_PERIOD);
+        }
+        return roomRepository.findAvailableRooms(sessionDate, periodStart, periodEnd);
+    }
+
+    /*
+    public List<SuggestedSlotDto> getSuggestedSlots(Long sessionId, Integer weeks) {
+        ClassSession originalSession = classSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_SESSION_NOT_FOUND));
+
+        if (originalSession.getStatus() != ClassSession.Status.cancelled) {
+            throw new AppException(ErrorCode.SESSION_NOT_CANCELLED);
+        }
+
+        int searchWeeks = (weeks == null || weeks <= 0) ? 2 : weeks;
+        int daysToSearch = searchWeeks * 7;
+
+        java.time.LocalDate startDate = java.time.LocalDate.now();
+        java.time.LocalDate semesterEndDate = originalSession.getSchedule().getSemester().getEndDate();
+        java.time.LocalDate endDate = startDate.plusDays(daysToSearch);
+        if (endDate.isAfter(semesterEndDate)) {
+            endDate = semesterEndDate;
+        }
+
+        if (startDate.isAfter(endDate)) {
+            return java.util.Collections.emptyList();
+        }
+
+        Long adminClassId = originalSession.getSchedule().getAdminClass().getId();
+        Long lecturerId = originalSession.getActualLecturer().getId();
+        Long scheduleId = originalSession.getSchedule().getId();
+        int duration = originalSession.getActualPeriodEnd() - originalSession.getActualPeriodStart() + 1;
+
+        // Load active sessions for class and lecturer in memory
+        List<ClassSession> classSessions = classSessionRepository.findBySchedule_AdminClass_IdAndSessionDateBetweenAndStatusNot(
+                adminClassId, startDate, endDate, ClassSession.Status.cancelled);
+        List<ClassSession> lecturerSessions = classSessionRepository.findByActualLecturer_IdAndSessionDateBetweenAndStatusNot(
+                lecturerId, startDate, endDate, ClassSession.Status.cancelled);
+        List<ClassSession> scheduleSessions = classSessionRepository.findBySchedule_IdAndSessionDateBetween(
+                scheduleId, startDate, endDate);
+
+        List<SuggestedSlotDto> suggestions = new java.util.ArrayList<>();
+
+        // Loop through each day from startDate to endDate (inclusive)
+        for (java.time.LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            // Loop through potential starting periods
+            for (int s = 1; s <= 16 - duration; s++) {
+                int e = s + duration - 1;
+
+                // 1. Check unique constraint on schedule, sessionDate, actualPeriodStart (including cancelled ones)
+                boolean uniqueViolation = false;
+                for (ClassSession cs : scheduleSessions) {
+                    if (cs.getSessionDate().equals(date) && cs.getActualPeriodStart() == s) {
+                        uniqueViolation = true;
+                        break;
+                    }
+                }
+                if (uniqueViolation) {
+                    continue;
+                }
+
+                // 2. Check class conflict
+                boolean classConflicted = false;
+                for (ClassSession cs : classSessions) {
+                    if (cs.getSessionDate().equals(date) && cs.getActualPeriodStart() <= e && cs.getActualPeriodEnd() >= s) {
+                        classConflicted = true;
+                        break;
+                    }
+                }
+                if (classConflicted) {
+                    continue;
+                }
+
+                // 3. Check lecturer conflict
+                boolean lecturerConflicted = false;
+                for (ClassSession cs : lecturerSessions) {
+                    if (cs.getSessionDate().equals(date) && cs.getActualPeriodStart() <= e && cs.getActualPeriodEnd() >= s) {
+                        lecturerConflicted = true;
+                        break;
+                    }
+                }
+                if (lecturerConflicted) {
+                    continue;
+                }
+
+                // 4. Query available rooms
+                List<ken.example.dekiru.academic.entity.Room> rooms = roomRepository.findAvailableRooms(date, (byte) s, (byte) e);
+                if (!rooms.isEmpty()) {
+                    List<DropdownOption> roomOptions = rooms.stream()
+                            .map(r -> new DropdownOption(r.getId(), r.getCode(), r.getCode() + (r.getBuilding() != null ? " - " + r.getBuilding() : "")))
+                            .toList();
+
+                    String dayOfWeekStr = getDayOfWeekVietnamese(date);
+                    suggestions.add(new SuggestedSlotDto(date, (byte) s, (byte) e, dayOfWeekStr, roomOptions));
+
+                    if (suggestions.size() >= 15) {
+                        return suggestions;
+                    }
+                }
+            }
+        }
+
+        return suggestions;
+    }
+
+    private String getDayOfWeekVietnamese(java.time.LocalDate date) {
+        switch (date.getDayOfWeek()) {
+            case MONDAY: return "Thứ Hai";
+            case TUESDAY: return "Thứ Ba";
+            case WEDNESDAY: return "Thứ Tư";
+            case THURSDAY: return "Thứ Năm";
+            case FRIDAY: return "Thứ Sáu";
+            case SATURDAY: return "Thứ Bảy";
+            case SUNDAY: return "Chủ Nhật";
+            default: return "";
+        }
+    }
+    */
 }

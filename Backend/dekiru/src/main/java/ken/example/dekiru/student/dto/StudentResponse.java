@@ -16,5 +16,9 @@ public class StudentResponse {
     String adminClassCode;
     String adminClassName;
     Boolean isActive;
+    String phoneNumber;
+    String gender;
+    java.time.LocalDate birthday;
+    String birthPlace;
 }
 

@@ -41,6 +41,8 @@ import jakarta.validation.Validator;
 import org.springframework.data.domain.Pageable;
 import java.util.*;
 import java.util.stream.Collectors;
+import ken.example.dekiru.common.enums.Gender;
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)
@@ -114,7 +116,7 @@ public class UserService  {
             if (headerRow == null) {
                 throw new RuntimeException("File Excel không có dữ liệu");
             }
-            String[] expectedHeaders = {"Họ và tên", "Email", "Mã giảng viên", "Mã khoa"};
+            String[] expectedHeaders = {"Họ và tên", "Email", "Mã giảng viên", "Mã khoa", "Số điện thoại", "Giới tính", "Ngày sinh", "Nơi sinh"};
             for (int i = 0; i < expectedHeaders.length; i++) {
                 if (!expectedHeaders[i].equalsIgnoreCase(getCellValue(headerRow.getCell(i)))) {
                     throw new RuntimeException("Sai định dạng file mẫu. Cột " + (i + 1) + " phải là '" + expectedHeaders[i] + "'");
@@ -131,6 +133,10 @@ public class UserService  {
                         .email(getCellValue(row.getCell(1)))
                         .lecturerCode(getCellValue(row.getCell(2)))
                         .facultyCode(getCellValue(row.getCell(3)))
+                        .phoneNumber(getCellValue(row.getCell(4)))
+                        .gender(getCellValue(row.getCell(5)))
+                        .birthday(parseDate(row.getCell(6)))
+                        .birthPlace(getCellValue(row.getCell(7)))
                         .build();
                 rawList.add(dto);
             }
@@ -211,6 +217,10 @@ public class UserService  {
                     .fullName(dto.getFullName())
                     .role(User.Role.lecturer)
                     .isActive(true)
+                    .phoneNumber(dto.getPhoneNumber())
+                    .gender(parseGender(dto.getGender()))
+                    .birthday(dto.getBirthday())
+                    .birthPlace(dto.getBirthPlace())
                     .build();
 
             Faculty faculty = mappedFaculties.get(dto.getFacultyCode());
@@ -241,7 +251,7 @@ public class UserService  {
             if (headerRow == null) {
                 throw new RuntimeException("File Excel không có dữ liệu");
             }
-            String[] expectedHeaders = {"Họ và tên", "Email", "Mã sinh viên", "Mã lớp hành chính"};
+            String[] expectedHeaders = {"Họ và tên", "Email", "Mã sinh viên", "Mã lớp hành chính", "Số điện thoại", "Giới tính", "Ngày sinh", "Nơi sinh"};
             for (int i = 0; i < expectedHeaders.length; i++) {
                 if (!expectedHeaders[i].equalsIgnoreCase(getCellValue(headerRow.getCell(i)))) {
                     throw new RuntimeException("Sai định dạng file mẫu. Cột " + (i + 1) + " phải là '" + expectedHeaders[i] + "'");
@@ -258,6 +268,10 @@ public class UserService  {
                         .email(getCellValue(row.getCell(1)))
                         .studentCode(getCellValue(row.getCell(2)))
                         .adminClassCode(getCellValue(row.getCell(3)))
+                        .phoneNumber(getCellValue(row.getCell(4)))
+                        .gender(getCellValue(row.getCell(5)))
+                        .birthday(parseDate(row.getCell(6)))
+                        .birthPlace(getCellValue(row.getCell(7)))
                         .build();
                 rawList.add(dto);
             }
@@ -341,6 +355,10 @@ public class UserService  {
                     .fullName(dto.getFullName())
                     .role(User.Role.student)
                     .isActive(true)
+                    .phoneNumber(dto.getPhoneNumber())
+                    .gender(parseGender(dto.getGender()))
+                    .birthday(dto.getBirthday())
+                    .birthPlace(dto.getBirthPlace())
                     .build();
 
             AdministrativeClass adminClass = mappedAdminClasses.get(dto.getAdminClassCode());
@@ -393,6 +411,10 @@ public class UserService  {
                 .fullName(request.getFullName())
                 .role(User.Role.student)
                 .isActive(true)
+                .phoneNumber(request.getPhoneNumber())
+                .gender(parseGender(request.getGender()))
+                .birthday(request.getBirthday())
+                .birthPlace(request.getBirthPlace())
                 .build();
         userRepository.save(user);
 
@@ -446,6 +468,10 @@ public class UserService  {
                 .fullName(request.getFullName())
                 .role(User.Role.lecturer)
                 .isActive(true)
+                .phoneNumber(request.getPhoneNumber())
+                .gender(parseGender(request.getGender()))
+                .birthday(request.getBirthday())
+                .birthPlace(request.getBirthPlace())
                 .build();
         userRepository.save(user);
 
@@ -467,5 +493,38 @@ public class UserService  {
             return String.valueOf((long) cell.getNumericCellValue());
         }
         return "";
+    }
+
+    private LocalDate parseDate(Cell cell) {
+        if (cell == null) return null;
+        if (cell.getCellType() == CellType.NUMERIC) {
+            if (DateUtil.isCellDateFormatted(cell)) {
+                return cell.getLocalDateTimeCellValue().toLocalDate();
+            } else {
+                return DateUtil.getLocalDateTime(cell.getNumericCellValue()).toLocalDate();
+            }
+        } else if (cell.getCellType() == CellType.STRING) {
+            String val = cell.getStringCellValue().trim();
+            if (val.isEmpty()) return null;
+            try {
+                if (val.contains("-")) {
+                    return LocalDate.parse(val);
+                } else if (val.contains("/")) {
+                    return LocalDate.parse(val, java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy"));
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return null;
+    }
+
+    private Gender parseGender(String value) {
+        if (value == null || value.isBlank()) return null;
+        String val = value.trim().toLowerCase();
+        if (val.equals("nam") || val.equals("male") || val.equals("m")) return Gender.male;
+        if (val.equals("nữ") || val.equals("nu") || val.equals("female") || val.equals("f")) return Gender.female;
+        if (val.equals("khác") || val.equals("khac") || val.equals("other") || val.equals("o")) return Gender.other;
+        return null;
     }
 }
