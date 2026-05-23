@@ -87,4 +87,10 @@ public class VLecturerToday {
     @Column(name = "left_early_count")
     private Integer leftEarlyCount;
 
+    @Column(name = "makeup_for_id")
+    private Long makeupForId;
+
+    @Column(name = "original_session_date")
+    private LocalDate originalSessionDate;
+
 }

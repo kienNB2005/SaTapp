@@ -5,6 +5,8 @@ import ken.example.dekiru.academic.dto.UpdateSubjectRequest;
 import ken.example.dekiru.academic.dto.SubjectResponse;
 import ken.example.dekiru.common.dto.ImportResponse;
 import ken.example.dekiru.academic.service.SubjectService;
+import ken.example.dekiru.attendance.service.ClassSessionService;
+import ken.example.dekiru.attendance.dto.DropdownOption;
 import ken.example.dekiru.common.response.ApiResponse;
 import ken.example.dekiru.common.exception.AppException;
 import ken.example.dekiru.common.exception.ErrorCode;
@@ -16,18 +18,32 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/subjects")
+@RequestMapping("/api/v1/subjects")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubjectController {
 
     SubjectService subjectService;
+    ClassSessionService classSessionService;
+
+    @GetMapping("/filter-by-session")
+    public ApiResponse<List<DropdownOption>> getSubjectsFilter(
+            @RequestParam(required = false) Long adminClassId) {
+        List<DropdownOption> subjects;
+        if (adminClassId != null) {
+            subjects = classSessionService.getSubjectsForLecturerAndClass(adminClassId);
+        } else {
+            subjects = classSessionService.getSubjectsForLecturer();
+        }
+        return ApiResponse.success(subjects, "Lấy danh sách môn học thành công");
+    }
 
     @GetMapping
     public ApiResponse<List<SubjectResponse>> getAllSubjects() {
@@ -42,24 +58,28 @@ public class SubjectController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<SubjectResponse> createSubject(@RequestBody CreateSubjectRequest request) {
         SubjectResponse subject = subjectService.createSubject(request);
         return ApiResponse.success(subject, "Thêm mới môn học thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<SubjectResponse> updateSubject(@PathVariable Long id, @RequestBody UpdateSubjectRequest request) {
         SubjectResponse subject = subjectService.updateSubject(id, request);
         return ApiResponse.success(subject, "Cập nhật môn học thành công");
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteSubject(@PathVariable Long id) {
         subjectService.deleteSubject(id);
         return ApiResponse.success(null, "Xóa môn học thành công");
     }
 
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ImportResponse> importSubjects(@RequestParam("file") MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {

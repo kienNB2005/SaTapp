@@ -45,7 +45,7 @@ export default function AdminDepartments() {
     setListLoading(true);
     setListError('');
     try {
-      const res = await api.get('/admin/departments', { signal });
+      const res = await api.get('/api/v1/departments', { signal });
       setDepartments(res.data.result || []);
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'CanceledError') return;
@@ -65,8 +65,19 @@ export default function AdminDepartments() {
   // =====================
   // IMPORT HANDLERS
   // =====================
-  const downloadTemplate = () => {
-    window.open('http://localhost:8080/admin/departments/template', '_blank');
+  const downloadTemplate = async () => {
+    try {
+      const res = await api.get('/api/v1/departments/template', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Template_Import_NganhHoc.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
+    }
   };
 
   const handleFileChange = async (event) => {
@@ -92,7 +103,7 @@ export default function AdminDepartments() {
     }, 350);
 
     try {
-      const response = await api.post('/admin/departments/import', formData, {
+      const response = await api.post('/api/v1/departments/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -141,7 +152,7 @@ export default function AdminDepartments() {
     
     // Fetch danh sách khoa khi mở modal sửa
     try {
-      const res = await api.get('/admin/faculties');
+      const res = await api.get('/api/v1/faculties');
       setFaculties(res.data.result || []);
     } catch (err) {
       console.error("Lỗi lấy danh sách khoa", err);
@@ -159,7 +170,7 @@ export default function AdminDepartments() {
     }
     setIsSaving(true);
     try {
-      await api.put(`/admin/departments/${editingDept.id}`, { 
+      await api.put(`/api/v1/departments/${editingDept.id}`, { 
         name: editName,
         facultyId: Number(editFacultyId)
       });
@@ -178,7 +189,7 @@ export default function AdminDepartments() {
     }
     setIsDeleting(dept.id);
     try {
-      await api.delete(`/admin/departments/${dept.id}`);
+      await api.delete(`/api/v1/departments/${dept.id}`);
       fetchDepartments(); // Refresh list
     } catch (err) {
       alert(err.response?.data?.message || 'Xóa thất bại. Vui lòng thử lại.');
@@ -193,7 +204,7 @@ export default function AdminDepartments() {
     setAddName('');
     setAddFacultyId('');
     try {
-      const res = await api.get('/admin/faculties');
+      const res = await api.get('/api/v1/faculties');
       setFaculties(res.data.result || []);
     } catch (err) {
       console.error("Lỗi lấy danh sách khoa", err);
@@ -211,7 +222,7 @@ export default function AdminDepartments() {
     }
     setIsSaving(true);
     try {
-      await api.post('/admin/departments', { 
+      await api.post('/api/v1/departments', { 
         code: addCode,
         name: addName,
         facultyId: Number(addFacultyId)

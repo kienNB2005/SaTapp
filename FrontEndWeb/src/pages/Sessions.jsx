@@ -85,7 +85,7 @@ export default function Sessions() {
   // Fetch phòng học trống khi thông tin thời gian hợp lệ
   useEffect(() => {
     if (makeupModalSessionId && makeupForm.sessionDate && makeupForm.periodStart && makeupForm.periodEnd && makeupForm.periodEnd >= makeupForm.periodStart) {
-      api.get("/sessions/available-rooms", {
+      api.get("/api/v1/rooms/available", {
         params: {
           sessionDate: makeupForm.sessionDate,
           periodStart: makeupForm.periodStart,
@@ -107,7 +107,7 @@ export default function Sessions() {
 
   // Load danh sách lớp hành chính
   useEffect(() => {
-    api.get('/sessions/filter/admin-classes')
+    api.get('/api/v1/administrative-classes/filter-by-session')
       .then(({ data }) => {
         const list = data.result ?? data.data ?? data;
         setClasses(list);
@@ -127,7 +127,7 @@ export default function Sessions() {
     if (!selectedClass) return;
     setSubjects([]);
     setSelectedSubject(null);
-    api.get('/sessions/filter/subjects', { params: { adminClassId: selectedClass.id } })
+    api.get('/api/v1/subjects/filter-by-session', { params: { adminClassId: selectedClass.id } })
       .then(({ data }) => {
         const list = data.result ?? data.data ?? data;
         setSubjects(list);
@@ -147,7 +147,7 @@ export default function Sessions() {
     if (!selectedClass || !selectedSubject) return;
     setLoading(true);
     setError(null);
-    api.get('/sessions/list', {
+    api.get('/api/v1/sessions', {
       params: { adminClassId: selectedClass.id, subjectId: selectedSubject.id }
     })
       .then(({ data }) => {
@@ -171,7 +171,7 @@ export default function Sessions() {
   async function handleOpen(sessionId) {
     setActionLoading(sessionId);
     try {
-      await api.post(`/sessions/${sessionId}/open`);
+      await api.patch(`/api/v1/sessions/${sessionId}/status`, { status: "OPEN" });
       await loadSessions();
       navigate(`/qr?sessionId=${sessionId}`);
     } catch (err) {
@@ -186,7 +186,7 @@ export default function Sessions() {
     if (!confirm('Bạn có chắc muốn kết thúc buổi học này?')) return;
     setActionLoading(sessionId);
     try {
-      await api.post(`/sessions/${sessionId}/close`);
+      await api.patch(`/api/v1/sessions/${sessionId}/status`, { status: "CLOSED" });
       loadSessions();
     } catch (err) {
       alert(friendlyError(err));
@@ -198,7 +198,7 @@ export default function Sessions() {
   async function submitCancel() {
     if (cancelReason.trim().length < 5) return alert("Lý do hủy buổi học quá ngắn.");
     try {
-      await api.post(`/sessions/${cancelModalSessionId}/cancel`, { reason: cancelReason });
+      await api.patch(`/api/v1/sessions/${cancelModalSessionId}/status`, { status: "CANCELLED", reason: cancelReason });
       setCancelModalSessionId(null);
       setCancelReason("");
       loadSessions();
@@ -210,7 +210,7 @@ export default function Sessions() {
   // const fetchSuggestions = useCallback(async (sessionId) => {
   //   setLoadingSuggestions(true);
   //   try {
-  //     const res = await api.get(`/sessions/${sessionId}/suggested-slots`);
+  //     const res = await api.get(`/api/v1/sessions/${sessionId}/suggested-slots`);
   //     const list = res.data?.result ?? res.data?.data ?? res.data ?? [];
   //     setSuggestions(list);
   //   } catch (err) {
@@ -237,7 +237,7 @@ export default function Sessions() {
     }
     if (!makeupForm.roomId) return alert("Vui lòng chọn phòng học trống.");
     try {
-      await api.post(`/sessions/${makeupModalSessionId}/makeup`, makeupForm);
+      await api.post(`/api/v1/sessions/${makeupModalSessionId}/makeup`, makeupForm);
       setMakeupModalSessionId(null);
       loadSessions();
     } catch (err) {

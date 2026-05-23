@@ -8,12 +8,13 @@ import ken.example.dekiru.common.response.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/semesters")
+@RequestMapping("/api/v1/semesters")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SemesterController {
@@ -33,18 +34,21 @@ public class SemesterController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<SemesterResponse> createSemester(@RequestBody CreateSemesterRequest request) {
         SemesterResponse response = semesterService.createSemester(request);
         return ApiResponse.success(response, "Tạo học kỳ thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<SemesterResponse> updateSemester(@PathVariable Long id, @RequestBody UpdateSemesterRequest request) {
         SemesterResponse response = semesterService.updateSemester(id, request);
         return ApiResponse.success(response, "Cập nhật học kỳ thành công");
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteSemester(@PathVariable Long id) {
         semesterService.deleteSemester(id);
         return ApiResponse.success(null, "Xóa học kỳ thành công");

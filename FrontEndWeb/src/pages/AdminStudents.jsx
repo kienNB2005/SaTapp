@@ -72,7 +72,7 @@ export default function AdminStudents() {
 
   const fetchClasses = async () => {
     try {
-      const res = await api.get('/admin/administrative-classes');
+      const res = await api.get('/api/v1/administrative-classes');
       const data = res.data.result || res.data.data || res.data;
       const classList = Array.isArray(data) ? data : (data?.content ? data.content : []);
       setClasses(classList);
@@ -94,7 +94,7 @@ export default function AdminStudents() {
       if (selectedClassId) params.classId = selectedClassId;
       if (selectedStatus !== '') params.isActive = selectedStatus === 'true';
 
-      const res = await api.get('/users/students', { params });
+      const res = await api.get('/api/v1/users/students', { params });
       if (res.data.result) {
         setStudents(res.data.result.content || []);
         setTotalPages(res.data.result.page?.totalPages || res.data.result.totalPages || 1);
@@ -139,7 +139,7 @@ export default function AdminStudents() {
         ...addForm,
         adminClassId: Number(addForm.adminClassId)
       };
-      await api.post('/users/students', payload);
+      await api.post('/api/v1/users/students', payload);
       setIsAddingStudent(false);
       fetchStudents(); // Refresh list
     } catch (err) {
@@ -157,7 +157,7 @@ export default function AdminStudents() {
     setEditLoading(true);
     setEditError('');
     try {
-      await api.put(`/users/students/${editingStudent.id}`, editForm);
+      await api.put(`/api/v1/users/students/${editingStudent.id}`, editForm);
       setEditingStudent(null);
       fetchStudents(); // Refresh list
     } catch (err) {
@@ -188,7 +188,7 @@ export default function AdminStudents() {
     try {
       setTimeout(() => { setProgress(60); setStatusText('Đang phân tích dữ liệu Excel...'); }, 500);
 
-      const res = await api.post('/users/students/import/preview', formData, {
+      const res = await api.post('/api/v1/users/students/import/preview', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -216,7 +216,7 @@ export default function AdminStudents() {
     setStatusText(`Đang lưu ${validStudents.length} sinh viên vào hệ thống...`);
 
     try {
-      await api.post('/users/students/import/confirm', validStudents);
+      await api.post('/api/v1/users/students/import/confirm', validStudents);
       setProgress(100);
       setStatusText('Lưu dữ liệu thành công!');
       setImportStep('success');
@@ -229,7 +229,7 @@ export default function AdminStudents() {
 
   const downloadTemplate = async () => {
     try {
-      const res = await api.get('/users/students/template', { responseType: 'blob' });
+      const res = await api.get('/api/v1/users/students/template', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;

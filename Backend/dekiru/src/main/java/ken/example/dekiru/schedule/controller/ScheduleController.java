@@ -17,19 +17,37 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
+import ken.example.dekiru.common.config.SecurityUtils;
+
 @RestController
-@RequestMapping("/admin/schedules")
+@RequestMapping("/api/v1/schedules")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ScheduleController {
 
     ScheduleService scheduleService;
+    SecurityUtils securityUtils;
+
+    /**
+     * Lấy danh sách TKB cá nhân của giảng viên đang đăng nhập.
+     */
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('LECTURER')")
+    public ApiResponse<Page<ScheduleResponse>> getMySchedules(
+            @RequestParam(required = false) Long semesterId,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Long lecturerId = securityUtils.getCurrentLecturerId();
+        Page<ScheduleResponse> page = scheduleService.getSchedules(
+                semesterId, null, null, lecturerId, null, pageable);
+        return ApiResponse.success(page);
+    }
 
     /**
      * Lấy danh sách TKB — phân trang, tìm kiếm, lọc.
@@ -70,6 +88,7 @@ public class ScheduleController {
      * Bước 1: Preview — Upload file Excel, validate và trả về danh sách xem trước
      */
     @PostMapping("/import/preview")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<SchedulePreviewResponse>> previewImport(@RequestParam("file") MultipartFile file) {
         List<SchedulePreviewResponse> response = scheduleService.previewImportSchedule(file);
         return ApiResponse.success(response, "Preview danh sách import thời khóa biểu");
@@ -79,6 +98,7 @@ public class ScheduleController {
      * Bước 2: Confirm — Lưu các dòng hợp lệ vào DB
      */
     @PostMapping("/import/confirm")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Map<String, Object>> confirmImport(
             @RequestParam("semesterId") Long semesterId,
             @RequestBody List<ScheduleExcelDTO> schedules) {

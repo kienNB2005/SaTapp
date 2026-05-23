@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller chỉ còn nhận HTTP request và trả ResponseEntity.
  */
 @RestController
-@RequestMapping("/lecturer/dashboard")
+@RequestMapping("/api/v1/lecturers/me/dashboard")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DashboardController {

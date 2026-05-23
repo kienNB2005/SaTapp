@@ -104,7 +104,7 @@ export default function AdminRooms() {
     setListLoading(true);
     setListError('');
     try {
-      const res = await api.get('/admin/rooms', { signal });
+      const res = await api.get('/api/v1/rooms', { signal });
       setRooms(res.data.result || []);
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'CanceledError') return;
@@ -149,7 +149,7 @@ export default function AdminRooms() {
         gpsRadiusM: editGpsRadius ? parseInt(editGpsRadius) : null,
         clearGps: editClearGps
       };
-      await api.put(`/admin/rooms/${editingRoom.id}`, payload);
+      await api.put(`/api/v1/rooms/${editingRoom.id}`, payload);
       setEditingRoom(null);
       fetchRooms();
     } catch (err) {
@@ -163,7 +163,7 @@ export default function AdminRooms() {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa phòng "${room.code}" không?`)) return;
     setIsDeleting(room.id);
     try {
-      await api.delete(`/admin/rooms/${room.id}`);
+      await api.delete(`/api/v1/rooms/${room.id}`);
       fetchRooms();
     } catch (err) {
       alert(err.response?.data?.message || 'Xóa thất bại');
@@ -197,7 +197,7 @@ export default function AdminRooms() {
         longitude: addLongitude ? parseFloat(addLongitude) : null,
         gpsRadiusM: addGpsRadius ? parseInt(addGpsRadius) : null
       };
-      await api.post('/admin/rooms', payload);
+      await api.post('/api/v1/rooms', payload);
       setIsAdding(false);
       fetchRooms();
     } catch (err) {
@@ -310,7 +310,7 @@ export default function AdminRooms() {
     try {
       setTimeout(() => { setProgress(40); setStatusText('Đang đọc dữ liệu Excel...'); }, 500);
 
-      const res = await api.post('/admin/rooms/import', formData, {
+      const res = await api.post('/api/v1/rooms/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -330,7 +330,7 @@ export default function AdminRooms() {
 
   const downloadTemplate = async () => {
     try {
-      const res = await api.get('/admin/rooms/template', { responseType: 'blob' });
+      const res = await api.get('/api/v1/rooms/template', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;

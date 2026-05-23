@@ -72,7 +72,7 @@ export default function AdminLecturers() {
 
   const fetchFaculties = async () => {
     try {
-      const res = await api.get('/admin/faculties');
+      const res = await api.get('/api/v1/faculties');
       const data = res.data.result || res.data.data || res.data;
       const facultyList = Array.isArray(data) ? data : (data?.content ? data.content : []);
       setFaculties(facultyList);
@@ -94,7 +94,7 @@ export default function AdminLecturers() {
       if (selectedDepartmentId) params.departmentId = selectedDepartmentId;
       if (selectedStatus !== '') params.isActive = selectedStatus === 'true';
 
-      const res = await api.get('/users/lecturers', { params });
+      const res = await api.get('/api/v1/users/lecturers', { params });
       if (res.data.result) {
         setLecturers(res.data.result.content || []);
         setTotalPages(res.data.result.page?.totalPages || res.data.result.totalPages || 1);
@@ -146,7 +146,7 @@ export default function AdminLecturers() {
         ...addForm,
         facultyId: Number(addForm.facultyId)
       };
-      await api.post('/users/lecturers', payload);
+      await api.post('/api/v1/users/lecturers', payload);
       setIsAddingLecturer(false);
       fetchLecturers(); // Refresh list
     } catch (err) {
@@ -168,7 +168,7 @@ export default function AdminLecturers() {
         ...editForm,
         facultyId: Number(editForm.facultyId)
       };
-      await api.put(`/users/lecturers/${editingLecturer.id}`, payload);
+      await api.put(`/api/v1/users/lecturers/${editingLecturer.id}`, payload);
       setEditingLecturer(null);
       fetchLecturers(); // Refresh list
     } catch (err) {
@@ -199,7 +199,7 @@ export default function AdminLecturers() {
     try {
       setTimeout(() => { setProgress(60); setStatusText('Đang phân tích dữ liệu Excel...'); }, 500);
 
-      const res = await api.post('/users/lecturers/import/preview', formData, {
+      const res = await api.post('/api/v1/users/lecturers/import/preview', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -227,7 +227,7 @@ export default function AdminLecturers() {
     setStatusText(`Đang lưu ${validLecturers.length} giảng viên vào hệ thống...`);
 
     try {
-      await api.post('/users/lecturers/import/confirm', validLecturers);
+      await api.post('/api/v1/users/lecturers/import/confirm', validLecturers);
       setProgress(100);
       setStatusText('Lưu dữ liệu thành công!');
       setImportStep('success');
@@ -240,7 +240,7 @@ export default function AdminLecturers() {
 
   const downloadTemplate = async () => {
     try {
-      const res = await api.get('/users/lecturer/template', { responseType: 'blob' });
+      const res = await api.get('/api/v1/users/lecturers/template', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;

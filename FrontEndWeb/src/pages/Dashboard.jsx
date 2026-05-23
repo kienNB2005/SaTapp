@@ -193,6 +193,11 @@ function TodaySessions({ sessions, loading, navigate }) {
                       {s.className} · Tiết {s.periodStart}–{s.periodEnd} · {s.roomCode}
                       {s.building ? ` · ${s.building}` : ""} · Buổi{" "}
                       {s.sessionNumber ?? "?"}/{s.totalSessions ?? "?"}
+                      {s.makeupForId && (
+                        <span style={{ color: "#D97706", fontWeight: 600, marginLeft: 6 }}>
+                          (Học bù)
+                        </span>
+                      )}
                     </div>
                   </div>
                   {statusBadge(s.status)}
@@ -377,6 +382,13 @@ function SessionDetailPopover({ session: s, onClose }) {
           </div>
         ))}
 
+        {s.makeupForId && (
+          <div style={{ marginTop: 14, padding: "10px", background: "rgba(245, 158, 11, 0.1)", color: "#D97706", borderRadius: 8, fontSize: 13, fontWeight: 600, border: "1px solid rgba(245, 158, 11, 0.3)", display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 16 }}>⚠️</span>
+            <span>Học bù cho ngày {s.originalSessionDate ? new Date(s.originalSessionDate).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}</span>
+          </div>
+        )}
+
         <div style={{ marginTop: 14, fontSize: 11, color: "var(--tx3)", textAlign: "center" }}>
           Nhấn ra ngoài để đóng
         </div>
@@ -433,6 +445,11 @@ function WeekSchedule({ sessions, loading }) {
                   </td>
                   <td style={{ fontWeight: isToday ? 500 : 400 }}>
                     {s.subjectName} · {s.className} · {s.roomCode} · T.{s.periodStart}–{s.periodEnd}
+                    {s.makeupForId && (
+                      <span style={{ color: "#D97706", fontWeight: 600, marginLeft: 6, fontSize: 10, border: "1px solid rgba(245,158,11,0.4)", padding: "1px 4px", borderRadius: 4, background: "rgba(245,158,11,0.1)" }}>
+                        Bù
+                      </span>
+                    )}
                   </td>
                   <td>
                     {isToday && s.status?.toLowerCase() === "open"
@@ -474,7 +491,7 @@ export default function Dashboard() {
 
     const params = selectedSemesterId ? { semesterId: selectedSemesterId } : {};
 
-    api.get("/lecturer/dashboard", { params, signal: controller.signal })
+    api.get("/api/v1/lecturers/me/dashboard", { params, signal: controller.signal })
       .then((res) => {
         const json = res.data;
         setData(json);

@@ -11,15 +11,14 @@ import ken.example.dekiru.student.service.StudentAttendanceService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ken.example.dekiru.attendance.service.ClassSessionService;
+import ken.example.dekiru.attendance.dto.StudentAttendRequest;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/api/v1/students/me/attendances")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentAttendanceController {
@@ -27,9 +26,9 @@ public class StudentAttendanceController {
       StudentAttendanceService studentAttendanceService;
       SemesterMapper semesterMapper;
       SemesterService semesterService;
+      ClassSessionService classSessionService;
 
-
-    @GetMapping("/attendance/semesters")
+    @GetMapping("/semesters")
     public ApiResponse<List<SemesterResponse>> getStudentSemesters() {
         return ApiResponse.success(
                 studentAttendanceService.getSemestersForFilter(),
@@ -85,7 +84,7 @@ public class StudentAttendanceController {
      *   }
      * }
      */
-    @GetMapping("/attendance")
+    @GetMapping("/overview")
     public ApiResponse<AttendanceScreenResponse> getAttendanceScreen(
             @RequestParam(required = false) Long semesterId) {
         return ApiResponse.success(
@@ -99,10 +98,16 @@ public class StudentAttendanceController {
      * Lấy riêng danh sách môn đang vượt ngưỡng cấm thi.
      * Dùng cho push notification hoặc widget cảnh báo nhanh ở màn hình chính.
      */
-    @GetMapping("/attendance/danger")
+    @GetMapping("/danger")
     public ApiResponse<List<AttendanceSubjectResponse>> getDangerSubjects() {
         return ApiResponse.success(
                 studentAttendanceService.getDangerSubjects()
         );
+    }
+
+    @PostMapping("/submit-qr")
+    public ApiResponse<Void> submitQr(@RequestBody StudentAttendRequest request) {
+        classSessionService.studentAttend(request);
+        return ApiResponse.success(null, "Điểm danh thành công");
     }
 }

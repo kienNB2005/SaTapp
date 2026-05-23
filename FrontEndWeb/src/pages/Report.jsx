@@ -46,7 +46,7 @@ export default function Report() {
 
   const fetchSemesters = async () => {
     try {
-      const res = await api.get('/api/lecturer/reports/semesters');
+      const res = await api.get('/api/v1/reports/lecturer/semesters');
       if (res.data.code === 1000) {
         setSemesters(res.data.result);
         if (res.data.result.length > 0) {
@@ -60,7 +60,7 @@ export default function Report() {
 
   const fetchClasses = async (semesterId) => {
     try {
-      const res = await api.get(`/api/lecturer/reports/classes?semesterId=${semesterId}`);
+      const res = await api.get(`/api/v1/reports/lecturer/classes?semesterId=${semesterId}`);
       if (res.data.code === 1000) {
         setClasses(res.data.result);
         if (res.data.result.length > 0) {
@@ -76,7 +76,7 @@ export default function Report() {
 
   const fetchSubjects = async (semesterId, adminClassId) => {
     try {
-      const res = await api.get(`/api/lecturer/reports/subjects?semesterId=${semesterId}&adminClassId=${adminClassId}`);
+      const res = await api.get(`/api/v1/reports/lecturer/subjects?semesterId=${semesterId}&adminClassId=${adminClassId}`);
       if (res.data.code === 1000) {
         setSubjects(res.data.result);
         if (res.data.result.length > 0) {
@@ -93,7 +93,7 @@ export default function Report() {
   const fetchReportData = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/lecturer/reports/data', {
+      const res = await api.get('/api/v1/reports/lecturer/data', {
         params: {
           semesterId: selectedSemester,
           adminClassId: selectedClass,
@@ -113,7 +113,7 @@ export default function Report() {
 
   const handleExportExcel = async () => {
     try {
-      const response = await api.get('/api/lecturer/reports/export/excel', {
+      const response = await api.get('/api/v1/reports/lecturer/export/excel', {
         params: {
           semesterId: selectedSemester,
           adminClassId: selectedClass,

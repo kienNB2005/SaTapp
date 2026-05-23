@@ -46,7 +46,7 @@ export default function Homeroom() {
 
   const fetchClasses = async () => {
     try {
-      const res = await api.get('/api/homeroom/reports/classes');
+      const res = await api.get('/api/v1/reports/homeroom/classes');
       if (res.data.code === 1000) {
         setClasses(res.data.result);
         if (res.data.result.length > 0) {
@@ -60,7 +60,7 @@ export default function Homeroom() {
 
   const fetchSemesters = async (adminClassId) => {
     try {
-      const res = await api.get(`/api/homeroom/reports/semesters?adminClassId=${adminClassId}`);
+      const res = await api.get(`/api/v1/reports/homeroom/semesters?adminClassId=${adminClassId}`);
       if (res.data.code === 1000) {
         setSemesters(res.data.result);
         if (res.data.result.length > 0) {
@@ -76,7 +76,7 @@ export default function Homeroom() {
 
   const fetchSubjects = async (adminClassId, semesterId) => {
     try {
-      const res = await api.get(`/api/homeroom/reports/subjects?adminClassId=${adminClassId}&semesterId=${semesterId}`);
+      const res = await api.get(`/api/v1/reports/homeroom/subjects?adminClassId=${adminClassId}&semesterId=${semesterId}`);
       if (res.data.code === 1000) {
         setSubjects(res.data.result);
         setSelectedSubject(''); // Mặc định là "Tất cả các môn"
@@ -98,7 +98,7 @@ export default function Homeroom() {
         params.subjectId = selectedSubject;
       }
       
-      const res = await api.get('/api/homeroom/reports/data', { params });
+      const res = await api.get('/api/v1/reports/homeroom/data', { params });
       if (res.data.code === 1000) {
         setReportData(res.data.result);
       }
@@ -120,7 +120,7 @@ export default function Homeroom() {
         params.subjectId = selectedSubject;
       }
 
-      const response = await api.get('/api/homeroom/reports/export/excel', {
+      const response = await api.get('/api/v1/reports/homeroom/export/excel', {
         params,
         responseType: 'blob'
       });

@@ -68,10 +68,16 @@ public class VLecturerWeek {
 
     @Column(name = "total_sessions")
     private Integer totalSessions;
+
+    @Column(name = "makeup_for_id")
+    private Long makeupForId;
+
+    @Column(name = "original_session_date")
+    private LocalDate originalSessionDate;
+
 //
 //    @Transient
 //    @Column(name = "total_students")
 //    private Integer totalStudents;
-
 
 }

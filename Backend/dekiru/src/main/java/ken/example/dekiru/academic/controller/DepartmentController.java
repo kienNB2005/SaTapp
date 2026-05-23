@@ -16,13 +16,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/departments")
+@RequestMapping("/api/v1/departments")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DepartmentController {
@@ -42,24 +43,28 @@ public class DepartmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<DepartmentResponse> createDepartment(@RequestBody CreateDepartmentRequest request) {
         DepartmentResponse department = departmentService.createDepartment(request);
         return ApiResponse.success(department, "Thêm mới bộ môn thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<DepartmentResponse> updateDepartment(@PathVariable Long id, @RequestBody UpdateDepartmentRequest request) {
         DepartmentResponse department = departmentService.updateDepartment(id, request);
         return ApiResponse.success(department, "Cập nhật bộ môn thành công");
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ApiResponse.success(null, "Xóa bộ môn thành công");
     }
 
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ImportResponse> importDepartments(@RequestParam("file") MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {

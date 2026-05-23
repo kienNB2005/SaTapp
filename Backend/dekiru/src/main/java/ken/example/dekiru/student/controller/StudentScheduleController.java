@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/api/v1/students/me/schedules")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentScheduleController {
@@ -28,7 +28,7 @@ public class StudentScheduleController {
         );
     }
 
-    @GetMapping("/schedule")
+    @GetMapping
     public ApiResponse<List<StudentSchedule>> getSchedule(
             @RequestParam(required = false, defaultValue = "0") Integer weekNumber) {
         return ApiResponse.success(

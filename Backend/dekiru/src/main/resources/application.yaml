@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/HTDiemDanhSinhVienTest1
+    url: jdbc:mysql://localhost:3306/HTDiemDanhSinhVien
     username: root
     password: 157359
   data:

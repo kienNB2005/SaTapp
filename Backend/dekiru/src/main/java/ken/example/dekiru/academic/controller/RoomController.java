@@ -5,6 +5,8 @@ import ken.example.dekiru.academic.dto.UpdateRoomRequest;
 import ken.example.dekiru.common.dto.ImportResponse;
 import ken.example.dekiru.academic.dto.RoomResponse;
 import ken.example.dekiru.academic.service.RoomService;
+import ken.example.dekiru.attendance.service.ClassSessionService;
+import ken.example.dekiru.attendance.dto.DropdownOption;
 import ken.example.dekiru.common.response.ApiResponse;
 import ken.example.dekiru.common.exception.AppException;
 import ken.example.dekiru.common.exception.ErrorCode;
@@ -16,18 +18,32 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/rooms")
+@RequestMapping("/api/v1/rooms")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoomController {
 
     RoomService roomService;
+    ClassSessionService classSessionService;
+
+    @GetMapping("/available")
+    public ApiResponse<List<DropdownOption>> getAvailableRooms(
+            @RequestParam java.time.LocalDate sessionDate,
+            @RequestParam Byte periodStart,
+            @RequestParam Byte periodEnd) {
+        List<ken.example.dekiru.academic.entity.Room> rooms = classSessionService.findAvailableRooms(sessionDate, periodStart, periodEnd);
+        List<DropdownOption> options = rooms.stream()
+                .map(r -> new DropdownOption(r.getId(), r.getCode(), r.getCode() + (r.getBuilding() != null ? " - " + r.getBuilding() : "")))
+                .collect(java.util.stream.Collectors.toList());
+        return ApiResponse.success(options, "Lấy danh sách phòng trống thành công");
+    }
 
     @GetMapping
     public ApiResponse<List<RoomResponse>> getAllRooms() {
@@ -42,24 +58,28 @@ public class RoomController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<RoomResponse> createRoom(@RequestBody CreateRoomRequest request) {
         RoomResponse room = roomService.createRoom(request);
         return ApiResponse.success(room, "Thêm mới phòng thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<RoomResponse> updateRoom(@PathVariable Long id, @RequestBody UpdateRoomRequest request) {
         RoomResponse room = roomService.updateRoom(id, request);
         return ApiResponse.success(room, "Cập nhật phòng thành công");
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteRoom(@PathVariable Long id) {
         roomService.deleteRoom(id);
         return ApiResponse.success(null, "Xóa phòng thành công");
     }
 
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ImportResponse> importRooms(@RequestParam("file") MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {

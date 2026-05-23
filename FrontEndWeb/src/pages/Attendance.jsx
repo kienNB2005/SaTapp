@@ -345,7 +345,7 @@ export default function Attendance() {
   // Fetch session info (once)
   useEffect(() => {
     if (!sessionId) return;
-    api.get(`/sessions/${sessionId}`)
+    api.get(`/api/v1/sessions/${sessionId}`)
       .then(({ data }) => setSessionInfo(data.result ?? data))
       .catch(() => { });
   }, [sessionId]);
@@ -359,7 +359,7 @@ export default function Attendance() {
     if (debouncedSearch) params.search = debouncedSearch;
     if (uiStatus) params.uiStatus = uiStatus;
 
-    api.get(`/sessions/${sessionId}/attendances`, { params })
+    api.get(`/api/v1/sessions/${sessionId}/attendances`, { params })
       .then(({ data }) => {
         const res = data.result ?? data;
         setPageData(res);
@@ -472,7 +472,7 @@ export default function Attendance() {
          };
       });
 
-      await api.put(`/sessions/${sessionId}/attendances`, { items });
+      await api.put(`/api/v1/sessions/${sessionId}/attendances`, { items });
       
       // Thành công -> cập nhật lại pageData và reset nháp
       setPageData(prev => {

@@ -3,8 +3,10 @@ package ken.example.dekiru.academic.controller;
 import ken.example.dekiru.academic.dto.CreateAdministrativeClassRequest;
 import ken.example.dekiru.academic.dto.UpdateAdministrativeClassRequest;
 import ken.example.dekiru.academic.dto.AdministrativeClassResponse;
-import ken.example.dekiru.common.dto.ImportResponse;
 import ken.example.dekiru.academic.service.AdministrativeClassService;
+import ken.example.dekiru.attendance.service.ClassSessionService;
+import ken.example.dekiru.attendance.dto.DropdownOption;
+import ken.example.dekiru.common.dto.ImportResponse;
 import ken.example.dekiru.common.response.ApiResponse;
 import ken.example.dekiru.common.exception.AppException;
 import ken.example.dekiru.common.exception.ErrorCode;
@@ -16,18 +18,26 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/administrative-classes")
+@RequestMapping("/api/v1/administrative-classes")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdministrativeClassController {
 
     AdministrativeClassService administrativeClassService;
+    ClassSessionService classSessionService;
+
+    @GetMapping("/filter-by-session")
+    public ApiResponse<List<DropdownOption>> getAdminClassesFilter() {
+        List<DropdownOption> classes = classSessionService.getAdminClassesForLecturer();
+        return ApiResponse.success(classes, "Lấy danh sách lớp hành chính thành công");
+    }
 
     @GetMapping
     public ApiResponse<List<AdministrativeClassResponse>> getAllAdministrativeClasses() {
@@ -42,24 +52,28 @@ public class AdministrativeClassController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<AdministrativeClassResponse> createAdministrativeClass(@RequestBody CreateAdministrativeClassRequest request) {
         AdministrativeClassResponse administrativeClass = administrativeClassService.createAdministrativeClass(request);
         return ApiResponse.success(administrativeClass, "Thêm mới lớp hành chính thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<AdministrativeClassResponse> updateAdministrativeClass(@PathVariable Long id, @RequestBody UpdateAdministrativeClassRequest request) {
         AdministrativeClassResponse administrativeClass = administrativeClassService.updateAdministrativeClass(id, request);
         return ApiResponse.success(administrativeClass, "Cập nhật lớp hành chính thành công");
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteAdministrativeClass(@PathVariable Long id) {
         administrativeClassService.deleteAdministrativeClass(id);
         return ApiResponse.success(null, "Xóa lớp hành chính thành công");
     }
 
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ImportResponse> importAdministrativeClasses(@RequestParam("file") MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {

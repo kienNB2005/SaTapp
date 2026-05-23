@@ -44,7 +44,7 @@ export default function AdminSubjects() {
     setListLoading(true);
     setListError('');
     try {
-      const res = await api.get('/admin/subjects', { signal });
+      const res = await api.get('/api/v1/subjects', { signal });
       setSubjects(res.data.result || []);
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'CanceledError') return;
@@ -77,7 +77,7 @@ export default function AdminSubjects() {
     }
     setIsSaving(true);
     try {
-      await api.put(`/admin/subjects/${editingSubject.id}`, { name: editName, credits: parseInt(editCredits) });
+      await api.put(`/api/v1/subjects/${editingSubject.id}`, { name: editName, credits: parseInt(editCredits) });
       setEditingSubject(null);
       fetchSubjects();
     } catch (err) {
@@ -91,7 +91,7 @@ export default function AdminSubjects() {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa môn học "${subj.name}" không?`)) return;
     setIsDeleting(subj.id);
     try {
-      await api.delete(`/admin/subjects/${subj.id}`);
+      await api.delete(`/api/v1/subjects/${subj.id}`);
       fetchSubjects();
     } catch (err) {
       alert(err.response?.data?.message || 'Xóa thất bại');
@@ -114,7 +114,7 @@ export default function AdminSubjects() {
     }
     setIsSaving(true);
     try {
-      await api.post('/admin/subjects', { 
+      await api.post('/api/v1/subjects', { 
         code: addCode, 
         name: addName, 
         credits: parseInt(addCredits) 
@@ -156,7 +156,7 @@ export default function AdminSubjects() {
     try {
       setTimeout(() => { setProgress(40); setStatusText('Đang đọc dữ liệu Excel...'); }, 500);
 
-      const res = await api.post('/admin/subjects/import', formData, {
+      const res = await api.post('/api/v1/subjects/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -176,7 +176,7 @@ export default function AdminSubjects() {
 
   const downloadTemplate = async () => {
     try {
-      const res = await api.get('/admin/subjects/template', { responseType: 'blob' });
+      const res = await api.get('/api/v1/subjects/template', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;

@@ -27,7 +27,7 @@ export default function AdminSemesters() {
     setLoading(true);
     setError('');
     try {
-      const res = await api.get('/admin/semesters');
+      const res = await api.get('/api/v1/semesters');
       setSemesters(res.data.result || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Không thể tải danh sách học kỳ.');
@@ -66,7 +66,7 @@ export default function AdminSemesters() {
 
     setIsSaving(true);
     try {
-      await api.post('/admin/semesters', payload);
+      await api.post('/api/v1/semesters', payload);
       setShowCreate(false);
       setCreateData({ name: '', startDate: null, endDate: null });
       fetchSemesters();
@@ -89,7 +89,7 @@ export default function AdminSemesters() {
     }
     setIsSaving(true);
     try {
-      await api.put(`/admin/semesters/${editingSemester.id}`, editData);
+      await api.put(`/api/v1/semesters/${editingSemester.id}`, editData);
       setEditingSemester(null);
       fetchSemesters();
     } catch (err) {
@@ -103,7 +103,7 @@ export default function AdminSemesters() {
     if (!window.confirm(`Bạn có chắc muốn xóa học kỳ "${sem.name}" không?`)) return;
     setIsDeleting(sem.id);
     try {
-      await api.delete(`/admin/semesters/${sem.id}`);
+      await api.delete(`/api/v1/semesters/${sem.id}`);
       fetchSemesters();
     } catch (err) {
       alert(err.response?.data?.message || 'Xóa thất bại!');

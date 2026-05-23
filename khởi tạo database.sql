@@ -89,6 +89,11 @@ ADD COLUMN gender       ENUM('male', 'female', 'other') NULL COMMENT 'Giới tí
 ADD COLUMN birthday     DATE         NULL COMMENT 'Ngày sinh (YYYY-MM-DD)',
 ADD COLUMN birth_place  VARCHAR(150) NULL COMMENT 'Nơi sinh';
 
+-- Insert tài khoản Admin mặc định
+INSERT INTO user (email, full_name, role, is_active) 
+VALUES ('admin@gmail.com', 'System Admin', 'admin', 1);
+
+
 -- 5. LECTURER — Hồ sơ giảng viên (mở rộng 1-1 từ user)
 CREATE TABLE lecturer (
     id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
@@ -636,6 +641,8 @@ SELECT
     r.building,
     r.gps_radius_m,
     l.id                                                            AS lecturer_id,
+    cs.makeup_for_id                                                AS makeup_for_id,
+    cs_org.session_date                                             AS original_session_date,
     COUNT(a.id)                                                     AS total_students,
     COUNT(CASE WHEN a.status   = 'present' THEN 1 END)             AS present_count,
     COUNT(CASE WHEN a.is_late  = 1         THEN 1 END)             AS late_count,
@@ -648,6 +655,7 @@ JOIN room                   r    ON r.id   = cs.actual_room_id
 JOIN lecturer               l    ON l.id   = cs.actual_lecturer_id
 JOIN period_time            pt_s ON pt_s.period_number = cs.actual_period_start
 JOIN period_time            pt_e ON pt_e.period_number = cs.actual_period_end
+LEFT JOIN class_session     cs_org ON cs_org.id = cs.makeup_for_id
 LEFT JOIN attendance        a    ON a.class_session_id = cs.id
 WHERE cs.session_date = CURDATE()
 GROUP BY
@@ -657,7 +665,7 @@ GROUP BY
     sc.total_sessions,
     sub.name, sub.code, ac.name,
     r.code, r.building, r.gps_radius_m,
-    l.id;
+    l.id, cs.makeup_for_id, cs_org.session_date;
  
  
 -- ============================================================
@@ -999,6 +1007,8 @@ SELECT
     ac.name                 AS class_name,
     r.code                  AS room_code,
     l.id                    AS lecturer_id,
+    cs.makeup_for_id        AS makeup_for_id,
+    cs_org.session_date     AS original_session_date,
     sc.total_sessions
 FROM class_session cs
 JOIN schedule               sc   ON sc.id  = cs.schedule_id
@@ -1008,6 +1018,7 @@ JOIN room                   r    ON r.id   = cs.actual_room_id
 JOIN lecturer               l    ON l.id   = cs.actual_lecturer_id
 JOIN period_time            pt_s ON pt_s.period_number = cs.actual_period_start
 JOIN period_time            pt_e ON pt_e.period_number = cs.actual_period_end
+LEFT JOIN class_session     cs_org ON cs_org.id = cs.makeup_for_id
 -- ĐÃ BỎ: LEFT JOIN attendance
 WHERE cs.session_date BETWEEN
     DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)  -- Thứ Hai tuần này

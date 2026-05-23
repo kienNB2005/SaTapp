@@ -9,12 +9,12 @@ const PAGE_TITLES = {
   '/homeroom': ['Lớp chủ nhiệm', 'CNTT-K22A · HK1-2024-2025'],
   '/admin': ['Dashboard Admin', 'HK1-2024-2025 · Toàn trường'],
   '/admin/tkb': ['Nhập Thời khóa biểu', 'Upload file TKB từ trường'],
-  '/admin/faculties': ['Quản lý Khoa', 'Import & Quản lý danh sách Khoa'],
-  '/admin/departments': ['Quản lý Ngành', 'Import & Quản lý danh sách Ngành'],
+  '/api/v1/faculties': ['Quản lý Khoa', 'Import & Quản lý danh sách Khoa'],
+  '/api/v1/departments': ['Quản lý Ngành', 'Import & Quản lý danh sách Ngành'],
   '/admin/users': ['Quản lý Tài khoản', 'Admin · Giảng viên · Sinh viên'],
-  '/admin/rooms': ['Quản lý Phòng học', '4 phòng · 1 chưa có GPS'],
-  '/admin/subjects': ['Quản lý Môn học', '48 môn học'],
-  '/admin/semesters': ['Quản lý Học kỳ', '1 học kỳ đang active'],
+  '/api/v1/rooms': ['Quản lý Phòng học', '4 phòng · 1 chưa có GPS'],
+  '/api/v1/subjects': ['Quản lý Môn học', '48 môn học'],
+  '/api/v1/semesters': ['Quản lý Học kỳ', '1 học kỳ đang active'],
   '/admin/report': ['Báo cáo Toàn trường', 'HK1-2024-2025'],
 };
 

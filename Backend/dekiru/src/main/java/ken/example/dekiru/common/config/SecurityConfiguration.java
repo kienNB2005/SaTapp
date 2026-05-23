@@ -27,18 +27,15 @@ public class SecurityConfiguration {
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
                 .authorizeHttpRequests((authorize) -> authorize
                         // public
-                                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/login", "/auth/refresh","/auth/register","/admin/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh","/auth/register").permitAll()
 
-//                        // ADMIN only
-//                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-
-                        // ADMIN + CLIENT
-                        .requestMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN", "CLIENT")
+                        // Chỉ định các API yêu cầu xác thực chung
+                        .requestMatchers("/api/v1/**").authenticated()
+                        .requestMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers("/**/*.html", "/**/*.css", "/**/*.js").permitAll()
 
-
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .bearerTokenResolver(bearerTokenResolver())

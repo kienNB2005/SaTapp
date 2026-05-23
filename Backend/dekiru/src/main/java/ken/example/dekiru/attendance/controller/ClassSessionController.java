@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sessions")
+@RequestMapping("/api/v1/sessions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ClassSessionController {
@@ -28,40 +28,30 @@ public class ClassSessionController {
     AttendanceSseService attendanceSseService;
     AttendanceService attendanceService;
 
-    @PostMapping("/attend")
-    public ApiResponse<Void> studentAttend(@RequestBody StudentAttendRequest request) {
-        classSessionService.studentAttend(request);
-        return ApiResponse.success(null, "Điểm danh thành công");
-    }
-    @PostMapping("/{id}/open")
-    public ApiResponse<QrTokenResponse> openSession(@PathVariable Long id) {
-        QrTokenResponse response = classSessionService.openClassSession(id);
-        return ApiResponse.success(response, "Mở buổi học thành công, bắt đầu điểm danh (Check-in)");
+    @PatchMapping("/{id}/status")
+    public ApiResponse<?> updateSessionStatus(@PathVariable Long id, @RequestBody ken.example.dekiru.attendance.dto.UpdateSessionStatusRequest request) {
+        String status = request.getStatus();
+        if ("OPEN".equals(status)) {
+            QrTokenResponse response = classSessionService.openClassSession(id);
+            return ApiResponse.success(response, "Mở buổi học thành công, bắt đầu điểm danh (Check-in)");
+        } else if ("CHECKING_OUT".equals(status)) {
+            int mins = request.getCheckoutMinutes() != null ? request.getCheckoutMinutes() : 5;
+            QrTokenResponse response = classSessionService.startCheckOutQr(id, mins);
+            return ApiResponse.success(response, "Đã chuyển sang mã QR Check-out");
+        } else if ("CLOSED".equals(status)) {
+            classSessionService.closeClassSession(id);
+            return ApiResponse.success(null, "Đóng buổi học thành công");
+        } else if ("CANCELLED".equals(status)) {
+            classSessionService.cancelClassSession(id, request.getReason());
+            return ApiResponse.success(null, "Hủy buổi học thành công");
+        }
+        throw new ken.example.dekiru.common.exception.AppException(ken.example.dekiru.common.exception.ErrorCode.INVALID_SESSION_STATUS);
     }
 
-    @PostMapping("/{id}/checkout/start")
-    public ApiResponse<QrTokenResponse> startCheckOutQr(@PathVariable Long id, @RequestParam(required = false, defaultValue = "5") int checkoutMinutes) {
-        QrTokenResponse response = classSessionService.startCheckOutQr(id, checkoutMinutes);
-        return ApiResponse.success(response, "Đã chuyển sang mã QR Check-out");
-    }
-
-    @PutMapping("/{id}/qr/refresh")
+    @PostMapping("/{id}/qr/refresh")
     public ApiResponse<QrTokenResponse> refreshQrToken(@PathVariable Long id) {
         QrTokenResponse response = classSessionService.refreshQrToken(id);
         return ApiResponse.success(response, "Làm mới mã QR thành công (" + response.getType() + ")");
-    }
-
-    @PostMapping("/{id}/close")
-    public ApiResponse<Void> closeSession(@PathVariable Long id) {
-        classSessionService.closeClassSession(id);
-        return ApiResponse.success(null, "Đóng buổi học thành công");
-    }
-
-    @PostMapping("/{id}/cancel")
-    public ApiResponse<Void> cancelSession(@PathVariable Long id, @RequestBody java.util.Map<String, String> request) {
-        String reason = request.get("reason");
-        classSessionService.cancelClassSession(id, reason);
-        return ApiResponse.success(null, "Hủy buổi học thành công");
     }
 
     @PostMapping("/{id}/makeup")
@@ -79,18 +69,6 @@ public class ClassSessionController {
 //        List<SuggestedSlotDto> suggestions = classSessionService.getSuggestedSlots(id, weeks);
 //        return ApiResponse.success(suggestions, "Lấy danh sách slot gợi ý thành công");
 //    }
-
-    @GetMapping("/available-rooms")
-    public ApiResponse<List<DropdownOption>> getAvailableRooms(
-            @RequestParam java.time.LocalDate sessionDate,
-            @RequestParam Byte periodStart,
-            @RequestParam Byte periodEnd) {
-        List<ken.example.dekiru.academic.entity.Room> rooms = classSessionService.findAvailableRooms(sessionDate, periodStart, periodEnd);
-        List<DropdownOption> options = rooms.stream()
-                .map(r -> new DropdownOption(r.getId(), r.getCode(), r.getCode() + (r.getBuilding() != null ? " - " + r.getBuilding() : "")))
-                .collect(java.util.stream.Collectors.toList());
-        return ApiResponse.success(options, "Lấy danh sách phòng trống thành công");
-    }
 
     /**
      * GV subscribe SSE để nhận danh sách điểm danh real-time.
@@ -112,7 +90,7 @@ public class ClassSessionController {
         return ApiResponse.success(detail, "Lấy thông tin buổi học thành công");
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public ApiResponse<List<ClassSessionListDto>> getSessionList(
             @RequestParam Long adminClassId,   // bắt buộc
             @RequestParam Long subjectId) // bắt buộc
@@ -121,23 +99,7 @@ public class ClassSessionController {
         return ApiResponse.success(list, "Lấy danh sách buổi học thành công");
     }
 
-    @GetMapping("/filter/admin-classes")
-    public ApiResponse<List<DropdownOption>> getAdminClassesFilter() {
-        List<DropdownOption> classes = classSessionService.getAdminClassesForLecturer();
-        return ApiResponse.success(classes, "Lấy danh sách lớp hành chính thành công");
-    }
 
-    @GetMapping("/filter/subjects")
-    public ApiResponse<List<DropdownOption>> getSubjectsFilter(
-            @RequestParam(required = false) Long adminClassId) {
-        List<DropdownOption> subjects;
-        if (adminClassId != null) {
-            subjects = classSessionService.getSubjectsForLecturerAndClass(adminClassId);
-        } else {
-            subjects = classSessionService.getSubjectsForLecturer();
-        }
-        return ApiResponse.success(subjects, "Lấy danh sách môn học thành công");
-    }
 
 
     @GetMapping("/{sessionId}/attendances")

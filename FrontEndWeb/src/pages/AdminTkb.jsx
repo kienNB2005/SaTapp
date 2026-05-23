@@ -45,7 +45,7 @@ export default function AdminTkb() {
   const fetchSemesters = async () => {
     setIsSemestersLoading(true);
     try {
-      const res = await api.get('/admin/semesters');
+      const res = await api.get('/api/v1/semesters');
       const sems = res.data.result || [];
       setSemesters(sems);
       
@@ -90,7 +90,7 @@ export default function AdminTkb() {
     setListLoading(true);
     setListError('');
     try {
-      let url = `/admin/schedules?page=${page}&size=15`;
+      let url = `/api/v1/schedules?page=${page}&size=15`;
       if (selectedSemester) url += `&semesterId=${selectedSemester}`;
       if (searchText) url += `&search=${encodeURIComponent(searchText)}`;
       if (filterDay) url += `&dayOfWeek=${filterDay}`;
@@ -153,7 +153,7 @@ export default function AdminTkb() {
         setStatusText('Đang ánh xạ mã lớp, môn, giảng viên...');
       }, 500);
 
-      const res = await api.post('/admin/schedules/import/preview', formData, {
+      const res = await api.post('/api/v1/schedules/import/preview', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -202,7 +202,7 @@ export default function AdminTkb() {
         if (importProgress > 60) setStatusText('Đang thiết lập trạng thái "Đã lên lịch"...');
       }, 500);
 
-      const res = await api.post(`/admin/schedules/import/confirm?semesterId=${selectedSemester}`, validSchedules);
+      const res = await api.post(`/api/v1/schedules/import/confirm?semesterId=${selectedSemester}`, validSchedules);
 
       clearInterval(interval);
       setImportProgress(100);
@@ -220,7 +220,7 @@ export default function AdminTkb() {
 
   const downloadTemplate = async () => {
     try {
-      const res = await api.get('/admin/schedules/template', { responseType: 'blob' });
+      const res = await api.get('/api/v1/schedules/template', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;

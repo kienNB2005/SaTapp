@@ -42,7 +42,7 @@ export default function AdminFaculties() {
     setListLoading(true);
     setListError('');
     try {
-      const res = await api.get('/admin/faculties', { signal });
+      const res = await api.get('/api/v1/faculties', { signal });
       setFaculties(res.data.result || []);
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'CanceledError') return; // bị hủy, bỏ qua
@@ -62,8 +62,19 @@ export default function AdminFaculties() {
   // =====================
   // IMPORT HANDLERS
   // =====================
-  const downloadTemplate = () => {
-    window.open('http://localhost:8080/admin/faculties/template', '_blank');
+  const downloadTemplate = async () => {
+    try {
+      const res = await api.get('/api/v1/faculties/template', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Template_Import_Khoa.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
+    }
   };
 
   const handleFileChange = async (event) => {
@@ -90,7 +101,7 @@ export default function AdminFaculties() {
     }, 350);
 
     try {
-      const response = await api.post('/admin/faculties/import', formData, {
+      const response = await api.post('/api/v1/faculties/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -144,7 +155,7 @@ export default function AdminFaculties() {
     }
     setIsSaving(true);
     try {
-      await api.put(`/admin/faculties/${editingFaculty.id}`, { name: editName });
+      await api.put(`/api/v1/faculties/${editingFaculty.id}`, { name: editName });
       setEditingFaculty(null);
       fetchFaculties(); // Refresh list
     } catch (err) {
@@ -160,7 +171,7 @@ export default function AdminFaculties() {
     }
     setIsDeleting(faculty.id);
     try {
-      await api.delete(`/admin/faculties/${faculty.id}`);
+      await api.delete(`/api/v1/faculties/${faculty.id}`);
       fetchFaculties(); // Refresh list
     } catch (err) {
       alert(err.response?.data?.message || 'Xóa thất bại. Vui lòng thử lại.');
@@ -176,7 +187,7 @@ export default function AdminFaculties() {
     }
     setIsSaving(true);
     try {
-      await api.post('/admin/faculties', { code: addCode, name: addName });
+      await api.post('/api/v1/faculties', { code: addCode, name: addName });
       setIsAdding(false);
       setAddCode('');
       setAddName('');

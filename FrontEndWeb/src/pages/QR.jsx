@@ -94,7 +94,7 @@ export default function QR() {
   const fetchDetail = useCallback(async () => {
     try {
       setSessionLoading(true);
-      const res = await api.get(`/sessions/${sessionId}`);
+      const res = await api.get(`/api/v1/sessions/${sessionId}`);
       const detail = res.data.result;
       setSession(detail);
       if (detail.status === 'closed') setSessionClosed(true);
@@ -117,7 +117,7 @@ export default function QR() {
 
     // Gọi open ngay — server tự xử lý idempotent nếu đã open rồi
     setQrLoading(true);
-    api.post(`/sessions/${sessionId}/open`)
+    api.patch(`/api/v1/sessions/${sessionId}/status`, { status: "OPEN" })
       .then(res => { applyQrResponse(res.data.result); fetchDetail(); })
       .catch(err => {
         const msg = friendlyError(err);
@@ -135,7 +135,7 @@ export default function QR() {
         // để đảm bảo backend đã tạo xong danh sách sinh viên mặc định
         const token = localStorage.getItem('accessToken');
         const baseUrl = api.defaults.baseURL || '';
-        const sseUrl = `${baseUrl}/sessions/${sessionId}/attendances/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+        const sseUrl = `${baseUrl}/api/v1/sessions/${sessionId}/attendances/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`;
         const sse = new EventSource(sseUrl);
         sseRef.current = sse;
 
@@ -168,7 +168,7 @@ export default function QR() {
   const handleRefreshQr = async () => {
     try {
       setQrLoading(true);
-      const res = await api.put(`/sessions/${sessionId}/qr/refresh`);
+      const res = await api.post(`/api/v1/sessions/${sessionId}/qr/refresh`);
       applyQrResponse(res.data.result);
     } catch (e) {
       toast(friendlyError(e), 'error');
@@ -180,7 +180,7 @@ export default function QR() {
   const handleStartCheckout = async () => {
     try {
       setCheckoutLoading(true);
-      const res = await api.post(`/sessions/${sessionId}/checkout/start?checkoutMinutes=${checkoutMins}`);
+      const res = await api.patch(`/api/v1/sessions/${sessionId}/status`, { status: "CHECKING_OUT", checkoutMinutes: checkoutMins });
       applyQrResponse(res.data.result);
       setCheckoutActive(true);
       setModalOpen(false);
@@ -196,9 +196,9 @@ export default function QR() {
   const handleCloseSession = async () => {
     if (!window.confirm('Bạn có chắc chắn muốn kết thúc buổi học này không?')) return;
     try {
-      await api.post(`/sessions/${sessionId}/close`);
+      await api.patch(`/api/v1/sessions/${sessionId}/status`, { status: "CLOSED" });
       toast('Đã kết thúc buổi học!', 'success');
-      setTimeout(() => navigate(-1), 1200);
+      setTimeout(() => navigate(`/sessions/${sessionId}/attendances`), 1200);
     } catch (e) {
       toast(friendlyError(e), 'error');
     }

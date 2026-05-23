@@ -23,13 +23,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
@@ -66,24 +67,28 @@ public class UserController {
     }
 
     @PostMapping("/students/import/preview")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<StudentPreviewResponse>> previewImportStudent(@RequestParam("file") MultipartFile file) {
         List<StudentPreviewResponse> response = userService.previewImportStudent(file);
         return ApiResponse.success(response, "Preview danh sách import sinh viên");
     }
 
     @PostMapping("/students/import/confirm")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> confirmImportStudent(@RequestBody List<StudentExcelDTO> students) {
         userService.confirmImportStudent(students);
         return ApiResponse.success(null, "Import sinh viên thành công");
     }
 
     @PostMapping("/students")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<StudentResponse> createStudent(@RequestBody CreateStudentRequest request) {
         StudentResponse response = userService.createStudent(request);
         return ApiResponse.success(response, "Thêm mới sinh viên thành công");
     }
 
     @PutMapping("/students/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<StudentResponse> updateStudent(@PathVariable("id") Long id, @RequestBody UpdateStudentRequest request) {
         StudentResponse response = userService.updateStudent(id, request);
         return ApiResponse.success(response, "Cập nhật sinh viên thành công");
@@ -119,24 +124,28 @@ public class UserController {
     }
 
     @PostMapping("/lecturers/import/preview")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<LecturerPreviewResponse>> previewImportLecturer(@RequestParam("file") MultipartFile file) {
         List<LecturerPreviewResponse> response = userService.previewImportLecturer(file);
         return ApiResponse.success(response, "Preview danh sách import giảng viên");
     }
 
     @PostMapping("/lecturers/import/confirm")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> confirmImportLecturer(@RequestBody List<LecturerExcelDTO> lecturers) {
         userService.confirmImportLecturer(lecturers);
         return ApiResponse.success(null, "Import giảng viên thành công");
     }
 
     @PostMapping("/lecturers")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<LecturerResponse> createLecturer(@RequestBody CreateLecturerRequest request) {
         LecturerResponse response = userService.createLecturer(request);
         return ApiResponse.success(response, "Thêm mới giảng viên thành công");
     }
 
     @PutMapping("/lecturers/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<LecturerResponse> updateLecturer(@PathVariable("id") Long id, @RequestBody UpdateLecturerRequest request) {
         LecturerResponse response = userService.updateLecturer(id, request);
         return ApiResponse.success(response, "Cập nhật giảng viên thành công");

@@ -1,0 +1,12 @@
+1. khởi tạo database;
+
+- Sửa email ở câu lệnh insert trong database để lấy tài khoản admin đăng nhập
+
+2. Backend:
+
+- thay mật khẩu ở file cấu hính property.yamal trong file resource để kết nối database
+
+
+3. frontend:
+- thứ tự import: khoa -> ngành -> giảng viên (vào file sửa tài khoản google cho một tài khoản để đăng nhập trang giảng viên) -> lớp hành chính -> sinh viên -> tạo các đơn môn học, phòng -> tạo học kì -> thêm thời khóa biểu.
+

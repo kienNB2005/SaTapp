@@ -49,7 +49,7 @@ export default function AdminAdministrativeClasses() {
     setListLoading(true);
     setListError('');
     try {
-      const res = await api.get('/admin/administrative-classes', { signal });
+      const res = await api.get('/api/v1/administrative-classes', { signal });
       setClasses(res.data.result || []);
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'CanceledError') return;
@@ -88,7 +88,7 @@ export default function AdminAdministrativeClasses() {
         cohortYear: editCohortYear,
         lecturerCode: editLecturerCode || ''
       };
-      await api.put(`/admin/administrative-classes/${editingClass.id}`, payload);
+      await api.put(`/api/v1/administrative-classes/${editingClass.id}`, payload);
       setEditingClass(null);
       fetchClasses();
     } catch (err) {
@@ -102,7 +102,7 @@ export default function AdminAdministrativeClasses() {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa lớp "${cls.code}" không?`)) return;
     setIsDeleting(cls.id);
     try {
-      await api.delete(`/admin/administrative-classes/${cls.id}`);
+      await api.delete(`/api/v1/administrative-classes/${cls.id}`);
       fetchClasses();
     } catch (err) {
       alert(err.response?.data?.message || 'Xóa thất bại');
@@ -119,7 +119,7 @@ export default function AdminAdministrativeClasses() {
     setAddDepartmentId('');
     setAddLecturerCode('');
     try {
-      const res = await api.get('/admin/departments');
+      const res = await api.get('/api/v1/departments');
       setDepartments(res.data.result || []);
     } catch (err) {
       console.error("Lỗi lấy danh sách ngành", err);
@@ -137,7 +137,7 @@ export default function AdminAdministrativeClasses() {
     }
     setIsSaving(true);
     try {
-      await api.post('/admin/administrative-classes', {
+      await api.post('/api/v1/administrative-classes', {
         code: addCode,
         name: addName,
         cohortYear: addCohortYear,
@@ -181,7 +181,7 @@ export default function AdminAdministrativeClasses() {
     try {
       setTimeout(() => { setProgress(40); setStatusText('Đang đọc dữ liệu Excel...'); }, 500);
 
-      const res = await api.post('/admin/administrative-classes/import', formData, {
+      const res = await api.post('/api/v1/administrative-classes/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -201,7 +201,7 @@ export default function AdminAdministrativeClasses() {
 
   const downloadTemplate = async () => {
     try {
-      const res = await api.get('/admin/administrative-classes/template', { responseType: 'blob' });
+      const res = await api.get('/api/v1/administrative-classes/template', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;

@@ -17,13 +17,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/faculties")
+@RequestMapping("/api/v1/faculties")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FacultyController {
@@ -43,24 +44,28 @@ public class FacultyController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<FacultyResponse> createFaculty(@RequestBody CreateFacultyRequest request) {
         FacultyResponse faculty = facultyService.createFaculty(request);
         return ApiResponse.success(faculty, "Thêm mới khoa thành công");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<FacultyResponse> updateFaculty(@PathVariable Long id, @RequestBody UpdateFacultyRequest request) {
         FacultyResponse faculty = facultyService.updateFaculty(id, request);
         return ApiResponse.success(faculty, "Cập nhật khoa thành công");
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteFaculty(@PathVariable Long id) {
         facultyService.deleteFaculty(id);
         return ApiResponse.success(null, "Xóa khoa thành công");
     }
 
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ImportResponse> importFaculties(@RequestParam("file") MultipartFile file) {
         // Validate định dạng file .xlsx
         String contentType = file.getContentType();
