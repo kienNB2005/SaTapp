@@ -3,7 +3,8 @@
 --  Phiên bản hoàn chỉnh · MySQL 8.0+
 --  15 bảng · 1 Stored Procedure · 1 Function · 6 View
 -- ============================================================
-
+create database HTDiemDanhSinhVien;
+use HTDiemDanhSinhVien;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
