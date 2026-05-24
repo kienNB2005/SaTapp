@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -85,9 +85,21 @@ export default function AdminLecturers() {
   const validCount = previewList.filter((x) => x.valid).length;
   const invalidCount = previewList.length - validCount;
 
-  useEffect(() => {
-    fetchFaculties();
+  const fetchFaculties = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/faculties');
+      const data = res.data.result || res.data.data || res.data;
+      const facultyList = Array.isArray(data) ? data : data?.content || [];
+
+      setFaculties(facultyList);
+    } catch (err) {
+      console.error('Lỗi lấy danh sách khoa', err);
+    }
   }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchFaculties());
+  }, [fetchFaculties]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -103,25 +115,7 @@ export default function AdminLecturers() {
     return () => clearTimeout(timer);
   }, [searchText]);
 
-  useEffect(() => {
-    if (view === 'list') {
-      fetchLecturers();
-    }
-  }, [page, selectedDepartmentId, selectedStatus, debouncedSearchText, view]);
-
-  const fetchFaculties = async () => {
-    try {
-      const res = await api.get('/api/v1/faculties');
-      const data = res.data.result || res.data.data || res.data;
-      const facultyList = Array.isArray(data) ? data : data?.content || [];
-
-      setFaculties(facultyList);
-    } catch (err) {
-      console.error('Lỗi lấy danh sách khoa', err);
-    }
-  };
-
-  const fetchLecturers = async () => {
+  const fetchLecturers = useCallback(async () => {
     setListLoading(true);
     setListError('');
 
@@ -163,7 +157,13 @@ export default function AdminLecturers() {
     } finally {
       setListLoading(false);
     }
-  };
+  }, [page, debouncedSearchText, selectedDepartmentId, selectedStatus]);
+
+  useEffect(() => {
+    if (view === 'list') {
+      Promise.resolve().then(() => fetchLecturers());
+    }
+  }, [page, selectedDepartmentId, selectedStatus, debouncedSearchText, view, fetchLecturers]);
 
   const handleEditClick = (lecturer) => {
     setEditingLecturer(lecturer);
@@ -343,7 +343,7 @@ export default function AdminLecturers() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };

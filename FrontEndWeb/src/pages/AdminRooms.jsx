@@ -152,7 +152,7 @@ export default function AdminRooms() {
 
     const controller = new AbortController();
 
-    fetchRooms(controller.signal);
+    Promise.resolve().then(() => fetchRooms(controller.signal));
 
     return () => controller.abort();
   }, [view]);
@@ -260,6 +260,7 @@ export default function AdminRooms() {
   // =====================
   const handleMapClick = (lat, lng) => {
     // Chỉ cập nhật tọa độ, không cập nhật tên Tòa nhà
+    void lat; void lng;
   };
 
   const searchLocation = async () => {
@@ -289,7 +290,7 @@ export default function AdminRooms() {
       } else {
         alert('Không tìm thấy địa điểm nào với từ khóa này.');
       }
-    } catch (err) {
+    } catch {
       alert('Lỗi khi tìm kiếm địa điểm.');
     } finally {
       setIsSearchingMap(false);
@@ -417,7 +418,7 @@ export default function AdminRooms() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };

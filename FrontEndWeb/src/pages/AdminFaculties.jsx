@@ -97,7 +97,7 @@ export default function AdminFaculties() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };

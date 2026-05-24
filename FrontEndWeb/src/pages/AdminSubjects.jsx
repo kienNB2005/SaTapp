@@ -75,7 +75,7 @@ export default function AdminSubjects() {
 
     const controller = new AbortController();
 
-    fetchSubjects(controller.signal);
+    Promise.resolve().then(() => fetchSubjects(controller.signal));
 
     return () => controller.abort();
   }, [view]);
@@ -230,7 +230,7 @@ export default function AdminSubjects() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };

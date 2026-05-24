@@ -80,7 +80,7 @@ export default function AdminAdministrativeClasses() {
 
     const controller = new AbortController();
 
-    fetchClasses(controller.signal);
+    Promise.resolve().then(() => fetchClasses(controller.signal));
 
     return () => controller.abort();
   }, [view]);
@@ -260,7 +260,7 @@ export default function AdminAdministrativeClasses() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };
@@ -275,15 +275,6 @@ export default function AdminAdministrativeClasses() {
   // =====================
   // RENDER HELPERS
   // =====================
-  const formatDate = (isoString) => {
-    if (!isoString) return '—';
-
-    return new Date(isoString).toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
 
   const filteredClasses = classes.filter(
     (c) =>

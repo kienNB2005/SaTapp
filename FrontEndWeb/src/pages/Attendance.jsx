@@ -4,13 +4,6 @@ import api from '../utils/api';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const UI_STATUS_CONFIG = {
-  PRESENT: { label: 'Có mặt', cls: 'att-badge s-present', dot: 'var(--gr)' },
-  LATE: { label: 'Muộn', cls: 'att-badge s-late', dot: 'var(--am)' },
-  ABSENT: { label: 'Vắng', cls: 'att-badge s-absent', dot: 'var(--rd)' },
-  EXCUSED: { label: 'Có phép', cls: 'att-badge s-excused', dot: 'var(--bl)' },
-};
-
 const FILTER_TABS = [
   { value: '', label: 'Tất cả' },
   { value: 'PRESENT', label: 'Có mặt' },
@@ -58,19 +51,6 @@ function StatPill({ color, label, value }) {
   );
 }
 
-// Badge trạng thái
-function StatusBadge({ status }) {
-  const cfg = UI_STATUS_CONFIG[status] ?? { label: status, cls: 'att-badge', dot: 'var(--tx3)' };
-  return (
-    <span className={cfg.cls}>
-      <span style={{
-        width: 6, height: 6, borderRadius: '50%',
-        background: cfg.dot, display: 'inline-block', marginRight: 5, flexShrink: 0,
-      }} />
-      {cfg.label}
-    </span>
-  );
-}
 
 // Inline status dropdown khi giảng viên sửa
 function StatusSelect({ value, onChange, loading }) {
@@ -116,21 +96,7 @@ function StatusSelect({ value, onChange, loading }) {
   );
 }
 
-// Bar chuyên cần mini
-function AttBar({ present, absent, excused, late, total }) {
-  if (!total) return <span style={{ color: 'var(--bd2)', fontSize: 12 }}>—</span>;
-  const attended = (present || 0) + (late || 0);
-  const pct = Math.round((attended / total) * 100);
-  const color = pct >= 80 ? 'var(--gr)' : pct >= 60 ? 'var(--am)' : 'var(--rd)';
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ flex: 1, minWidth: 50, height: 6, borderRadius: 3, background: 'var(--bg4)', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.5s ease' }} />
-      </div>
-      <span style={{ fontSize: 12, color: 'var(--tx)', fontFamily: 'var(--mo)', fontWeight: 600, width: 32 }}>{pct}%</span>
-    </div>
-  );
-}
+
 
 // Pagination controls
 function Pagination({ page, totalPages, onChange }) {
@@ -183,8 +149,8 @@ function StudentRow({ row, idx, pendingData, onUpdate, isSelected, onToggleSelec
   const [note, setNote] = useState(data.note || '');
   const [lateMins, setLateMins] = useState(data.lateMinutes || '');
 
-  useEffect(() => { setNote(data.note || ''); }, [data.note]);
-  useEffect(() => { setLateMins(data.lateMinutes || ''); }, [data.lateMinutes]);
+  useEffect(() => { Promise.resolve().then(() => setNote(data.note || '')); }, [data.note]);
+  useEffect(() => { Promise.resolve().then(() => setLateMins(data.lateMinutes || '')); }, [data.lateMinutes]);
 
   const handleBlurNote = () => {
     if (note !== (data.note || '')) onUpdate({ note });
@@ -377,9 +343,9 @@ export default function Attendance() {
       })
       .catch((err) => setError(friendlyError(err)))
       .finally(() => setLoading(false));
-  }, [sessionId, page, debouncedSearch, uiStatus, retryCount]);
+  }, [sessionId, page, debouncedSearch, uiStatus]);
 
-  useEffect(() => { fetchList(); }, [fetchList]);
+  useEffect(() => { Promise.resolve().then(() => fetchList()); }, [fetchList, retryCount]);
 
   // Reset page khi đổi filter/search
   const handleTabChange = (v) => { setUiStatus(v); setPage(0); };
@@ -487,7 +453,7 @@ export default function Attendance() {
       });
       
       // Cập nhật thống kê cục bộ lại luôn
-      setStats(prevStats => {
+      setStats(() => {
          let p = 0, l = 0, a = 0, e = 0;
          pageData.content.forEach(row => {
             const finalStatus = pendingChanges[row.attendanceId]?.uiStatus || row.uiStatus;

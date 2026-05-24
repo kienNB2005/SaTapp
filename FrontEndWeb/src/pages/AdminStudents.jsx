@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -84,9 +84,21 @@ export default function AdminStudents() {
   const validCount = previewList.filter((x) => x.valid).length;
   const invalidCount = previewList.length - validCount;
 
-  useEffect(() => {
-    fetchClasses();
+  const fetchClasses = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/administrative-classes');
+      const data = res.data.result || res.data.data || res.data;
+      const classList = Array.isArray(data) ? data : data?.content || [];
+
+      setClasses(classList);
+    } catch (err) {
+      console.error('Lỗi lấy danh sách lớp', err);
+    }
   }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchClasses());
+  }, [fetchClasses]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -102,25 +114,7 @@ export default function AdminStudents() {
     return () => clearTimeout(timer);
   }, [searchText]);
 
-  useEffect(() => {
-    if (view === 'list') {
-      fetchStudents();
-    }
-  }, [page, selectedClassId, selectedStatus, debouncedSearchText, view]);
-
-  const fetchClasses = async () => {
-    try {
-      const res = await api.get('/api/v1/administrative-classes');
-      const data = res.data.result || res.data.data || res.data;
-      const classList = Array.isArray(data) ? data : data?.content || [];
-
-      setClasses(classList);
-    } catch (err) {
-      console.error('Lỗi lấy danh sách lớp', err);
-    }
-  };
-
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     setListLoading(true);
     setListError('');
 
@@ -162,7 +156,13 @@ export default function AdminStudents() {
     } finally {
       setListLoading(false);
     }
-  };
+  }, [page, debouncedSearchText, selectedClassId, selectedStatus]);
+
+  useEffect(() => {
+    if (view === 'list') {
+      Promise.resolve().then(() => fetchStudents());
+    }
+  }, [page, selectedClassId, selectedStatus, debouncedSearchText, view, fetchStudents]);
 
   const handleEditClick = (student) => {
     setEditingStudent(student);
@@ -331,7 +331,7 @@ export default function AdminStudents() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };

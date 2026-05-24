@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 import '../css/Homeroom.css';
 export default function Homeroom() {
@@ -14,37 +14,8 @@ export default function Homeroom() {
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchClasses();
-  }, []);
-
-  useEffect(() => {
-    if (selectedClass) {
-      fetchSemesters(selectedClass);
-    } else {
-      setSemesters([]);
-      setSelectedSemester('');
-    }
-  }, [selectedClass]);
-
-  useEffect(() => {
-    if (selectedClass && selectedSemester) {
-      fetchSubjects(selectedClass, selectedSemester);
-    } else {
-      setSubjects([]);
-      setSelectedSubject('');
-    }
-  }, [selectedClass, selectedSemester]);
-
-  useEffect(() => {
-    if (selectedClass && selectedSemester) {
-      fetchReportData();
-    } else {
-      setReportData(null);
-    }
-  }, [selectedClass, selectedSemester, selectedSubject, absentLimitPct]);
-
-  const fetchClasses = async () => {
+  // Hoisted fetch functions
+  async function fetchClasses() {
     try {
       const res = await api.get('/api/v1/reports/homeroom/classes');
       if (res.data.code === 1000) {
@@ -56,9 +27,9 @@ export default function Homeroom() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }
 
-  const fetchSemesters = async (adminClassId) => {
+  async function fetchSemesters(adminClassId) {
     try {
       const res = await api.get(`/api/v1/reports/homeroom/semesters?adminClassId=${adminClassId}`);
       if (res.data.code === 1000) {
@@ -72,9 +43,9 @@ export default function Homeroom() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }
 
-  const fetchSubjects = async (adminClassId, semesterId) => {
+  async function fetchSubjects(adminClassId, semesterId) {
     try {
       const res = await api.get(`/api/v1/reports/homeroom/subjects?adminClassId=${adminClassId}&semesterId=${semesterId}`);
       if (res.data.code === 1000) {
@@ -84,9 +55,9 @@ export default function Homeroom() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }
 
-  const fetchReportData = async () => {
+  const fetchReportData = useCallback(async () => {
     try {
       setLoading(true);
       const params = {
@@ -107,7 +78,39 @@ export default function Homeroom() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedClass, selectedSemester, selectedSubject, absentLimitPct]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchClasses());
+  }, []);
+
+  useEffect(() => {
+    if (selectedClass) {
+      Promise.resolve().then(() => fetchSemesters(selectedClass));
+    } else {
+      Promise.resolve().then(() => setSemesters([]));
+      Promise.resolve().then(() => setSelectedSemester(''));
+    }
+  }, [selectedClass]);
+
+  useEffect(() => {
+    if (selectedClass && selectedSemester) {
+      Promise.resolve().then(() => fetchSubjects(selectedClass, selectedSemester));
+    } else {
+      Promise.resolve().then(() => setSubjects([]));
+      Promise.resolve().then(() => setSelectedSubject(''));
+    }
+  }, [selectedClass, selectedSemester]);
+
+  useEffect(() => {
+    if (selectedClass && selectedSemester) {
+      Promise.resolve().then(() => fetchReportData());
+    } else {
+      Promise.resolve().then(() => setReportData(null));
+    }
+  }, [selectedClass, selectedSemester, selectedSubject, absentLimitPct, fetchReportData]);
+
+  
 
   const handleExportExcel = async () => {
     try {

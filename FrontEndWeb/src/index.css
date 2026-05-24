@@ -532,6 +532,7 @@ body {
   border-radius: 8px;
   outline: none;
   transition: border-color .2s;
+  appearance: none;
   -webkit-appearance: none;
 }
 .fi:focus { border-color: var(--gr); }

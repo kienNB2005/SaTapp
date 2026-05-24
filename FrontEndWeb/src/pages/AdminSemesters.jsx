@@ -48,7 +48,7 @@ export default function AdminSemesters() {
     fetchSemesters();
   }, []);
 
-  const fetchSemesters = async () => {
+  async function fetchSemesters() {
     setLoading(true);
     setError('');
 
@@ -62,7 +62,7 @@ export default function AdminSemesters() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const formatDateForAPI = (dateObj) => {
     if (!dateObj) return '';

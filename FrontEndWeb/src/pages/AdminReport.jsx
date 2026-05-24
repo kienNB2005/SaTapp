@@ -140,7 +140,7 @@ function ReportTable() {
 
         <div className="srch">
           <span className="srch-ic">🔍</span>
-          <input placeholder="Tìm lớp, giảng viên..." />
+          <input aria-label="Tìm lớp hoặc giảng viên" placeholder="Tìm lớp, giảng viên..." />
         </div>
       </div>
 

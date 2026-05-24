@@ -147,47 +147,11 @@ export default function QR() {
 
   useEffect(() => {
     if (timerVal === 0 && !sessionClosed && qrData && !isLocked) {
-      handleRefreshQr();
+      Promise.resolve().then(() => handleRefreshQr());
     }
   }, [timerVal, sessionClosed, qrData, isLocked, handleRefreshQr]);
 
-  useEffect(() => {
-    if (!sessionId) return undefined;
-
-    fetchDetail();
-
-    setQrLoading(true);
-
-    api
-      .patch(`/api/v1/sessions/${sessionId}/status`, { status: 'OPEN' })
-      .then((res) => {
-        applyQrResponse(res.data.result);
-        fetchDetail();
-      })
-      .catch((err) => {
-        const msg = friendlyError(err);
-
-        if (err?.response?.data?.code === 'SESSION_ALREADY_OPEN') {
-          fetchDetail();
-        } else {
-          setOpenError(msg);
-        }
-      })
-      .finally(() => {
-        setQrLoading(false);
-        connectSse();
-      });
-
-    return () => {
-      if (sseRef.current) {
-        sseRef.current.close();
-      }
-
-      clearInterval(timerRef.current);
-    };
-  }, [sessionId, fetchDetail, applyQrResponse]);
-
-  const connectSse = () => {
+  const connectSse = useCallback(() => {
     const token = localStorage.getItem('accessToken');
     const baseUrl = api.defaults.baseURL || '';
 
@@ -232,7 +196,47 @@ export default function QR() {
       setSessionClosed(true);
       sse.close();
     });
-  };
+  }, [sessionId, toast]);
+
+  useEffect(() => {
+    if (!sessionId) return undefined;
+
+    Promise.resolve().then(() => {
+      fetchDetail();
+
+      setQrLoading(true);
+
+      api
+        .patch(`/api/v1/sessions/${sessionId}/status`, { status: 'OPEN' })
+        .then((res) => {
+          applyQrResponse(res.data.result);
+          fetchDetail();
+        })
+        .catch((err) => {
+          const msg = friendlyError(err);
+
+          if (err?.response?.data?.code === 'SESSION_ALREADY_OPEN') {
+            fetchDetail();
+          } else {
+            setOpenError(msg);
+          }
+        })
+        .finally(() => {
+          setQrLoading(false);
+          connectSse();
+        });
+    });
+
+    return () => {
+      if (sseRef.current) {
+        sseRef.current.close();
+      }
+
+      clearInterval(timerRef.current);
+    };
+  }, [sessionId, fetchDetail, applyQrResponse, connectSse]);
+
+
 
   const handleStartCheckout = async () => {
     try {

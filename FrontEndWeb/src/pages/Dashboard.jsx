@@ -63,8 +63,10 @@ export default function Dashboard() {
   useEffect(() => {
     const controller = new AbortController();
 
-    setLoading(true);
-    setError(null);
+    Promise.resolve().then(() => {
+      setLoading(true);
+      setError(null);
+    });
 
     const params = selectedSemesterId ? { semesterId: selectedSemesterId } : {};
 
@@ -102,7 +104,7 @@ export default function Dashboard() {
       });
 
     return () => controller.abort();
-  }, [selectedSemesterId, retryCount]);
+  }, [selectedSemesterId, retryCount, semesters.length]);
 
   const summary = data?.semesterSummary ?? null;
   const todaySessions = data?.todaySessions ?? [];

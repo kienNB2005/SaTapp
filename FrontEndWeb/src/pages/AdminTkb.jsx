@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -46,49 +46,9 @@ export default function AdminTkb() {
 
   const [isSemestersLoading, setIsSemestersLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSemesters();
-  }, []);
+  
 
-  useEffect(() => {
-    if (view === 'list' && selectedSemester) {
-      fetchSchedules(0);
-    }
-  }, [selectedSemester, view, filterDay]);
-
-  useEffect(() => {
-    if (view !== 'list' || !selectedSemester) return;
-
-    const timeoutId = setTimeout(() => {
-      fetchSchedules(0);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchText]);
-
-  const fetchSemesters = async () => {
-    setIsSemestersLoading(true);
-
-    try {
-      const res = await api.get('/api/v1/semesters');
-      const sems = res.data.result || [];
-
-      setSemesters(sems);
-
-      if (sems.length > 0) {
-        const active = sems.find((semester) => semester.isActive);
-        setSelectedSemester(active ? active.id.toString() : '');
-      } else {
-        setSelectedSemester('');
-      }
-    } catch (err) {
-      console.error('Failed to fetch semesters:', err);
-    } finally {
-      setIsSemestersLoading(false);
-    }
-  };
-
-  const fetchSchedules = async (page = currentPage) => {
+  const fetchSchedules = useCallback(async (page = currentPage) => {
     setListLoading(true);
     setListError('');
 
@@ -124,7 +84,51 @@ export default function AdminTkb() {
     } finally {
       setListLoading(false);
     }
-  };
+  }, [currentPage, selectedSemester, searchText, filterDay]);
+
+  const fetchSemesters = useCallback(async () => {
+    setIsSemestersLoading(true);
+
+    try {
+      const res = await api.get('/api/v1/semesters');
+      const sems = res.data.result || [];
+
+      setSemesters(sems);
+
+      if (sems.length > 0) {
+        const active = sems.find((semester) => semester.isActive);
+        setSelectedSemester(active ? active.id.toString() : '');
+      } else {
+        setSelectedSemester('');
+      }
+    } catch (err) {
+      console.error('Failed to fetch semesters:', err);
+    } finally {
+      setIsSemestersLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => fetchSemesters());
+  }, [fetchSemesters]);
+
+  useEffect(() => {
+    if (view === 'list' && selectedSemester) {
+      Promise.resolve().then(() => fetchSchedules(0));
+    }
+  }, [selectedSemester, view, filterDay, fetchSchedules]);
+
+  useEffect(() => {
+    if (view !== 'list' || !selectedSemester) return;
+
+    const timeoutId = setTimeout(() => {
+      Promise.resolve().then(() => fetchSchedules(0));
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchText, fetchSchedules, selectedSemester, view]);
+
+  
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -264,7 +268,7 @@ export default function AdminTkb() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert('Không thể tải file mẫu. Vui lòng thử lại sau.');
     }
   };
