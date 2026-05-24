@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-
+import '../css/Homeroom.css';
 export default function Homeroom() {
   const [classes, setClasses] = useState([]);
   const [semesters, setSemesters] = useState([]);

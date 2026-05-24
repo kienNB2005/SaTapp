@@ -34,7 +34,7 @@ export default function Sidebar({ role }) {
       <div className="sb-logo">
         <div className="sb-logo-ic">📡</div>
         <div>
-          <div className="sb-logo-tx">QRAttend</div>
+          <div className="sb-logo-tx">SaTAPP</div>
           <div className="sb-logo-su">Hệ thống điểm danh QR</div>
         </div>
       </div>
