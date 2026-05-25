@@ -12,7 +12,12 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- NHÓM 1 — TỔ CHỨC HÀNH CHÍNH
 -- ============================================================
 
--- 1. FACULTY — Khoa
+-- ============================================================
+-- 1. BẢNG: FACULTY (Khoa)
+-- ============================================================
+-- Mục đích : Lưu trữ danh mục các khoa trong trường học.
+--            Đóng vai trò là đơn vị hành chính cao nhất để phân 
+--            cấp quản lý ngành học và giảng viên.
 CREATE TABLE faculty (
     id          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     code        VARCHAR(20)     NOT NULL COMMENT 'Mã khoa ngắn gọn, VD: CNTT',
@@ -26,7 +31,12 @@ CREATE TABLE faculty (
   COMMENT='Khoa — đơn vị hành chính cao nhất';
 
 
--- 2. DEPARTMENT — Ngành học
+-- ============================================================
+-- 2. BẢNG: DEPARTMENT (Ngành học)
+-- ============================================================
+-- Mục đích : Quản lý các ngành học thuộc từng khoa.
+--            Giúp phân loại sinh viên và lớp hành chính theo 
+--            chuyên môn đào tạo cụ thể.
 CREATE TABLE department (
     id          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     faculty_id  INT UNSIGNED    NOT NULL COMMENT 'Thuộc khoa nào',
@@ -44,7 +54,12 @@ CREATE TABLE department (
   COMMENT='Ngành học — thuộc một khoa';
 
 
--- 3. ADMINISTRATIVE_CLASS — Lớp hành chính
+-- ============================================================
+-- 3. BẢNG: ADMINISTRATIVE_CLASS (Lớp hành chính)
+-- ============================================================
+-- Mục đích : Quản lý danh sách các lớp hành chính cố định.
+--            Tập hợp các sinh viên cùng ngành học và cùng khóa, 
+--            làm cơ sở để xếp thời khóa biểu và điểm danh.
 CREATE TABLE administrative_class (
     id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     department_id   INT UNSIGNED    NOT NULL COMMENT 'Ngành của lớp',
@@ -67,7 +82,12 @@ CREATE TABLE administrative_class (
 -- NHÓM 2 — NGƯỜI DÙNG
 -- ============================================================
 
--- 4. USER — Tài khoản xác thực trung tâm
+-- ============================================================
+-- 4. BẢNG: USER (Tài khoản người dùng)
+-- ============================================================
+-- Mục đích : Bảng trung tâm quản lý tài khoản xác thực của mọi
+--            thành viên trong hệ thống (Admin, Giảng viên, Sinh viên).
+--            Lưu trữ thông tin cá nhân và quyền truy cập (Role).
 CREATE TABLE user (
     id          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     email       VARCHAR(255)    NOT NULL COMMENT 'Email Google tổ chức — định danh OAuth2',
@@ -95,7 +115,12 @@ INSERT INTO user (email, full_name, role, is_active)
 VALUES ('admin@gmail.com', 'System Admin', 'admin', 1);
 
 
--- 5. LECTURER — Hồ sơ giảng viên (mở rộng 1-1 từ user)
+-- ============================================================
+-- 5. BẢNG: LECTURER (Hồ sơ giảng viên)
+-- ============================================================
+-- Mục đích : Lưu trữ thông tin đặc thù của giảng viên.
+--            Liên kết 1-1 với bảng USER, quản lý mã giảng viên và 
+--            đơn vị khoa trực thuộc để phân công giảng dạy.
 CREATE TABLE lecturer (
     id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     user_id         INT UNSIGNED    NOT NULL COMMENT 'Liên kết 1-1 với user',
@@ -121,7 +146,12 @@ ADD CONSTRAINT fk_adminclass_lecturer
     FOREIGN KEY (homeroom_teacher_id) 
     REFERENCES lecturer(id) 
     ON DELETE SET NULL;
--- 6. STUDENT — Hồ sơ sinh viên (mở rộng 1-1 từ user)
+-- ============================================================
+-- 6. BẢNG: STUDENT (Hồ sơ sinh viên)
+-- ============================================================
+-- Mục đích : Lưu trữ thông tin đặc thù của sinh viên.
+--            Liên kết 1-1 với bảng USER, xác định sinh viên thuộc 
+--            lớp hành chính nào làm cơ sở đối chiếu khi điểm danh.
 CREATE TABLE student (
     id                  INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     user_id             INT UNSIGNED    NOT NULL COMMENT 'Liên kết 1-1 với user',
@@ -146,7 +176,12 @@ CREATE TABLE student (
 -- NHÓM 3 — DANH MỤC HỌC THUẬT
 -- ============================================================
 
--- 7. SUBJECT — Môn học
+-- ============================================================
+-- 7. BẢNG: SUBJECT (Môn học)
+-- ============================================================
+-- Mục đích : Danh mục các môn học được đào tạo trong trường.
+--            Cung cấp thông tin số tín chỉ và mã môn để tái sử dụng 
+--            qua nhiều học kỳ khác nhau.
 CREATE TABLE subject (
     id          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     code        VARCHAR(20)     NOT NULL COMMENT 'Mã môn — phải khớp chính xác với file TKB trường',
@@ -161,7 +196,12 @@ CREATE TABLE subject (
   COMMENT='Môn học — danh mục tái sử dụng qua nhiều học kỳ';
 
 
--- 8. ROOM — Phòng học
+-- ============================================================
+-- 8. BẢNG: ROOM (Phòng học)
+-- ============================================================
+-- Mục đích : Danh mục các phòng học vật lý của trường.
+--            Quan trọng nhất: Lưu trữ tọa độ GPS (latitude, longitude)
+--            và bán kính hợp lệ để xác thực vị trí quét QR của sinh viên.
 CREATE TABLE room (
     id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     code            VARCHAR(20)     NOT NULL COMMENT 'Mã phòng — phải khớp file TKB, VD: B201',
@@ -178,7 +218,12 @@ CREATE TABLE room (
   COMMENT='Phòng học — lưu GPS để xác thực vị trí SV khi quét QR';
 
 
--- 9. SEMESTER — Học kỳ
+-- ============================================================
+-- 9. BẢNG: SEMESTER (Học kỳ)
+-- ============================================================
+-- Mục đích : Quản lý khung thời gian các học kỳ trong năm.
+--            Dùng để nhóm thời khóa biểu và buổi học theo từng đợt, 
+--            chỉ định học kỳ nào đang diễn ra (is_active).
 CREATE TABLE semester (
     id          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     name        VARCHAR(50)     NOT NULL COMMENT 'Tên học kỳ, VD: HK1-2024-2025',
@@ -195,7 +240,12 @@ CREATE TABLE semester (
   COMMENT='Học kỳ — khung thời gian bao trùm toàn bộ TKB';
 
 
--- 10. PERIOD_TIME — Giờ học theo số tiết
+-- ============================================================
+-- 10. BẢNG: PERIOD_TIME (Thời gian tiết học)
+-- ============================================================
+-- Mục đích : Bảng tra cứu thời gian bắt đầu và kết thúc của từng 
+--            tiết học (1-15) trong ngày. Là cơ sở để hệ thống tính 
+--            toán số phút đi muộn của sinh viên.
 CREATE TABLE period_time (
     period_number   TINYINT     NOT NULL COMMENT 'Số thứ tự tiết: 1–15',
     start_time      TIME        NOT NULL COMMENT 'Giờ bắt đầu tiết. AttendanceService dùng tính phút muộn',
@@ -226,7 +276,12 @@ INSERT INTO period_time VALUES
 -- NHÓM 4 — THỜI KHÓA BIỂU & BUỔI HỌC
 -- ============================================================
 
--- 11. SCHEDULE — Công thức TKB lặp tuần
+-- ============================================================
+-- 11. BẢNG: SCHEDULE (Thời khóa biểu)
+-- ============================================================
+-- Mục đích : Lưu trữ cấu trúc thời khóa biểu lặp lại theo tuần.
+--            Đóng vai trò là khuôn mẫu (1 dòng) để Stored Procedure
+--            tự động sinh ra hàng loạt buổi học (N dòng) thực tế.
 --     1 dòng = môn × lớp × GV × phòng × thứ/tiết/tuần
 --     Stored procedure đọc bảng này để sinh hàng loạt ClassSession
 CREATE TABLE schedule (
@@ -272,7 +327,12 @@ CREATE TABLE schedule (
   COMMENT='Công thức TKB — 1 dòng sinh ra N buổi học khi Admin xác nhận nhập TKB';
 
 
--- 12. CLASS_SESSION — Buổi học cụ thể
+-- ============================================================
+-- 12. BẢNG: CLASS_SESSION (Buổi học thực tế)
+-- ============================================================
+-- Mục đích : Quản lý chi tiết từng buổi học cụ thể diễn ra theo ngày.
+--            Lưu trữ mã QR token theo thời gian thực và trạng thái
+--            của buổi học (Đang mở, Đã đóng, Bị hủy).
 --     Sinh hàng loạt tự động khi Admin nhập TKB (UC-08)
 --     GV không tạo buổi — chỉ kích hoạt buổi đã có sẵn
 --     QR token ghi đè mỗi 60s trên CÙNG MỘT HÀNG, không INSERT thêm
@@ -332,10 +392,48 @@ CREATE TABLE class_session (
   COMMENT='Buổi học cụ thể — sinh sẵn toàn bộ khi nhập TKB, GV chỉ kích hoạt';
 
 -- ============================================================
+-- 12.5 BẢNG: CLASS_SESSION_REQUEST (Yêu cầu hủy/bù buổi học)
+-- ============================================================
+CREATE TABLE class_session_request (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    lecturer_id INT UNSIGNED NOT NULL COMMENT 'Giảng viên gửi yêu cầu',
+    class_session_id INT UNSIGNED NOT NULL COMMENT 'Buổi học gốc cần hủy hoặc cần bù',
+    
+    -- Trạng thái phê duyệt độc lập cho từng bước
+    cancel_status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending' COMMENT 'Trạng thái duyệt hủy',
+    makeup_status ENUM('pending', 'approved', 'rejected') NULL COMMENT 'Trạng thái duyệt bù',
+    
+    -- Thông tin hủy buổi
+    cancel_reason VARCHAR(500) NULL COMMENT 'Lý do hủy',
+    
+    -- Thông tin dạy bù
+    makeup_date DATE NULL COMMENT 'Ngày dạy bù đề xuất',
+    makeup_period_start TINYINT NULL COMMENT 'Tiết bắt đầu dạy bù',
+    makeup_period_end TINYINT NULL COMMENT 'Tiết kết thúc dạy bù',
+    makeup_room_id INT UNSIGNED NULL COMMENT 'Phòng dạy bù đề xuất',
+    
+    -- Thông tin kiểm duyệt (Audit)
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    approved_by INT UNSIGNED NULL COMMENT 'Admin xử lý duyệt',
+    approved_at DATETIME NULL,
+    reject_reason VARCHAR(500) NULL COMMENT 'Lý do từ chối nếu bị bác bỏ',
+    
+    CONSTRAINT fk_csreq_lecturer FOREIGN KEY (lecturer_id) REFERENCES lecturer(id) ON DELETE CASCADE,
+    CONSTRAINT fk_csreq_session FOREIGN KEY (class_session_id) REFERENCES class_session(id) ON DELETE CASCADE,
+    CONSTRAINT fk_csreq_room FOREIGN KEY (makeup_room_id) REFERENCES room(id) ON DELETE SET NULL,
+    CONSTRAINT fk_csreq_approver FOREIGN KEY (approved_by) REFERENCES user(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
 -- NHÓM 5 — CHECK-OUT TỨC THỜI
 -- ============================================================
 
--- 15. CHECKOUT_EVENT — Mỗi lần GV kích hoạt check-out = 1 bản ghi
+-- ============================================================
+-- 13. BẢNG: CHECKOUT_EVENT (Sự kiện Check-out)
+-- ============================================================
+-- Mục đích : Quản lý các lần giảng viên kích hoạt yêu cầu check-out 
+--            đột xuất giữa buổi học. Giúp chống tình trạng sinh viên
+--            điểm danh xong rồi bỏ về sớm.
 --     GV có thể kích hoạt bất kỳ thời điểm nào trong buổi học
 --     khi nghi ngờ có SV về sớm. Có thể kích hoạt nhiều lần.
 --     Sau deadline: Scheduler đánh dấu left_early=1 cho SV chưa quét
@@ -368,7 +466,12 @@ CREATE TABLE checkout_event (
 -- NHÓM 6 — VẬN HÀNH ĐIỂM DANH
 -- ============================================================
 
--- 13. ATTENDANCE — Bản ghi điểm danh
+-- ============================================================
+-- 14. BẢNG: ATTENDANCE (Bản ghi điểm danh)
+-- ============================================================
+-- Mục đích : Lưu trữ kết quả điểm danh của sinh viên theo từng buổi học.
+--            Đảm bảo mỗi sinh viên chỉ có 1 bản ghi mỗi buổi, lưu thông
+--            tin tọa độ quét, số phút đi muộn, về sớm.
 --     1 dòng = 1 SV × 1 buổi học
 --     UNIQUE(session_id, student_id) chống quét trùng
 --     is_late (đến muộn) và left_early (về sớm) hoàn toàn độc lập nhau
@@ -763,15 +866,18 @@ SELECT
     sem.name                                                        AS semester_name,
     sc.subject_id,
     sub.name                                                        AS subject_name,
-    COUNT(a.id)                                                     AS total_sessions,
+    sc.total_sessions                                               AS total_sessions,
     COUNT(CASE WHEN a.status   = 'present' THEN 1 END)             AS present_count,
     COUNT(CASE WHEN a.status   = 'absent'  THEN 1 END)             AS absent_count,
     COUNT(CASE WHEN a.status   = 'excused' THEN 1 END)             AS excused_count,
     COUNT(CASE WHEN a.is_late  = 1         THEN 1 END)             AS late_count,
     COUNT(CASE WHEN a.left_early = 1       THEN 1 END)             AS left_early_count,
     ROUND(
-        COUNT(CASE WHEN a.status = 'present' THEN 1 END) * 100.0
-        / NULLIF(COUNT(a.id), 0)
+        COALESCE(
+            SUM(CASE WHEN cs2.status IN ('closed', 'open') AND a.status IN ('present', 'excused') THEN 1.0 ELSE 0.0 END)
+            / NULLIF(COUNT(DISTINCT CASE WHEN cs2.status IN ('closed', 'open') THEN cs2.id END), 0)
+            * 100
+        , 100.0)
     , 1)                                                            AS attendance_rate
 FROM student s
 JOIN user               u   ON u.id   = s.user_id
@@ -784,208 +890,9 @@ JOIN subject            sub ON sub.id = sc.subject_id
 WHERE cs2.status != 'cancelled'
 GROUP BY
     s.id, u.full_name, s.student_code,
-    sc.semester_id, sem.name, sc.subject_id, sub.name;
+    sc.semester_id, sem.name, sc.subject_id, sub.name, sc.total_sessions;
  
  
--- ============================================================
--- V4: v_suspicious_attendance — Điểm danh đáng ngờ (audit GPS)
--- ============================================================
---
---  Mục đích : Liệt kê các bản ghi điểm danh có dấu hiệu gian lận
---             vị trí — SV quét QR từ xa hoặc bị GV override GPS.
---             Dùng cho Admin / GV kiểm tra và xử lý thủ công.
---
---  Ai dùng  : Admin, Giảng viên (kiểm tra sau buổi học)
---
---  Lọc sẵn : Chỉ trả về bản ghi thoả một trong hai điều kiện:
---             (1) gps_verified = 0 → ngoài phạm vi nhưng GV override
---             (2) distance_m > gps_radius_m × 2 → xa gấp đôi bán kính
---
---  Các cột trả về:
---  ┌──────────────────┬─────────────────────────────────────────────────────┐
---  │ attendance_id    │ ID bản ghi điểm danh — dùng để tra cứu / sửa tay   │
---  │ student_name     │ Họ tên sinh viên                                    │
---  │ student_code     │ Mã số sinh viên                                     │
---  │ subject_name     │ Môn học của buổi điểm danh                         │
---  │ session_date     │ Ngày diễn ra buổi học                               │
---  │ scanned_at       │ Thời điểm SV quét QR check-in                       │
---  │ scan_lat         │ Vĩ độ GPS lúc SV quét                               │
---  │ scan_lng         │ Kinh độ GPS lúc SV quét                             │
---  │ distance_m       │ Khoảng cách SV đến tâm phòng (mét, tính Haversine) │
---  │ gps_radius_m     │ Bán kính hợp lệ của phòng thực tế (mét)            │
---  │ over_radius_m    │ Số mét vượt bán kính (distance_m - gps_radius_m)   │
---  │                  │ Âm = trong phòng; dương = ngoài phạm vi            │
---  │ gps_verified     │ 0 = ngoài phạm vi nhưng GV đã bấm override         │
---  │                  │ NULL = GPS bị tắt cho buổi đó (không nghi ngờ)     │
---  │ late_minutes     │ Số phút muộn lúc check-in (0 = đúng giờ)           │
---  └──────────────────┴─────────────────────────────────────────────────────┘
---
---  Lưu ý   : gps_radius_m lấy từ actual_room_id (phòng thực tế của buổi)
---             để đảm bảo so sánh chính xác khi buổi học ở phòng bù.
--- ============================================================
-CREATE OR REPLACE VIEW v_suspicious_attendance AS
-SELECT
-    a.id                                        AS attendance_id,
-    u.full_name                                 AS student_name,
-    s.student_code,
-    sub.name                                    AS subject_name,
-    cs.session_date,
-    a.scanned_at,
-    a.scan_lat,
-    a.scan_lng,
-    a.distance_m,
-    r.gps_radius_m,
-    (a.distance_m - r.gps_radius_m)            AS over_radius_m,
-    a.gps_verified,
-    a.late_minutes
-FROM attendance a
-JOIN student            s   ON s.id   = a.student_id
-JOIN user               u   ON u.id   = s.user_id
-JOIN class_session      cs  ON cs.id  = a.class_session_id
-JOIN schedule           sc  ON sc.id  = cs.schedule_id
-JOIN subject            sub ON sub.id = sc.subject_id
--- ★ Dùng actual_room_id — GPS radius phải khớp phòng thực tế của buổi học
-JOIN room               r   ON r.id   = cs.actual_room_id
-WHERE a.gps_verified = 0
-   OR (a.distance_m IS NOT NULL AND a.distance_m > r.gps_radius_m * 2);
- 
- 
--- ============================================================
--- V5: v_makeup_sessions — Buổi dạy bù và buổi gốc tương ứng
--- ============================================================
---
---  Mục đích : Liệt kê tất cả buổi dạy bù trong hệ thống kèm
---             thông tin buổi gốc mà buổi bù thay thế. Dùng để
---             Admin / GV theo dõi và đối chiếu lịch bù.
---
---  Ai dùng  : Admin, Giảng viên
---
---  Lọc sẵn : Chỉ trả về class_session có makeup_for_id IS NOT NULL
---             (tức là các buổi được tạo ra để bù một buổi khác)
---
---  Các cột trả về:
---  ┌──────────────────────┬───────────────────────────────────────────────────┐
---  │ makeup_session_id    │ ID buổi dạy bù                                    │
---  │ schedule_id          │ ID dòng TKB gốc mà buổi bù thuộc về              │
---  │ makeup_date          │ Ngày dạy bù thực tế                               │
---  │ makeup_status        │ Trạng thái buổi bù: scheduled / open / closed     │
---  │ session_number       │ Số thứ tự buổi (giữ nguyên số của buổi gốc)       │
---  │ original_session_id  │ ID buổi gốc bị thay thế                           │
---  │ original_date        │ Ngày của buổi gốc                                 │
---  │ subject_name         │ Tên môn học                                       │
---  │ class_name           │ Tên lớp hành chính                               │
---  │ makeup_room          │ Mã phòng học buổi bù (actual_room_id của buổi bù) │
---  │ makeup_building      │ Toà nhà phòng học buổi bù                        │
---  │ original_room        │ Mã phòng buổi gốc (actual_room_id của buổi gốc)   │
---  │ original_building    │ Toà nhà phòng buổi gốc                           │
---  │ makeup_lecturer_id   │ ID GV dạy buổi bù (có thể khác GV gốc)           │
---  │ makeup_lecturer_name │ Họ tên GV dạy buổi bù                            │
---  └──────────────────────┴───────────────────────────────────────────────────┘
---
---  Lưu ý   : makeup_room và original_room lấy từ actual_room_id của
---             từng buổi (không phải schedule.room_id), đảm bảo phản
---             ánh đúng phòng thực tế kể cả khi đổi phòng nhiều lần.
--- ============================================================
-CREATE OR REPLACE VIEW v_makeup_sessions AS
-SELECT
-    cs_buu.id                                   AS makeup_session_id,
-    cs_buu.schedule_id,
-    cs_buu.session_date                         AS makeup_date,
-    cs_buu.status                               AS makeup_status,
-    cs_buu.session_number,
-    cs_buu.actual_period_start                  AS makeup_period_start,
-    cs_buu.actual_period_end                    AS makeup_period_end,
-    pt_buu_s.start_time                         AS makeup_start_time,
-    pt_buu_e.end_time                           AS makeup_end_time,
-    cs_goc.id                                   AS original_session_id,
-    cs_goc.session_date                         AS original_date,
-    cs_goc.actual_period_start                  AS original_period_start,
-    cs_goc.actual_period_end                    AS original_period_end,
-    pt_goc_s.start_time                         AS original_start_time,
-    pt_goc_e.end_time                           AS original_end_time,
-    sub.name                                    AS subject_name,
-    ac.name                                     AS class_name,
-    r_buu.code                                  AS makeup_room,
-    r_buu.building                              AS makeup_building,
-    r_goc.code                                  AS original_room,
-    r_goc.building                              AS original_building,
-    l_buu.id                                    AS makeup_lecturer_id,
-    u_buu.full_name                             AS makeup_lecturer_name
-FROM class_session cs_buu
-JOIN class_session        cs_goc  ON cs_goc.id   = cs_buu.makeup_for_id
-JOIN schedule             sc      ON sc.id        = cs_buu.schedule_id
-JOIN subject              sub     ON sub.id       = sc.subject_id
-JOIN administrative_class ac      ON ac.id        = sc.admin_class_id
--- ★ Phòng dạy bù = actual_room_id của buổi bù
-JOIN room                 r_buu   ON r_buu.id     = cs_buu.actual_room_id
--- ★ Phòng buổi gốc = actual_room_id của buổi gốc
-JOIN room                 r_goc   ON r_goc.id     = cs_goc.actual_room_id
--- GV dạy buổi bù (có thể khác GV dạy buổi gốc)
-JOIN lecturer             l_buu   ON l_buu.id     = cs_buu.actual_lecturer_id
-JOIN user                 u_buu   ON u_buu.id     = l_buu.user_id
-JOIN period_time          pt_buu_s ON pt_buu_s.period_number = cs_buu.actual_period_start
-JOIN period_time          pt_buu_e ON pt_buu_e.period_number = cs_buu.actual_period_end
-JOIN period_time          pt_goc_s ON pt_goc_s.period_number = cs_goc.actual_period_start
-JOIN period_time          pt_goc_e ON pt_goc_e.period_number = cs_goc.actual_period_end
-WHERE cs_buu.makeup_for_id IS NOT NULL;
- 
- 
--- ============================================================
--- V6: v_checkout_summary — Kết quả từng lần kích hoạt check-out
--- ============================================================
---
---  Mục đích : Tổng hợp kết quả sau mỗi lần GV kích hoạt check-out
---             giữa buổi học để kiểm tra SV về sớm. Dùng để GV xem
---             lại lịch sử các lần check-out và tỉ lệ SV phản hồi.
---
---  Ai dùng  : Giảng viên (xem lại sau buổi), Admin (audit)
---
---  Các cột trả về:
---  ┌────────────────────────┬─────────────────────────────────────────────────┐
---  │ checkout_event_id      │ ID lần check-out — khoá tra cứu chi tiết        │
---  │ class_session_id       │ ID buổi học mà check-out được kích hoạt         │
---  │ triggered_at           │ Thời điểm GV nhấn "Yêu cầu check-out"           │
---  │ deadline_at            │ Deadline SV phải quét (thường triggered_at + 5')│
---  │ closed_at              │ Thời điểm đóng check-out. NULL = đang mở         │
---  │ note                   │ Ghi chú lý do GV kích hoạt                      │
---  │ subject_name           │ Tên môn học của buổi                             │
---  │ class_name             │ Tên lớp hành chính                              │
---  │ triggered_by_name      │ Họ tên GV đã kích hoạt check-out                │
---  │ total_present_students │ Tổng SV đang có mặt (present) tại thời điểm đó  │
---  │ checked_out_count      │ Số SV đã quét QR check-out trước deadline        │
---  │ left_early_count       │ Số SV bị đánh left_early = 1 (không quét kịp)   │
---  └────────────────────────┴─────────────────────────────────────────────────┘
---
---  Lưu ý   : total_present_students chỉ đếm SV có status = 'present'
---             vì SV absent/excused không cần quét check-out.
---             Tỉ lệ phản hồi = checked_out_count / total_present_students.
--- ============================================================
-CREATE OR REPLACE VIEW v_checkout_summary AS
-SELECT
-    co.id                                                           AS checkout_event_id,
-    co.class_session_id,
-    co.triggered_at,
-    co.deadline_at,
-    co.closed_at,
-    co.note,
-    sub.name                                                        AS subject_name,
-    ac.name                                                         AS class_name,
-    u_gv.full_name                                                  AS triggered_by_name,
-    COUNT(a.id)                                                     AS total_present_students,
-    COUNT(CASE WHEN a.checked_out_at IS NOT NULL THEN 1 END)       AS checked_out_count,
-    COUNT(CASE WHEN a.left_early = 1             THEN 1 END)       AS left_early_count
-FROM checkout_event co
-JOIN class_session        cs   ON cs.id    = co.class_session_id
-JOIN schedule             sc   ON sc.id    = cs.schedule_id
-JOIN subject              sub  ON sub.id   = sc.subject_id
-JOIN administrative_class ac   ON ac.id    = sc.admin_class_id
-JOIN user                 u_gv ON u_gv.id  = co.triggered_by
--- Chỉ đếm SV đang có mặt (present) — SV absent/excused không cần check-out
-LEFT JOIN attendance      a    ON a.class_session_id = co.class_session_id
-                               AND a.status = 'present'
-GROUP BY
-    co.id, co.class_session_id, co.triggered_at, co.deadline_at,
-    co.closed_at, co.note, sub.name, ac.name, u_gv.full_name;
  
 
 CREATE OR REPLACE VIEW v_lecturer_week AS
@@ -1058,7 +965,7 @@ SELECT
     
     -- "Chuyên cần TB": trung bình tỉ lệ có mặt toàn lớp trong học kỳ
     ROUND(
-        AVG(CASE WHEN a.status = 'present' THEN 1.0 ELSE 0.0 END) * 100
+        AVG(CASE WHEN a.status IN ('present', 'excused') THEN 1.0 ELSE 0.0 END) * 100
     , 1)                                        AS avg_attendance_rate
 FROM lecturer l
 JOIN schedule           sc  ON sc.lecturer_id   = l.id
@@ -1365,18 +1272,234 @@ GROUP BY
 -- ============================================================
 SET FOREIGN_KEY_CHECKS = 1;
 -- ============================================================
--- TỔNG KẾT
+-- TỔNG KẾT HỆ THỐNG CƠ SỞ DỮ LIỆU
 -- ============================================================
--- Bảng chính  : 15
---   Nhóm 1    : faculty, department, administrative_class
---   Nhóm 2    : user, lecturer, student
---   Nhóm 3    : subject, room, semester, period_time
---   Nhóm 4    : schedule, class_session
---   Nhóm 5    : attendance
---   Nhóm 6    : checkout_event (★ MỚI)
--- Procedure   : 1  generate_sessions_for_schedule()
--- Function    : 1  haversine_distance()
--- View        : 6  v_lecturer_today, v_schedule_progress,
---                  v_attendance_summary, v_suspicious_attendance,
---                  v_makeup_sessions, v_checkout_summary (★ MỚI)
+-- Tổng số bảng chính  : 14 Bảng
+-- 
+-- Phân loại theo nhóm:
+--   Nhóm 1 (Tổ chức)      : faculty, department, administrative_class
+--   Nhóm 2 (Người dùng)   : user, lecturer, student
+--   Nhóm 3 (Học thuật)    : subject, room, semester, period_time
+--   Nhóm 4 (Lịch học)     : schedule, class_session
+--   Nhóm 5 (Check-out)    : checkout_event
+--   Nhóm 6 (Điểm danh)    : attendance
+--
+-- Logic & Khung nhìn:
+--   Stored Procedure      : 1 (generate_sessions_for_schedule)
+--   Function              : 1 (haversine_distance)
+--   View đang hoạt động   : 9 View
+--       1. v_lecturer_today
+--       2. v_schedule_progress
+--       3. v_attendance_summary
+--       4. v_lecturer_week
+--       5. v_lecturer_semester_summary
+--       6. v_student_today
+--       7. v_student_schedule
+--       8. v_student_attendance_overview
+--       9. v_student_attendance_by_subject
+--
+-- Ghi chú: 3 View cũ (suspicious_attendance, makeup_sessions, checkout_summary) 
+--          đã được chuyển xuống cuối file và comment lại.
 -- ============================================================
+-- ============================================================
+-- CÁC VIEW KHÔNG SỬ DỤNG (ĐƯỢC COMMENT VÀ ĐẨY XUỐNG CUỐI)
+-- ============================================================
+-- ============================================================
+-- V4: v_suspicious_attendance — Điểm danh đáng ngờ (audit GPS)
+-- ============================================================
+--
+--  Mục đích : Liệt kê các bản ghi điểm danh có dấu hiệu gian lận
+--             vị trí — SV quét QR từ xa hoặc bị GV override GPS.
+--             Dùng cho Admin / GV kiểm tra và xử lý thủ công.
+--
+--  Ai dùng  : Admin, Giảng viên (kiểm tra sau buổi học)
+--
+--  Lọc sẵn : Chỉ trả về bản ghi thoả một trong hai điều kiện:
+--             (1) gps_verified = 0 → ngoài phạm vi nhưng GV override
+--             (2) distance_m > gps_radius_m × 2 → xa gấp đôi bán kính
+--
+--  Các cột trả về:
+--  ┌──────────────────┬─────────────────────────────────────────────────────┐
+--  │ attendance_id    │ ID bản ghi điểm danh — dùng để tra cứu / sửa tay   │
+--  │ student_name     │ Họ tên sinh viên                                    │
+--  │ student_code     │ Mã số sinh viên                                     │
+--  │ subject_name     │ Môn học của buổi điểm danh                         │
+--  │ session_date     │ Ngày diễn ra buổi học                               │
+--  │ scanned_at       │ Thời điểm SV quét QR check-in                       │
+--  │ scan_lat         │ Vĩ độ GPS lúc SV quét                               │
+--  │ scan_lng         │ Kinh độ GPS lúc SV quét                             │
+--  │ distance_m       │ Khoảng cách SV đến tâm phòng (mét, tính Haversine) │
+--  │ gps_radius_m     │ Bán kính hợp lệ của phòng thực tế (mét)            │
+--  │ over_radius_m    │ Số mét vượt bán kính (distance_m - gps_radius_m)   │
+--  │                  │ Âm = trong phòng; dương = ngoài phạm vi            │
+--  │ gps_verified     │ 0 = ngoài phạm vi nhưng GV đã bấm override         │
+--  │                  │ NULL = GPS bị tắt cho buổi đó (không nghi ngờ)     │
+--  │ late_minutes     │ Số phút muộn lúc check-in (0 = đúng giờ)           │
+--  └──────────────────┴─────────────────────────────────────────────────────┘
+--
+--  Lưu ý   : gps_radius_m lấy từ actual_room_id (phòng thực tế của buổi)
+--             để đảm bảo so sánh chính xác khi buổi học ở phòng bù.
+-- ============================================================
+-- CREATE OR REPLACE VIEW v_suspicious_attendance AS
+-- SELECT
+--     a.id                                        AS attendance_id,
+--     u.full_name                                 AS student_name,
+--     s.student_code,
+--     sub.name                                    AS subject_name,
+--     cs.session_date,
+--     a.scanned_at,
+--     a.scan_lat,
+--     a.scan_lng,
+--     a.distance_m,
+--     r.gps_radius_m,
+--     (a.distance_m - r.gps_radius_m)            AS over_radius_m,
+--     a.gps_verified,
+--     a.late_minutes
+-- FROM attendance a
+-- JOIN student            s   ON s.id   = a.student_id
+-- JOIN user               u   ON u.id   = s.user_id
+-- JOIN class_session      cs  ON cs.id  = a.class_session_id
+-- JOIN schedule           sc  ON sc.id  = cs.schedule_id
+-- JOIN subject            sub ON sub.id = sc.subject_id
+-- ★ Dùng actual_room_id — GPS radius phải khớp phòng thực tế của buổi học
+-- JOIN room               r   ON r.id   = cs.actual_room_id
+-- WHERE a.gps_verified = 0
+--    OR (a.distance_m IS NOT NULL AND a.distance_m > r.gps_radius_m * 2);
+ 
+ 
+-- ============================================================
+-- V5: v_makeup_sessions — Buổi dạy bù và buổi gốc tương ứng
+-- ============================================================
+--
+--  Mục đích : Liệt kê tất cả buổi dạy bù trong hệ thống kèm
+--             thông tin buổi gốc mà buổi bù thay thế. Dùng để
+--             Admin / GV theo dõi và đối chiếu lịch bù.
+--
+--  Ai dùng  : Admin, Giảng viên
+--
+--  Lọc sẵn : Chỉ trả về class_session có makeup_for_id IS NOT NULL
+--             (tức là các buổi được tạo ra để bù một buổi khác)
+--
+--  Các cột trả về:
+--  ┌──────────────────────┬───────────────────────────────────────────────────┐
+--  │ makeup_session_id    │ ID buổi dạy bù                                    │
+--  │ schedule_id          │ ID dòng TKB gốc mà buổi bù thuộc về              │
+--  │ makeup_date          │ Ngày dạy bù thực tế                               │
+--  │ makeup_status        │ Trạng thái buổi bù: scheduled / open / closed     │
+--  │ session_number       │ Số thứ tự buổi (giữ nguyên số của buổi gốc)       │
+--  │ original_session_id  │ ID buổi gốc bị thay thế                           │
+--  │ original_date        │ Ngày của buổi gốc                                 │
+--  │ subject_name         │ Tên môn học                                       │
+--  │ class_name           │ Tên lớp hành chính                               │
+--  │ makeup_room          │ Mã phòng học buổi bù (actual_room_id của buổi bù) │
+--  │ makeup_building      │ Toà nhà phòng học buổi bù                        │
+--  │ original_room        │ Mã phòng buổi gốc (actual_room_id của buổi gốc)   │
+--  │ original_building    │ Toà nhà phòng buổi gốc                           │
+--  │ makeup_lecturer_id   │ ID GV dạy buổi bù (có thể khác GV gốc)           │
+--  │ makeup_lecturer_name │ Họ tên GV dạy buổi bù                            │
+--  └──────────────────────┴───────────────────────────────────────────────────┘
+--
+--  Lưu ý   : makeup_room và original_room lấy từ actual_room_id của
+--             từng buổi (không phải schedule.room_id), đảm bảo phản
+--             ánh đúng phòng thực tế kể cả khi đổi phòng nhiều lần.
+-- ============================================================
+-- CREATE OR REPLACE VIEW v_makeup_sessions AS
+-- SELECT
+--     cs_buu.id                                   AS makeup_session_id,
+--     cs_buu.schedule_id,
+--     cs_buu.session_date                         AS makeup_date,
+--     cs_buu.status                               AS makeup_status,
+--     cs_buu.session_number,
+--     cs_buu.actual_period_start                  AS makeup_period_start,
+--     cs_buu.actual_period_end                    AS makeup_period_end,
+--     pt_buu_s.start_time                         AS makeup_start_time,
+--     pt_buu_e.end_time                           AS makeup_end_time,
+--     cs_goc.id                                   AS original_session_id,
+--     cs_goc.session_date                         AS original_date,
+--     cs_goc.actual_period_start                  AS original_period_start,
+--     cs_goc.actual_period_end                    AS original_period_end,
+--     pt_goc_s.start_time                         AS original_start_time,
+--     pt_goc_e.end_time                           AS original_end_time,
+--     sub.name                                    AS subject_name,
+--     ac.name                                     AS class_name,
+--     r_buu.code                                  AS makeup_room,
+--     r_buu.building                              AS makeup_building,
+--     r_goc.code                                  AS original_room,
+--     r_goc.building                              AS original_building,
+--     l_buu.id                                    AS makeup_lecturer_id,
+--     u_buu.full_name                             AS makeup_lecturer_name
+-- FROM class_session cs_buu
+-- JOIN class_session        cs_goc  ON cs_goc.id   = cs_buu.makeup_for_id
+-- JOIN schedule             sc      ON sc.id        = cs_buu.schedule_id
+-- JOIN subject              sub     ON sub.id       = sc.subject_id
+-- JOIN administrative_class ac      ON ac.id        = sc.admin_class_id
+-- ★ Phòng dạy bù = actual_room_id của buổi bù
+-- JOIN room                 r_buu   ON r_buu.id     = cs_buu.actual_room_id
+-- ★ Phòng buổi gốc = actual_room_id của buổi gốc
+-- JOIN room                 r_goc   ON r_goc.id     = cs_goc.actual_room_id
+-- GV dạy buổi bù (có thể khác GV dạy buổi gốc)
+-- JOIN lecturer             l_buu   ON l_buu.id     = cs_buu.actual_lecturer_id
+-- JOIN user                 u_buu   ON u_buu.id     = l_buu.user_id
+-- JOIN period_time          pt_buu_s ON pt_buu_s.period_number = cs_buu.actual_period_start
+-- JOIN period_time          pt_buu_e ON pt_buu_e.period_number = cs_buu.actual_period_end
+-- JOIN period_time          pt_goc_s ON pt_goc_s.period_number = cs_goc.actual_period_start
+-- JOIN period_time          pt_goc_e ON pt_goc_e.period_number = cs_goc.actual_period_end
+-- WHERE cs_buu.makeup_for_id IS NOT NULL;
+ 
+ 
+-- ============================================================
+-- V6: v_checkout_summary — Kết quả từng lần kích hoạt check-out
+-- ============================================================
+--
+--  Mục đích : Tổng hợp kết quả sau mỗi lần GV kích hoạt check-out
+--             giữa buổi học để kiểm tra SV về sớm. Dùng để GV xem
+--             lại lịch sử các lần check-out và tỉ lệ SV phản hồi.
+--
+--  Ai dùng  : Giảng viên (xem lại sau buổi), Admin (audit)
+--
+--  Các cột trả về:
+--  ┌────────────────────────┬─────────────────────────────────────────────────┐
+--  │ checkout_event_id      │ ID lần check-out — khoá tra cứu chi tiết        │
+--  │ class_session_id       │ ID buổi học mà check-out được kích hoạt         │
+--  │ triggered_at           │ Thời điểm GV nhấn "Yêu cầu check-out"           │
+--  │ deadline_at            │ Deadline SV phải quét (thường triggered_at + 5')│
+--  │ closed_at              │ Thời điểm đóng check-out. NULL = đang mở         │
+--  │ note                   │ Ghi chú lý do GV kích hoạt                      │
+--  │ subject_name           │ Tên môn học của buổi                             │
+--  │ class_name             │ Tên lớp hành chính                              │
+--  │ triggered_by_name      │ Họ tên GV đã kích hoạt check-out                │
+--  │ total_present_students │ Tổng SV đang có mặt (present) tại thời điểm đó  │
+--  │ checked_out_count      │ Số SV đã quét QR check-out trước deadline        │
+--  │ left_early_count       │ Số SV bị đánh left_early = 1 (không quét kịp)   │
+--  └────────────────────────┴─────────────────────────────────────────────────┘
+--
+--  Lưu ý   : total_present_students chỉ đếm SV có status = 'present'
+--             vì SV absent/excused không cần quét check-out.
+--             Tỉ lệ phản hồi = checked_out_count / total_present_students.
+-- ============================================================
+-- CREATE OR REPLACE VIEW v_checkout_summary AS
+-- SELECT
+--     co.id                                                           AS checkout_event_id,
+--     co.class_session_id,
+--     co.triggered_at,
+--     co.deadline_at,
+--     co.closed_at,
+--     co.note,
+--     sub.name                                                        AS subject_name,
+--     ac.name                                                         AS class_name,
+--     u_gv.full_name                                                  AS triggered_by_name,
+--     COUNT(a.id)                                                     AS total_present_students,
+--     COUNT(CASE WHEN a.checked_out_at IS NOT NULL THEN 1 END)       AS checked_out_count,
+--     COUNT(CASE WHEN a.left_early = 1             THEN 1 END)       AS left_early_count
+-- FROM checkout_event co
+-- JOIN class_session        cs   ON cs.id    = co.class_session_id
+-- JOIN schedule             sc   ON sc.id    = cs.schedule_id
+-- JOIN subject              sub  ON sub.id   = sc.subject_id
+-- JOIN administrative_class ac   ON ac.id    = sc.admin_class_id
+-- JOIN user                 u_gv ON u_gv.id  = co.triggered_by
+-- Chỉ đếm SV đang có mặt (present) — SV absent/excused không cần check-out
+-- LEFT JOIN attendance      a    ON a.class_session_id = co.class_session_id
+--                                AND a.status = 'present'
+-- GROUP BY
+--     co.id, co.class_session_id, co.triggered_at, co.deadline_at,
+--     co.closed_at, co.note, sub.name, ac.name, u_gv.full_name;

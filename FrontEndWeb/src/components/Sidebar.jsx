@@ -72,6 +72,9 @@ export default function Sidebar({ role }) {
           <NavLink to="/sessions" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
             <span className="dot"></span>Sổ điểm danh
           </NavLink>
+          <NavLink to="/requests" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
+            <span className="dot"></span>Yêu cầu của tôi
+          </NavLink>
 
           <div className="sb-sec">Báo cáo</div>
           <NavLink to="/report" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
@@ -86,6 +89,9 @@ export default function Sidebar({ role }) {
           <div className="sb-sec">Tổng quan</div>
           <NavLink to="/admin" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`} end>
             <span className="dot"></span>Dashboard Admin
+          </NavLink>
+          <NavLink to="/admin/requests" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
+            <span className="dot"></span>Phê duyệt giảng dạy
           </NavLink>
 
           <div className="sb-sec">Quản lý danh mục</div>

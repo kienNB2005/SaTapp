@@ -1,9 +1,12 @@
 package ken.example.dekiru.attendance.controller;
 
 import ken.example.dekiru.attendance.dto.*;
+import ken.example.dekiru.attendance.entity.ClassSession;
 import ken.example.dekiru.attendance.service.AttendanceService;
 import ken.example.dekiru.attendance.service.AttendanceSseService;
 import ken.example.dekiru.attendance.service.ClassSessionService;
+import ken.example.dekiru.common.exception.AppException;
+import ken.example.dekiru.common.exception.ErrorCode;
 import ken.example.dekiru.common.response.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,11 +44,8 @@ public class ClassSessionController {
         } else if ("CLOSED".equals(status)) {
             classSessionService.closeClassSession(id);
             return ApiResponse.success(null, "Đóng buổi học thành công");
-        } else if ("CANCELLED".equals(status)) {
-            classSessionService.cancelClassSession(id, request.getReason());
-            return ApiResponse.success(null, "Hủy buổi học thành công");
         }
-        throw new ken.example.dekiru.common.exception.AppException(ken.example.dekiru.common.exception.ErrorCode.INVALID_SESSION_STATUS);
+        throw new AppException(ErrorCode.INVALID_SESSION_STATUS);
     }
 
     @PostMapping("/{id}/qr/refresh")
@@ -54,13 +54,7 @@ public class ClassSessionController {
         return ApiResponse.success(response, "Làm mới mã QR thành công (" + response.getType() + ")");
     }
 
-    @PostMapping("/{id}/makeup")
-    public ApiResponse<ken.example.dekiru.attendance.entity.ClassSession> createMakeupSession(
-            @PathVariable Long id, 
-            @RequestBody MakeupSessionRequest request) {
-        ken.example.dekiru.attendance.entity.ClassSession makeupSession = classSessionService.createMakeupSession(id, request);
-        return ApiResponse.success(makeupSession, "Lên lịch dạy bù thành công");
-    }
+
 
 //    @GetMapping("/{id}/suggested-slots")
 //    public ApiResponse<List<SuggestedSlotDto>> getSuggestedSlots(
@@ -97,6 +91,14 @@ public class ClassSessionController {
     {
         List<ClassSessionListDto> list = classSessionService.getSessionListForClassAndSubject(adminClassId, subjectId);
         return ApiResponse.success(list, "Lấy danh sách buổi học thành công");
+    }
+
+    @GetMapping("/weekly")
+    public ApiResponse<List<WeeklySessionDto>> getWeeklySessions(
+            @RequestParam Long semesterId,
+            @RequestParam Integer weekNumber) {
+        List<WeeklySessionDto> result = classSessionService.getLecturerSessionsByWeek(semesterId, weekNumber);
+        return ApiResponse.success(result, "Lấy thời khóa biểu tuần thành công");
     }
 
 

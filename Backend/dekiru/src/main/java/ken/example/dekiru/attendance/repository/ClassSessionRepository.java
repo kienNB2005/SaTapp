@@ -6,6 +6,7 @@ import ken.example.dekiru.schedule.entity.Schedule;
 import jakarta.persistence.LockModeType;
 import ken.example.dekiru.attendance.entity.ClassSession;
 import ken.example.dekiru.attendance.dto.ClassSessionListDto;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -74,6 +75,9 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
     List<ClassSession> findBySchedule_AdminClass_IdAndSessionDateBetweenAndStatusNot(Long adminClassId, java.time.LocalDate startDate, java.time.LocalDate endDate, ClassSession.Status status);
 
     List<ClassSession> findByActualLecturer_IdAndSessionDateBetweenAndStatusNot(Long lecturerId, java.time.LocalDate startDate, java.time.LocalDate endDate, ClassSession.Status status);
+    
+    @EntityGraph(attributePaths = {"schedule", "schedule.subject", "schedule.adminClass", "actualRoom", "makeupFor"})
+    List<ClassSession> findByActualLecturer_IdAndSessionDateBetween(Long lecturerId, java.time.LocalDate startDate, java.time.LocalDate endDate);
 
     List<ClassSession> findBySchedule_IdAndSessionDateBetween(Long scheduleId, java.time.LocalDate startDate, java.time.LocalDate endDate);
 

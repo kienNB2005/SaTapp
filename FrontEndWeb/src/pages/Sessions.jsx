@@ -13,6 +13,7 @@ function friendlyError(err) {
     NO_PERMISSION_ON_SESSION: 'Bạn không có quyền thao tác trên buổi học này.',
     MAKEUP_DATE_BEFORE_ORIGINAL: 'Ngày dạy bù phải từ ngày có buổi học gốc trở đi.',
     MAKEUP_DATE_AFTER_SEMESTER: 'Ngày dạy bù phải trước ngày kết thúc học kỳ.',
+    CANCEL_TOO_LATE: 'Chỉ được gửi yêu cầu hủy buổi học trước giờ học tối thiểu 15 phút.',
   };
   return map[code] || map[msg] || msg || 'Có lỗi xảy ra, vui lòng thử lại.';
 }
@@ -198,9 +199,10 @@ export default function Sessions() {
   async function submitCancel() {
     if (cancelReason.trim().length < 5) return alert("Lý do hủy buổi học quá ngắn.");
     try {
-      await api.patch(`/api/v1/sessions/${cancelModalSessionId}/status`, { status: "CANCELLED", reason: cancelReason });
+      await api.post(`/api/v1/session-requests/${cancelModalSessionId}/cancel`, { cancelReason: cancelReason });
       setCancelModalSessionId(null);
       setCancelReason("");
+      alert("Đã gửi yêu cầu hủy buổi, vui lòng chờ Admin duyệt.");
       loadSessions();
     } catch (err) {
       alert(friendlyError(err));
@@ -237,8 +239,9 @@ export default function Sessions() {
     }
     if (!makeupForm.roomId) return alert("Vui lòng chọn phòng học trống.");
     try {
-      await api.post(`/api/v1/sessions/${makeupModalSessionId}/makeup`, makeupForm);
+      await api.post(`/api/v1/session-requests/${makeupModalSessionId}/makeup`, makeupForm);
       setMakeupModalSessionId(null);
+      alert("Đã gửi yêu cầu tạo lịch dạy bù, vui lòng chờ Admin duyệt.");
       loadSessions();
     } catch (err) {
       alert(friendlyError(err));

@@ -53,6 +53,7 @@ public class ClassSessionService {
     AdministrativeClassMapper administrativeClassMapper;
     SubjectMapper subjectMapper;
     ken.example.dekiru.academic.repository.RoomRepository roomRepository;
+    ken.example.dekiru.academic.repository.SemesterRepository semesterRepository;
     // ==========================================
     // PRIVATE HELPER METHODS
     // ==========================================
@@ -439,6 +440,34 @@ public class ClassSessionService {
         return classSessionRepository.findClassSessionsListForAdminClassAndSubject(adminClassId, subjectId, lecturerId);
     }
 
+    public List<WeeklySessionDto> getLecturerSessionsByWeek(Long semesterId, int week) {
+        Long lecturerId = securityUtils.getCurrentLecturerId();
+        ken.example.dekiru.academic.entity.Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        java.time.LocalDate startDate = semester.getStartDate().plusWeeks(week - 1);
+        java.time.LocalDate endDate = startDate.plusDays(6);
+
+        List<ClassSession> sessions = classSessionRepository
+                .findByActualLecturer_IdAndSessionDateBetween(lecturerId, startDate, endDate);
+
+        return sessions.stream().map(s -> WeeklySessionDto.builder()
+                .id(s.getId())
+                .classSessionId(s.getId())
+                .subjectName(s.getSchedule().getSubject().getName())
+                .className(s.getSchedule().getAdminClass().getCode())
+                .roomCode(s.getActualRoom().getCode())
+                .sessionDate(s.getSessionDate())
+                .status(s.getStatus().name())
+                .sessionNumber(s.getSessionNumber() != null ? s.getSessionNumber().byteValue() : null)
+                .makeupForId(s.getMakeupFor() != null ? s.getMakeupFor().getId() : null)
+                .originalSessionDate(s.getMakeupFor() != null ? s.getMakeupFor().getSessionDate() : null)
+                .periodStart(s.getActualPeriodStart())
+                .periodEnd(s.getActualPeriodEnd())
+                .dayOfWeek(s.getSessionDate().getDayOfWeek().getValue() == 7 ? 8 : s.getSessionDate().getDayOfWeek().getValue() + 1)
+                .build()).collect(Collectors.toList());
+    }
+
     public List<DropdownOption> getAdminClassesForLecturer() {
         Long lecturerId = securityUtils.getCurrentLecturerId();
         return administrativeClassMapper.toDropdownOptionList(scheduleRepository.findDistinctAdminClassesByLecturer(lecturerId));
@@ -470,6 +499,24 @@ public class ClassSessionService {
             session.setStatus(ClassSession.Status.cancelled);
             session.setCancelReason(reason);
             session.setCancelledBy(session.getActualLecturer().getUser());
+            session.setCancelledAt(LocalDateTime.now());
+        }
+    }
+
+    @Transactional
+    public void adminCancelClassSession(Long sessionId, String reason, ken.example.dekiru.security.entity.User adminUser) {
+        ClassSession session = classSessionRepository.findByIdWithLock(sessionId)
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_SESSION_NOT_FOUND));
+        if (session.getStatus() != ClassSession.Status.scheduled) {
+            throw new AppException(ErrorCode.INVALID_SESSION_STATUS);
+        }
+        
+        if (session.getMakeupFor() != null) {
+            classSessionRepository.delete(session);
+        } else {
+            session.setStatus(ClassSession.Status.cancelled);
+            session.setCancelReason(reason);
+            session.setCancelledBy(adminUser);
             session.setCancelledAt(LocalDateTime.now());
         }
     }
@@ -516,6 +563,38 @@ public class ClassSessionService {
 
         if (classSessionRepository.countConflictForLecturer(request.getSessionDate(), request.getPeriodStart(), request.getPeriodEnd(), originalSession.getActualLecturer().getId()) > 0) {
             throw new AppException(ErrorCode.LECTURER_CONFLICT);
+        }
+
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
+
+        ClassSession makeupSession = ClassSession.builder()
+                .schedule(originalSession.getSchedule())
+                .actualRoom(room)
+                .actualLecturer(originalSession.getActualLecturer())
+                .actualPeriodStart(request.getPeriodStart())
+                .actualPeriodEnd(request.getPeriodEnd())
+                .sessionDate(request.getSessionDate())
+                .sessionNumber(originalSession.getSessionNumber()) // Vẫn giữ số thứ tự của buổi gốc
+                .status(ClassSession.Status.scheduled)
+                .gpsEnabled(originalSession.getGpsEnabled())
+                .makeupFor(originalSession)
+                .build();
+
+        return classSessionRepository.save(makeupSession);
+    }
+
+    @Transactional
+    public ClassSession adminCreateMakeupSession(Long originalSessionId, MakeupSessionRequest request) {
+        ClassSession originalSession = classSessionRepository.findByIdWithLock(originalSessionId)
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_SESSION_NOT_FOUND));
+        
+        if (originalSession.getStatus() != ClassSession.Status.cancelled) {
+            throw new AppException(ErrorCode.SESSION_NOT_CANCELLED);
+        }
+        
+        if (classSessionRepository.existsByMakeupFor_IdAndStatusNot(originalSessionId, ClassSession.Status.cancelled)) {
+            throw new AppException(ErrorCode.MAKEUP_ALREADY_EXISTS);
         }
 
         Room room = roomRepository.findById(request.getRoomId())

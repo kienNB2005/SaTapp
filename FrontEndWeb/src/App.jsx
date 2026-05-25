@@ -22,6 +22,8 @@ import AdminDepartments from './pages/AdminDepartments';
 import AdminAdministrativeClasses from './pages/AdminAdministrativeClasses';
 import AdminStudents from './pages/AdminStudents';
 import AdminLecturers from './pages/AdminLecturers';
+import LecturerRequests from './pages/LecturerRequests';
+import AdminRequests from './pages/AdminRequests';
 
 export default function App() {
   return (
@@ -39,10 +41,12 @@ export default function App() {
             <Route path="/sessions/:sessionId/attendances" element={<Attendance />} />
             <Route path="report" element={<Report />} />
             <Route path="homeroom" element={<Homeroom />} />
+            <Route path="requests" element={<LecturerRequests />} />
 
             {/* Admin Routes - Yêu cầu quyền ADMIN */}
             <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
               <Route path="admin" element={<AdminDashboard />} />
+              <Route path="admin/requests" element={<AdminRequests />} />
               <Route path="admin/tkb" element={<AdminTkb />} />
               <Route path="admin/faculties" element={<AdminFaculties />} />
               <Route path="admin/departments" element={<AdminDepartments />} />

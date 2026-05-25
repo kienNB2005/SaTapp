@@ -12,6 +12,8 @@ export default function Tkb() {
   const [scheduleData, setScheduleData] = useState({});
   const [loading, setLoading] = useState(true);
   const [hoveredId, setHoveredId] = useState(null);
+  const [semesterStartDate, setSemesterStartDate] = useState(null);
+  const [activeSemesterId, setActiveSemesterId] = useState(null);
 
   const allDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   
@@ -25,6 +27,7 @@ export default function Tkb() {
     { label: 'Sáng (T.4-6)', key: '4-6' },
     { label: 'Chiều (T.7-9)', key: '7-9' },
     { label: 'Chiều (T.10-12)', key: '10-12' },
+    { label: 'Tối (T.13-15)', key: '13-15' },
   ];
 
   const colors = ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#14B8A6', '#EC4899'];
@@ -52,6 +55,8 @@ export default function Tkb() {
         let calcCurrentWeek = 1;
         
         if (activeSem && activeSem.startDate) {
+          setActiveSemesterId(activeSem.id);
+          setSemesterStartDate(activeSem.startDate);
           const start = new Date(activeSem.startDate);
           // Set to start of the day to avoid timezone hours messing up diff
           start.setHours(0,0,0,0);
@@ -105,9 +110,11 @@ export default function Tkb() {
             const res = await api.get('/api/v1/lecturers/me/dashboard');
             transformSchedule(res.data.weekSessions, 'week_realtime');
           } else {
-            // Theoretical schedule for other weeks
-            const filtered = allSemesterData.filter(s => s.weekStart <= selectedWeek && s.weekEnd >= selectedWeek);
-            transformSchedule(filtered, 'week_theoretical');
+            // Fetch actual database sessions for the selected week
+            if (activeSemesterId) {
+              const res = await api.get(`/api/v1/sessions/weekly?semesterId=${activeSemesterId}&weekNumber=${selectedWeek}`);
+              transformSchedule(res.data.result, 'week_realtime');
+            }
           }
         }
       } catch (err) {
@@ -117,20 +124,26 @@ export default function Tkb() {
       }
     };
     fetchModeData();
-  }, [viewMode, selectedWeek, currentWeek, allSemesterData]);
+  }, [viewMode, selectedWeek, currentWeek, allSemesterData, activeSemesterId]);
 
   const transformSchedule = (data, mode) => {
     const newSchedule = {};
     if (!data) return;
     
     data.forEach(item => {
-      const dayStr = item.dayOfWeek === 8 ? 'Chủ Nhật' : `Thứ ${item.dayOfWeek}`;
+      let dayOfW = item.dayOfWeek;
+      if (!dayOfW && item.sessionDate) {
+        const d = new Date(item.sessionDate);
+        dayOfW = d.getDay() === 0 ? 8 : d.getDay() + 1;
+      }
+      const dayStr = dayOfW === 8 ? 'Chủ Nhật' : `Thứ ${dayOfW}`;
       
       let pKey = null;
       if (item.periodStart >= 1 && item.periodStart <= 3) pKey = '1-3';
       else if (item.periodStart >= 4 && item.periodStart <= 6) pKey = '4-6';
       else if (item.periodStart >= 7 && item.periodStart <= 9) pKey = '7-9';
       else if (item.periodStart >= 10 && item.periodStart <= 12) pKey = '10-12';
+      else if (item.periodStart >= 13 && item.periodStart <= 15) pKey = '13-15';
       else pKey = `${item.periodStart}-${item.periodEnd}`; 
       
       const key = `${dayStr}_${pKey}`;
@@ -167,6 +180,7 @@ export default function Tkb() {
         originalSessionDate: item.originalSessionDate,
         periodStart: item.periodStart,
         periodEnd: item.periodEnd,
+        dayOfWeek: dayOfW,
         isTheoretical: mode === 'week_theoretical'
       });
     });
@@ -280,12 +294,20 @@ export default function Tkb() {
                                       <>
                                         <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Ngày học: <strong style={{color: 'var(--tx)'}}>{formatDate(cls.sessionDate)}</strong></div>
                                         <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Tiết học: <strong style={{color: 'var(--tx)'}}>{cls.periodStart} – {cls.periodEnd}</strong></div>
-                                        <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Trạng thái: <strong style={{color: cls.status === 'scheduled' ? 'var(--tx)' : cls.status === 'open' ? '#22C55E' : cls.status === 'closed' ? '#3B82F6' : '#EF4444'}}>{cls.status === 'scheduled' ? 'Sắp học' : cls.status === 'open' ? 'Đang mở' : cls.status === 'closed' ? 'Đã hoàn thành' : 'Đã hủy'}</strong></div>
+                                        <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Trạng thái: <strong style={{color: cls.status === 'scheduled' ? 'var(--tx)' : cls.status === 'open' ? '#22C55E' : cls.status === 'closed' ? '#3B82F6' : cls.status === 'cancelled' ? '#EF4444' : '#EF4444'}}>{cls.status === 'scheduled' ? 'Sắp học' : cls.status === 'open' ? 'Đang mở' : cls.status === 'closed' ? 'Đã hoàn thành' : 'Đã hủy'}</strong></div>
                                       </>
                                     )}
 
                                     {cls.isTheoretical && (
-                                      <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Tiết học: <strong style={{color: 'var(--tx)'}}>{cls.periodStart} – {cls.periodEnd}</strong></div>
+                                      <>
+                                        {semesterStartDate && (
+                                          <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Ngày học: <strong style={{color: 'var(--tx)'}}>{
+                                            formatDate(new Date(new Date(semesterStartDate).setHours(0,0,0,0) + ((selectedWeek - 1) * 7 + (cls.dayOfWeek === 8 ? 6 : cls.dayOfWeek - 2)) * 24 * 60 * 60 * 1000))
+                                          }</strong></div>
+                                        )}
+                                        <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Tiết học: <strong style={{color: 'var(--tx)'}}>{cls.periodStart} – {cls.periodEnd}</strong></div>
+                                        <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Trạng thái: <strong style={{color: 'var(--tx)'}}>Theo kế hoạch</strong></div>
+                                      </>
                                     )}
 
                                     {cls.makeupForId && (
