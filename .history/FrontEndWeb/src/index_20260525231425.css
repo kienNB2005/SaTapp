@@ -100,27 +100,23 @@ body {
 }
 
 .sb-logo-ic {
-  width: 40px;
-  height: 40px;
-  background: #FFFFFF;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-mid));
+  color: #FFFFFF;
   border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 16px;
   flex-shrink: 0;
-  overflow: hidden;
-}
-.sb-logo-ic img {
-  width: 110%;
-  height: 110%;
-  object-fit: contain;
 }
 
 .sb-logo-tx {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--primary);
+  color: var(--tx);
 }
 
 .sb-logo-su {

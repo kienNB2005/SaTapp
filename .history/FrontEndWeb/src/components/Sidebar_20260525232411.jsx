@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import logo from "../assets/img/student-attendance-logo.png";
+import logo from "./assets/img/student-attendance-logo.png";
 
 export default function Sidebar({ role }) {
   const isAdmin = role === 'admin';

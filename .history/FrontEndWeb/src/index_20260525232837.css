@@ -117,10 +117,10 @@ body {
 }
 
 .sb-logo-tx {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--primary);
+  color: var(--tx);
 }
 
 .sb-logo-su {

@@ -1,0 +1,38 @@
+/* AdminDashboard.css */
+
+.adm-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.adm-subtitle {
+  font-size: 11px;
+  color: var(--tx3);
+}
+
+.small-text {
+  font-size: 11px;
+}
+
+.room-text {
+  font-family: var(--mo);
+  font-size: 11px;
+}
+
+.tl-list {
+  padding: 10px 14px;
+}
+
+.tl-title {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tl-desc {
+  font-size: 11px;
+  color: var(--tx3);
+}
+
+.tl-dot-blue {
+  background: var(--bl);
+}
