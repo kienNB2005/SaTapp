@@ -76,7 +76,7 @@ export default function Tkb() {
         // Fetch full semester schedule to determine maxWeek and cache data
         const schedRes = await api.get('/api/v1/schedules/me?size=1000');
         const schedules = schedRes.data.result.content || [];
-        setAllSemesterData(schedules); console.log('ALL SCHEDULES:', schedules);
+        setAllSemesterData(schedules);
         
         let mWeek = 15;
         schedules.forEach(s => {

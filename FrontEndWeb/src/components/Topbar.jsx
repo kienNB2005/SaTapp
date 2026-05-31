@@ -1,6 +1,5 @@
 
 import { useLocation } from 'react-router-dom';
-import { Bell } from "lucide-react";
 
 const PAGE_INFO = [
   { path: '/', section: 'Tổng quan', title: 'Dashboard', sub: 'Thứ 3, 02/09/2025 · HK1-2024-2025', exact: true },
@@ -43,15 +42,6 @@ export default function Topbar() {
       <div>
         <div className="tb-title" id="pgTitle">{displayTitle}</div>
         <div className="tb-sub" id="pgSub">{displaySub}</div>
-      </div>
-      <div className="tb-acts">
-        <div className="srch">
-          <span className="srch-ic">🔍</span>
-          <input placeholder="Tìm kiếm..." aria-label="Tìm kiếm" />
-        </div>
-        <button className="btn btn-bell" style={{ padding: '7px 10px' }}>
-          <Bell size={16} className="sb-icon" />
-        </button>
       </div>
     </div>
   );

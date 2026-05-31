@@ -193,21 +193,43 @@
 }
 
 .asm-form-group {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
 .asm-form-group-large {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
 .asm-form-group label {
   display: block;
-
-  margin-bottom: 8px;
-
+  margin-bottom: 0;
   color: var(--tx2);
   font-size: 13px;
   font-weight: 500;
+}
+
+.asm-form-group input,
+.asm-form-group .dp-wrapper {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .asm-form-group,
+  .asm-form-group-large {
+    grid-template-columns: 1fr;
+  }
+
+  .asm-form-group label {
+    margin-bottom: 8px;
+  }
 }
 
 .asm-input {

@@ -235,6 +235,13 @@
   text-align: center;
 }
 
+.atk-center-cell .atk-session-count,
+.atk-session-count {
+  display: inline-flex;
+  justify-content: left;
+  width: 100%;
+}
+
 .atk-session-count {
   color: var(--gr);
   font-weight: 600;
