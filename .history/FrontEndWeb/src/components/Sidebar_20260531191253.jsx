@@ -2,8 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import logo from "../assets/img/student-attendance-logo.png";
 import { LayoutDashboard, GraduationCap, CalendarDays ,SquareCheckBig,
-          BookOpen, Users, UserCog, DoorOpen, Library, Bookmark,
-          ChartColumn, LogOut} from "lucide-react";
+          BookOpen, Users, UserCog, DoorOpen, Library, BookMark,
+          ChartColumn, Logout} from "lucide-react";
 
 export default function Sidebar({ role }) {
   const isAdmin = role === 'admin';
@@ -93,76 +93,63 @@ export default function Sidebar({ role }) {
       ) : (
         <div id="nav-admin">
           <div className="sb-sec">Tổng quan</div>
-
           <NavLink to="/admin" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`} end>
-            <LayoutDashboard size={16} className="sb-icon" />
-            <span>Dashboard Admin</span>
+            <LayoutDashboard size={16} className="text-blue-300" />
+            <span className="dot"></span>Dashboard Admin
           </NavLink>
-
           <NavLink to="/admin/requests" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <SquareCheckBig size={16} className="sb-icon" />
-            <span>Phê duyệt giảng dạy</span>
+            <SquareCheckBig size={16} />
+            <span className="dot"></span>Phê duyệt giảng dạy
           </NavLink>
-
           <div className="sb-sec">Quản lý danh mục</div>
-
           <NavLink to="/admin/tkb" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
             <CalendarDays size={16} className="sb-icon" />
-            <span>Thời khóa biểu</span>
+            <span className="dot"></span>Thời khóa biểu
           </NavLink>
-
           <NavLink to="/admin/faculties" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <GraduationCap size={16} className="sb-icon" />
-            <span>Quản lý Khoa</span>
+            <GraduationCap size={16} />
+            <span className="dot"></span>Quản lý Khoa
           </NavLink>
-
           <NavLink to="/admin/departments" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <BookOpen size={16} className="sb-icon" />
-            <span>Quản lý Ngành</span>
+            <BookOpen size={16}/>
+            <span className="dot"></span>Quản lý Ngành
           </NavLink>
-
           <NavLink to="/admin/administrative-classes" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <Users size={16} className="sb-icon" />
-            <span>Lớp hành chính</span>
+            <Users size={16} />
+            <span className="dot"></span>Lớp hành chính
           </NavLink>
-
           <NavLink to="/admin/students" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <UserCog size={16} className="sb-icon" />
-            <span>Sinh viên</span>
+            <UserCog size={16} />
+            <span className="dot"></span>Sinh viên
           </NavLink>
-
           <NavLink to="/admin/lecturers" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <UserCog size={16} className="sb-icon" />
-            <span>Giảng viên</span>
+            <UserCog size={16} />
+            <span className="dot"></span>Giảng viên
           </NavLink>
-
           <NavLink to="/admin/rooms" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <DoorOpen size={16} className="sb-icon" />
-            <span>Phòng học</span>
+            <DoorOpen size={16} />
+            <span className="dot"></span>Phòng học
           </NavLink>
-
           <NavLink to="/admin/subjects" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <Library size={16} className="sb-icon" />
-            <span>Môn học</span>
+            <Library size={16} />
+            <span className="dot"></span>Môn học
           </NavLink>
-
           <NavLink to="/admin/semesters" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <Bookmark size={16} className="sb-icon" />
-            <span>Học kỳ</span>
+            <BookMark size={16} />
+            <span className="dot"></span>Học kỳ
           </NavLink>
 
           <div className="sb-sec">Báo cáo</div>
-
           <NavLink to="/admin/report" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <ChartColumn size={16} className="sb-icon" />
-            <span>Báo cáo toàn trường</span>
+            <ChartColumn size={16} />
+            <span className="dot"></span>Báo cáo toàn trường
           </NavLink>
         </div>
       )}
       <div className="sb-foot">
         <button className="sb-out" onClick={handleLogout}>
-          <LogOut size={16} className="sb-icon" />
-          <span>Đăng xuất</span>
+          <Logout size={16} />
+          <span className="dot"></span>Đăng xuất
         </button>
       </div>
     </aside>

@@ -1,9 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import logo from "../assets/img/student-attendance-logo.png";
-import { LayoutDashboard, GraduationCap, CalendarDays ,SquareCheckBig,
-          BookOpen, Users, UserCog, DoorOpen, Library, Bookmark,
-          ChartColumn, LogOut} from "lucide-react";
+import { Grid, CheckSquare, Calendar, Layers, BookOpen, Users, User, MapPin, FileText, BarChart, LogOut } from 'lucide-react';
 
 export default function Sidebar({ role }) {
   const isAdmin = role === 'admin';
@@ -70,16 +68,20 @@ export default function Sidebar({ role }) {
         <div id="nav-gv">
           <div className="sb-sec">Quản lý giảng dạy</div>
           <NavLink to="/" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`} end>
-            <span className="dot"></span>Tổng quan
+            <div className="sb-it-left"><Grid className="sb-icon" /> <span>Tổng quan</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
           <NavLink to="/tkb" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <span className="dot"></span>Thời khóa biểu
+            <div className="sb-it-left"><Calendar className="sb-icon" /> <span>Thời khóa biểu</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
           <NavLink to="/sessions" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <span className="dot"></span>Sổ điểm danh
+            <div className="sb-it-left"><FileText className="sb-icon" /> <span>Sổ điểm danh</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
           <NavLink to="/requests" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <span className="dot"></span>Yêu cầu của tôi
+            <div className="sb-it-left"><CheckSquare className="sb-icon" /> <span>Yêu cầu của tôi</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
 
           <div className="sb-sec">Báo cáo</div>
@@ -93,77 +95,63 @@ export default function Sidebar({ role }) {
       ) : (
         <div id="nav-admin">
           <div className="sb-sec">Tổng quan</div>
-
           <NavLink to="/admin" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`} end>
-            <LayoutDashboard size={16} className="sb-icon" />
-            <span>Dashboard Admin</span>
+            <div className="sb-it-left"><Grid className="sb-icon" /> <span>Dashboard Admin</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/requests" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <SquareCheckBig size={16} className="sb-icon" />
-            <span>Phê duyệt giảng dạy</span>
+            <div className="sb-it-left"><CheckSquare className="sb-icon" /> <span>Phê duyệt giảng dạy</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
 
           <div className="sb-sec">Quản lý danh mục</div>
-
           <NavLink to="/admin/tkb" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <CalendarDays size={16} className="sb-icon" />
-            <span>Thời khóa biểu</span>
+            <div className="sb-it-left"><Calendar className="sb-icon" /> <span>Thời khóa biểu</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/faculties" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <GraduationCap size={16} className="sb-icon" />
-            <span>Quản lý Khoa</span>
+            <div className="sb-it-left"><Layers className="sb-icon" /> <span>Quản lý Khoa</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/departments" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <BookOpen size={16} className="sb-icon" />
-            <span>Quản lý Ngành</span>
+            <div className="sb-it-left"><BookOpen className="sb-icon" /> <span>Quản lý Ngành</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/administrative-classes" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <Users size={16} className="sb-icon" />
-            <span>Lớp hành chính</span>
+            <div className="sb-it-left"><Users className="sb-icon" /> <span>Lớp hành chính</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/students" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <UserCog size={16} className="sb-icon" />
-            <span>Sinh viên</span>
+            <div className="sb-it-left"><User className="sb-icon" /> <span>Sinh viên</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/lecturers" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <UserCog size={16} className="sb-icon" />
-            <span>Giảng viên</span>
+            <div className="sb-it-left"><User className="sb-icon" /> <span>Giảng viên</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/rooms" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <DoorOpen size={16} className="sb-icon" />
-            <span>Phòng học</span>
+            <div className="sb-it-left"><MapPin className="sb-icon" /> <span>Phòng học</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/subjects" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <Library size={16} className="sb-icon" />
-            <span>Môn học</span>
+            <div className="sb-it-left"><BookOpen className="sb-icon" /> <span>Môn học</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
-
           <NavLink to="/admin/semesters" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <Bookmark size={16} className="sb-icon" />
-            <span>Học kỳ</span>
+            <div className="sb-it-left"><FileText className="sb-icon" /> <span>Học kỳ</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
 
           <div className="sb-sec">Báo cáo</div>
-
           <NavLink to="/admin/report" className={({ isActive }) => `sb-it ${isActive ? 'on' : ''}`}>
-            <ChartColumn size={16} className="sb-icon" />
-            <span>Báo cáo toàn trường</span>
+            <div className="sb-it-left"><BarChart className="sb-icon" /> <span>Báo cáo toàn trường</span></div>
+            <span className="sb-arrow">›</span>
           </NavLink>
         </div>
       )}
+
       <div className="sb-foot">
-        <button className="sb-out" onClick={handleLogout}>
-          <LogOut size={16} className="sb-icon" />
-          <span>Đăng xuất</span>
-        </button>
+        <button className="sb-out" onClick={handleLogout}>⎋ &nbsp;Đăng xuất</button>
       </div>
     </aside>
   );

@@ -1,0 +1,107 @@
+/* AdminDashboard.css */
+
+.adm-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.adm-hero-copy { display:flex; flex-direction:column; }
+.adm-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--tx);
+}
+.adm-subtitle { font-size: 13px; color: var(--tx3); margin-top:4px; }
+.adm-hero-actions { display:flex; align-items:center; }
+.sem-btn { border-radius: 999px; padding: 8px 12px; }
+
+.admin-stats { margin-bottom: 20px; }
+.admin-stats .sc { padding: 18px 16px; border-left-width:8px; }
+.sc-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.sc-rate { font-size:12px; font-weight:700; padding:4px 8px; border-radius:12px; background: rgba(34,197,94,0.08); color: #16a34a; }
+.sc-rate.negative { background: rgba(220,38,38,0.07); color: var(--rd); }
+
+.adm-grid { display:grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 18px; }
+.chart-card { min-height: 220px; }
+.card-h-spaced { padding: 14px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--bd); }
+
+.chart-bars { display:flex; gap:12px; padding: 18px; align-items:end; height:140px; }
+.chart-bar { display:flex; flex-direction:column; align-items:center; gap:8px; width:46px; }
+.chart-bar-fill { width:100%; background: linear-gradient(180deg,#fecaca, #fca5a5); border-radius:8px 8px 0 0; box-shadow: 0 6px 12px rgba(249,115,22,0.08); transition:height .3s ease; }
+.chart-bar span { font-size:12px; color:var(--tx3); }
+
+.line-chart { position:relative; height:160px; padding:12px 18px; }
+.line-svg { width:100%; height:120px; display:block; }
+.line-grid { position:absolute; inset:42px 18px 36px 18px; background-image: linear-gradient(transparent 1px, rgba(0,0,0,0) 1px), linear-gradient(90deg, transparent 1px, rgba(0,0,0,0) 1px); background-size:100% 24px, 40px 100%; opacity:0.06; }
+
+.trend-footer { display:flex; align-items:center; gap:12px; padding: 12px 18px 18px; }
+.progress-bar { background:var(--bd); height:8px; border-radius:999px; flex:1; overflow:hidden; }
+.progress-fill { background:linear-gradient(90deg,#7c3aed,#06b6d4); height:100%; }
+
+.activity-card .tl-list { padding:12px 18px; }
+.tl-item { display:flex; gap:12px; padding:12px 0; align-items:flex-start; border-bottom:1px solid var(--bd); }
+.tl-item:last-child { border-bottom:none; }
+.tl-dot { width:34px; height:34px; border-radius:50%; display:inline-block; flex-shrink:0; box-shadow:0 6px 12px rgba(15,23,42,0.04); }
+.tl-dot-success { background: #ECFDF5; border: 1px solid rgba(34,197,94,0.15); }
+.tl-dot-warning { background: #FFFBEB; border: 1px solid rgba(245,158,11,0.15); }
+.tl-title { font-size:14px; font-weight:600; color:var(--tx); }
+.tl-desc { font-size:12px; color:var(--tx3); margin-top:4px; }
+
+.card { border-radius: var(--r2); }
+.card.card-h-spaced { padding:0; }
+
+/* keep some older helpers */
+.small-text { font-size: 11px; }
+.room-text { font-family: var(--mo); font-size: 11px; }
+
+/* Icon styling inside stat cards */
+.sc-head .sc-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 6px 14px rgba(15,23,42,0.06);
+}
+
+.sc-vl { margin-top: 4px; }
+
+/* Timeline dot sizing */
+.tl-dot { width: 38px; height: 38px; }
+
+/* Responsive layout adjustments */
+@media (max-width: 1100px) {
+  .sg { grid-template-columns: repeat(2,1fr); gap:10px; }
+  .adm-grid { grid-template-columns: 1fr; }
+  .chart-bars { height:120px; }
+}
+
+@media (max-width: 720px) {
+  .sb { width: 72px; }
+  .sb-logo-tx { display:none; }
+  .sb-un, .sb-ur, .sb-sec { display:none; }
+  .main { padding-left: 0; }
+
+  .sg { grid-template-columns: repeat(2,1fr); gap:8px; }
+  .sc { padding: 12px; }
+  .sc-vl { font-size: 20px; }
+  .adm-hero { flex-direction:column; align-items:flex-start; gap:8px; }
+  .adm-hero-actions { align-self:stretch; }
+
+  .chart-bars { gap:8px; padding:12px; }
+  .chart-bar { width:34px; }
+  .line-svg { height:90px; }
+  .trend-footer { flex-direction:column; align-items:flex-start; gap:8px; }
+}
+
+@media (max-width: 420px) {
+  .sg { grid-template-columns: 1fr; }
+  .sc-head .sc-ic { width:38px; height:38px; font-size:18px; }
+  .card { margin-bottom: 12px; }
+  .tl-item { padding:10px 0; }
+}

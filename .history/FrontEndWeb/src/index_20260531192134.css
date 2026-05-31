@@ -13,7 +13,7 @@
 
   /* Main palette */
   --primary:      #1591DC; /* xanh chủ đạo cho nút, title, active */
-  --primary-dark: #0842a0; /* xanh đậm cho hover, nhấn mạnh */
+  --primary-dark: #2C5EAD; /* xanh đậm cho hover, nhấn mạnh */
   --primary-mid:  #4BB8FA; /* xanh sáng cho icon, highlight */
   --primary-soft: #C4E2F5; /* nền xanh nhạt */
   --primary-tint: #EEF8FF; /* nền hover rất nhẹ */
@@ -243,9 +243,9 @@ body {
   padding: 7px;
   background: var(--primary-tint);
   border: 1px solid var(--bd);
-  color: var(--primary-dark);
+  color: var(--tx);
   font-family: var(--fn);
-  font-size: 16px;
+  font-size: 11px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -320,13 +320,13 @@ body {
   box-shadow: 0 8px 20px rgba(21, 145, 220, 0.22);
 }
 
-.btn-s,.btn-bell {
+.btn-s {
   background: #FFFFFF;
   color: var(--tx2);
   border: 1px solid var(--bd2);
 }
 
-.btn-s,.btn-bell:hover {
+.btn-s:hover {
   color: var(--primary);
   border-color: var(--primary);
   background: var(--primary-tint);

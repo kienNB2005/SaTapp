@@ -13,7 +13,7 @@
 
   /* Main palette */
   --primary:      #1591DC; /* xanh chủ đạo cho nút, title, active */
-  --primary-dark: #0842a0; /* xanh đậm cho hover, nhấn mạnh */
+  --primary-dark: #2C5EAD; /* xanh đậm cho hover, nhấn mạnh */
   --primary-mid:  #4BB8FA; /* xanh sáng cho icon, highlight */
   --primary-soft: #C4E2F5; /* nền xanh nhạt */
   --primary-tint: #EEF8FF; /* nền hover rất nhẹ */
@@ -30,10 +30,8 @@
 
   /* Text */
   --tx:   #1F2937;
-  --tx2:  #ffffff;
+  --tx2:  #4B5563;
   --tx3:  #6B7280;
-  --color-blue-200: oklch(88.2% 0.059 254.128);
-  --color-blue-300: oklch(80.9% 0.105 251.813);
 
   /* Alias cũ để không phải sửa JSX/HTML */
   --gr:   var(--primary);
@@ -83,9 +81,9 @@ body {
 
 /* ── SIDEBAR ── */
 .sb {
-  width: 220px;
-  background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 40%, #2563eb 100%);
-  border-right: 1px solid var(--bd);
+  width: 260px;
+  background: linear-gradient(180deg,#1e40af 0%, #0ea5e9 100%);
+  border-right: none;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -122,12 +120,12 @@ body {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--tx2);
+  color: #fff;
 }
 
 .sb-logo-su {
   font-size: 10px;
-  color: var(--color-blue-200);
+  color: rgba(255,255,255,0.85);
   margin-top: 1px;
 }
 
@@ -143,8 +141,8 @@ body {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
+  background: linear-gradient(135deg,#fb923c,#f97316);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,12 +154,12 @@ body {
 .sb-un {
   font-size: 12px;
   font-weight: 600;
-  color: var(--tx2);
+  color: var(--tx);
 }
 
 .sb-ur {
   font-size: 10px;
-  color: var(--color-blue-200);
+  color: var(--tx3);
 }
 
 .sb-toggle {
@@ -194,44 +192,39 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-blue-300);                                                    
+  color: rgba(255,255,255,0.85);
   padding: 14px 14px 5px;
 }
 
 .sb-it {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 14px;
-  margin: 2px 7px;
-  border-radius: 8px;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 6px 10px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.15s;
-  color: var(--tx2);
+  color: rgba(255,255,255,0.92);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
 }
 
 .sb-it:hover {
-  background: var(--primary-tint);
-  color: var(--primary-dark);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
 }
 
 .sb-it.on {
-  background: var(--primary-tint);
+  background: #ffffff;
   color: var(--primary-dark);
-  border: 1px solid var(--primary-dark);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-.sb-it .dot {
-  display: none;
-}
+.sb-it .dot { display:none; }
 
-.sb-it.on .dot {
-  background: #FFFFFF;
-}
+.sb-it.on .dot { background: var(--primary-dark); }
 .sb-foot {
   margin-top: auto;
   padding: 10px 14px;
@@ -240,20 +233,20 @@ body {
 
 .sb-out {
   width: 100%;
-  padding: 7px;
-  background: var(--primary-tint);
-  border: 1px solid var(--bd);
-  color: var(--primary-dark);
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #fff;
   font-family: var(--fn);
-  font-size: 16px;
-  border-radius: 8px;
+  font-size: 13px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
 }
 
 .sb-out:hover {
-  background: var(--primary);
-  color: #FFFFFF;
+  background: #fff;
+  color: var(--primary-dark);
 }
 /* ── MAIN LAYOUT ── */
 .main {
@@ -320,13 +313,13 @@ body {
   box-shadow: 0 8px 20px rgba(21, 145, 220, 0.22);
 }
 
-.btn-s,.btn-bell {
+.btn-s {
   background: #FFFFFF;
   color: var(--tx2);
   border: 1px solid var(--bd2);
 }
 
-.btn-s,.btn-bell:hover {
+.btn-s:hover {
   color: var(--primary);
   border-color: var(--primary);
   background: var(--primary-tint);

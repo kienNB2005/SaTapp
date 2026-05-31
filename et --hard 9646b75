@@ -1,0 +1,10 @@
+[33m9646b75[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m update màu, thay ảnh logo
+[33m5d1e6b8[m update chức năng dạy bù
+[33m999fa5c[m Sửa lỗi tên username, sửa báo lỗi đỏ các file do k dùng đến biến đã tạo hoặc import
+[33m574ec4b[m clean code, tách file CSS sửa màu giao diện
+[33mfca8064[m sửa file khởi tạo database
+[33m186f664[m  update chức năng thời khóa biểu cho giảng viên
+[33m83543a6[m  update báo cáo
+[33m16e1f85[m fix loi
+[33mda5ac9a[m bat loi exception
+[33mcc1b6a3[m backend-frontend-web

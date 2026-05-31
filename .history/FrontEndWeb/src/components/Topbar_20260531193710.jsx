@@ -34,20 +34,20 @@ function getPageInfo(pathname) {
 
 export default function Topbar() {
   const location = useLocation();
-  const { section, title, sub } = getPageInfo(location.pathname);
-  const displayTitle = section || 'Dashboard';
-  const displaySub = title ? `${title} · ${sub}` : sub || '';
+  const { section: title, title: sub, sub } = getPageInfo(location.pathname);
+  const displayTitle = title || 'Dashboard';
+  const displaySub = sub || '';
 
   return (
     <div className="topbar">
       <div>
-        <div className="tb-title" id="pgTitle">{displayTitle}</div>
-        <div className="tb-sub" id="pgSub">{displaySub}</div>
+        <div className="tb-title" id="pgTitle">{title}</div>
+        <div className="tb-sub" id="pgSub">{sub}</div>
       </div>
       <div className="tb-acts">
         <div className="srch">
           <span className="srch-ic">🔍</span>
-          <input placeholder="Tìm kiếm..." aria-label="Tìm kiếm" />
+          <input placeholder="Tìm kiếm..." />
         </div>
         <button className="btn btn-bell" style={{ padding: '7px 10px' }}>
           <Bell size={16} className="sb-icon" />

@@ -243,9 +243,9 @@ body {
   padding: 7px;
   background: var(--primary-tint);
   border: 1px solid var(--bd);
-  color: var(--primary-dark);
+  color: var(--tx2);
   font-family: var(--fn);
-  font-size: 16px;
+  font-size: 14px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
