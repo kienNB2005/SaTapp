@@ -57,8 +57,28 @@ public class SemesterService {
             throw new AppException(ErrorCode.INVALID_DATE_RANGE);
         }
 
+        // Validate không được tạo học kỳ ở quá khứ
+        if (request.getStartDate().isBefore(java.time.LocalDate.now())) {
+            throw new AppException(ErrorCode.INVALID_START_DATE_PAST);
+        }
+
+        // Validate chống trùng tên
+        if (semesterRepository.existsByName(request.getName())) {
+            throw new AppException(ErrorCode.SEMESTER_EXISTED);
+        }
+
+        // Validate chống chồng chéo thời gian
+        if (semesterRepository.existsByDateRangeOverlap(request.getStartDate(), request.getEndDate())) {
+            throw new AppException(ErrorCode.SEMESTER_OVERLAP);
+        }
+
         // Dùng Mapper để convert Request → Entity
         Semester semester = semesterMapper.toSemester(request);
+        
+        // Cập nhật startWeek
+        if (request.getStartWeek() != null) {
+            semester.setStartWeek(request.getStartWeek());
+        }
         
         // Mặc định isActive = false khi create mới
         semester.setIsActive(false);
@@ -74,7 +94,14 @@ public class SemesterService {
                 .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_EXISTED));
 
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            if (semesterRepository.existsByNameAndIdNot(request.getName(), id)) {
+                throw new AppException(ErrorCode.SEMESTER_EXISTED);
+            }
             semester.setName(request.getName());
+        }
+
+        if (request.getStartWeek() != null) {
+            semester.setStartWeek(request.getStartWeek());
         }
 
         if (request.getIsActive() != null) {

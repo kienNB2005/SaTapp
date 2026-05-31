@@ -79,6 +79,9 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
     @EntityGraph(attributePaths = {"schedule", "schedule.subject", "schedule.adminClass", "actualRoom", "makeupFor"})
     List<ClassSession> findByActualLecturer_IdAndSessionDateBetween(Long lecturerId, java.time.LocalDate startDate, java.time.LocalDate endDate);
 
+    @EntityGraph(attributePaths = {"schedule", "schedule.subject", "schedule.adminClass", "actualRoom", "actualLecturer", "actualLecturer.user"})
+    List<ClassSession> findBySessionDate(java.time.LocalDate sessionDate);
+
     List<ClassSession> findBySchedule_IdAndSessionDateBetween(Long scheduleId, java.time.LocalDate startDate, java.time.LocalDate endDate);
 
     @Query("""

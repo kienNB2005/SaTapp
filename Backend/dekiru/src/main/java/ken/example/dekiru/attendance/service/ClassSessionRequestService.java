@@ -98,6 +98,9 @@ public class ClassSessionRequestService {
         if (makeupDate.isBefore(originalDate)) {
             throw new AppException(ErrorCode.MAKEUP_DATE_BEFORE_ORIGINAL);
         }
+        if (!makeupDate.isAfter(java.time.LocalDate.now())) {
+            throw new AppException(ErrorCode.MAKEUP_DATE_MUST_BE_FUTURE);
+        }
         if (!makeupDate.isBefore(semesterEndDate)) {
             throw new AppException(ErrorCode.MAKEUP_DATE_AFTER_SEMESTER);
         }

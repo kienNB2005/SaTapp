@@ -11,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class UpdateSemesterRequest {
     String name;
     Boolean isActive;
+    Byte startWeek;
 }
 

@@ -224,7 +224,7 @@ public class RoomService {
         if (Boolean.TRUE.equals(request.getClearGps())) {
             room.setLatitude(null);
             room.setLongitude(null);
-            room.setGpsRadiusM(null);
+            room.setGpsRadiusM((short) 50); // Bắt buộc phải có giá trị (không được null theo DB)
         }
 
         return roomMapper.toRoomResponse(roomRepository.save(room));

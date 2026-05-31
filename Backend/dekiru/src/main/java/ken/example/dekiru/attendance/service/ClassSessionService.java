@@ -148,10 +148,10 @@ public class ClassSessionService {
             throw new AppException(ErrorCode.CLASS_SESSION_ALREADY_OPEN);
         }
 
-//        // Nếu session chưa mở, kiểm tra thời gian có hợp lệ không
-//        if (session.getStatus() != ClassSession.Status.open) {
-//            validateSessionOpenTime(session);
-//        }
+        // Nếu session chưa mở, kiểm tra thời gian có hợp lệ không
+        if (session.getStatus() != ClassSession.Status.open) {
+            validateSessionOpenTime(session);
+        }
 
         if (session.getStatus() != ClassSession.Status.scheduled) {
             throw new AppException(ErrorCode.INVALID_SESSION_STATUS);
@@ -445,7 +445,8 @@ public class ClassSessionService {
         ken.example.dekiru.academic.entity.Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
 
-        java.time.LocalDate startDate = semester.getStartDate().plusWeeks(week - 1);
+        int relativeWeek = week - (semester.getStartWeek() != null ? semester.getStartWeek() : 1);
+        java.time.LocalDate startDate = semester.getStartDate().plusWeeks(relativeWeek);
         java.time.LocalDate endDate = startDate.plusDays(6);
 
         List<ClassSession> sessions = classSessionRepository
@@ -539,6 +540,9 @@ public class ClassSessionService {
 
         if (makeupDate.isBefore(originalDate)) {
             throw new AppException(ErrorCode.MAKEUP_DATE_BEFORE_ORIGINAL);
+        }
+        if (!makeupDate.isAfter(java.time.LocalDate.now())) {
+            throw new AppException(ErrorCode.MAKEUP_DATE_MUST_BE_FUTURE);
         }
 
         if (!makeupDate.isBefore(semesterEndDate)) {

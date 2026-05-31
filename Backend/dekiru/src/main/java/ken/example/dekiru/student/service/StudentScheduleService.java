@@ -44,7 +44,8 @@ public class StudentScheduleService {
             weekNumber = (int) ChronoUnit.WEEKS.between(anchorMonday, LocalDate.now()) + 1;
         }
 
-        LocalDate weekStart = anchorMonday.plusWeeks(weekNumber - 1);
+        int relativeWeek = weekNumber - (semester.getStartWeek() != null ? semester.getStartWeek() : 1);
+        LocalDate weekStart = anchorMonday.plusWeeks(relativeWeek);
         LocalDate weekEnd = weekStart.plusDays(6);
 
         return studentScheduleRepository

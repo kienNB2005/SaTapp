@@ -20,6 +20,7 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
     List<Student> findAllByStudentCodeIn(List<String> studentCodes);
     // THÊM DÒNG NÀY: Lấy danh sách Sinh viên theo mã Lớp hành chính
     List<Student> findAllByAdminClass_Code(String adminClassCode);
+    List<Student> findAllByAdminClass_Id(Long adminClassId);
 
     @NonNull // Khẳng định kết quả trả về không bao giờ null
     @EntityGraph(attributePaths = {

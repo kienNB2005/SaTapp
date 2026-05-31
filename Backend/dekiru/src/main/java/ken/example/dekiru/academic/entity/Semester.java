@@ -32,6 +32,10 @@ public class Semester {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column(name = "start_week", nullable = false)
+    @Builder.Default
+    private Byte startWeek = 1;
+
     /**
      * Chỉ 1 học kỳ được active tại 1 thời điểm.
      * Không có DB constraint — enforce ở Service khi kích hoạt.

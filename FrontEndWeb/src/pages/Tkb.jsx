@@ -14,6 +14,7 @@ export default function Tkb() {
   const [hoveredId, setHoveredId] = useState(null);
   const [semesterStartDate, setSemesterStartDate] = useState(null);
   const [activeSemesterId, setActiveSemesterId] = useState(null);
+  const [activeSemesterStartWeek, setActiveSemesterStartWeek] = useState(1);
 
   const allDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   
@@ -57,6 +58,7 @@ export default function Tkb() {
         if (activeSem && activeSem.startDate) {
           setActiveSemesterId(activeSem.id);
           setSemesterStartDate(activeSem.startDate);
+          setActiveSemesterStartWeek(activeSem.startWeek || 1);
           const start = new Date(activeSem.startDate);
           // Set to start of the day to avoid timezone hours messing up diff
           start.setHours(0,0,0,0);
@@ -65,7 +67,7 @@ export default function Tkb() {
           
           const diffTime = now - start;
           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          calcCurrentWeek = Math.max(1, Math.floor(diffDays / 7) + 1);
+          calcCurrentWeek = Math.max(activeSem.startWeek || 1, Math.floor(diffDays / 7) + (activeSem.startWeek || 1));
         }
         
         setCurrentWeek(calcCurrentWeek);
@@ -189,7 +191,9 @@ export default function Tkb() {
 
   // Generate week options
   const weekOptions = [];
-  for (let i = 1; i <= maxWeek; i++) {
+  const sWeek = activeSemesterStartWeek || 1;
+  const mWeek = maxWeek >= sWeek ? maxWeek : sWeek;
+  for (let i = sWeek; i <= mWeek; i++) {
     weekOptions.push(
       <option key={i} value={i}>
         {i === currentWeek ? `Tuần hiện tại ( ${i} )` : `Tuần ${i}`}
@@ -302,7 +306,7 @@ export default function Tkb() {
                                       <>
                                         {semesterStartDate && (
                                           <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Ngày học: <strong style={{color: 'var(--tx)'}}>{
-                                            formatDate(new Date(new Date(semesterStartDate).setHours(0,0,0,0) + ((selectedWeek - 1) * 7 + (cls.dayOfWeek === 8 ? 6 : cls.dayOfWeek - 2)) * 24 * 60 * 60 * 1000))
+                                            formatDate(new Date(new Date(semesterStartDate).setHours(0,0,0,0) + ((selectedWeek - (activeSemesterStartWeek || 1)) * 7 + (cls.dayOfWeek === 8 ? 6 : cls.dayOfWeek - 2)) * 24 * 60 * 60 * 1000))
                                           }</strong></div>
                                         )}
                                         <div style={{ fontSize: '12px', color: 'var(--tx2)' }}>Tiết học: <strong style={{color: 'var(--tx)'}}>{cls.periodStart} – {cls.periodEnd}</strong></div>

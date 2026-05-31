@@ -13,6 +13,16 @@ import java.util.Optional;
 @Repository
 public interface SemesterRepository extends JpaRepository<Semester, Long> {
     boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Long id);
+
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Semester s " +
+           "WHERE s.startDate <= :endDate AND s.endDate >= :startDate")
+    boolean existsByDateRangeOverlap(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Semester s " +
+           "WHERE s.startDate <= :endDate AND s.endDate >= :startDate AND s.id <> :excludeId")
+    boolean existsByDateRangeOverlapExcludeId(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("excludeId") Long excludeId);
+
     Optional<Semester> findByName(String name);
     Optional<Semester> findByIsActiveTrue();
     @Query("""

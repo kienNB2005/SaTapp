@@ -22,11 +22,13 @@ const DEFAULT_CREATE_DATA = {
   name: '',
   startDate: null,
   endDate: null,
+  startWeek: 1,
 };
 
 const DEFAULT_EDIT_DATA = {
   name: '',
   isActive: false,
+  startWeek: 1,
 };
 
 export default function AdminSemesters() {
@@ -97,8 +99,8 @@ export default function AdminSemesters() {
   };
 
   const handleCreate = async () => {
-    if (!createData.name.trim() || !createData.startDate || !createData.endDate) {
-      alert('Vui lòng nhập đầy đủ Tên, Ngày bắt đầu và Ngày kết thúc!');
+    if (!createData.name.trim() || !createData.startDate || !createData.endDate || !createData.startWeek) {
+      alert('Vui lòng nhập đầy đủ Tên, Ngày bắt đầu, Ngày kết thúc và Tuần bắt đầu!');
       return;
     }
 
@@ -111,6 +113,7 @@ export default function AdminSemesters() {
       name: createData.name,
       startDate: formatDateForAPI(createData.startDate),
       endDate: formatDateForAPI(createData.endDate),
+      startWeek: parseInt(createData.startWeek, 10),
     };
 
     setIsSaving(true);
@@ -133,12 +136,13 @@ export default function AdminSemesters() {
     setEditData({
       name: semester.name,
       isActive: semester.isActive || false,
+      startWeek: semester.startWeek || 1,
     });
   };
 
   const handleSaveEdit = async () => {
-    if (!editData.name.trim()) {
-      alert('Tên học kỳ không được để trống!');
+    if (!editData.name.trim() || !editData.startWeek) {
+      alert('Tên học kỳ và Tuần bắt đầu không được để trống!');
       return;
     }
 
@@ -303,6 +307,7 @@ export default function AdminSemesters() {
               <th>Tên Học Kỳ</th>
               <th className="asm-col-date">Ngày bắt đầu</th>
               <th className="asm-col-date">Ngày kết thúc</th>
+              <th className="asm-col-date">Tuần bắt đầu</th>
               <th className="asm-col-status">Trạng thái</th>
               <th className="asm-col-date">Ngày tạo</th>
               <th className="asm-col-actions">Thao tác</th>
@@ -322,6 +327,10 @@ export default function AdminSemesters() {
 
                 <td className="asm-date-cell">
                   <DateCell value={formatDateStr(semester.endDate)} />
+                </td>
+
+                <td className="asm-name-cell" style={{ textAlign: 'center' }}>
+                  Tuần {semester.startWeek || 1}
                 </td>
 
                 <td>
@@ -465,6 +474,21 @@ function SemesterModal({
             </div>
 
             <div className="asm-form-group">
+              <label>Tuần bắt đầu</label>
+              <input
+                type="number"
+                min="1"
+                max="52"
+                value={createData.startWeek}
+                onChange={(e) =>
+                  setCreateData({ ...createData, startWeek: e.target.value })
+                }
+                placeholder="Ví dụ: 1 hoặc 25"
+                className="asm-input asm-input-primary"
+              />
+            </div>
+
+            <div className="asm-form-group">
               <label>Ngày bắt đầu</label>
               <div className="dp-wrapper">
                 <DatePicker
@@ -514,6 +538,21 @@ function SemesterModal({
                 placeholder="Tên học kỳ..."
                 className="asm-input asm-input-primary"
                 autoFocus
+              />
+            </div>
+
+            <div className="asm-form-group">
+              <label>Tuần bắt đầu</label>
+              <input
+                type="number"
+                min="1"
+                max="52"
+                value={editData.startWeek}
+                onChange={(e) =>
+                  setEditData({ ...editData, startWeek: e.target.value })
+                }
+                placeholder="Ví dụ: 1 hoặc 25"
+                className="asm-input asm-input-primary"
               />
             </div>
 

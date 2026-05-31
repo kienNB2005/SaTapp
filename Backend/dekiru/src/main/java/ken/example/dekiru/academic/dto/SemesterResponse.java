@@ -16,6 +16,7 @@ public class SemesterResponse {
     LocalDate startDate;
     LocalDate endDate;
     Boolean isActive;
+    Byte startWeek;
     LocalDateTime createdAt;
 }
 

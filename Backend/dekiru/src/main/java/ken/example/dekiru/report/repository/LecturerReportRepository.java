@@ -39,14 +39,13 @@ public interface LecturerReportRepository extends JpaRepository<Student, Long> {
 
     @Query(value = """
         SELECT 
-            COUNT(cs.id) AS totalSessions,
+            SUM(CASE WHEN cs.makeup_for_id IS NULL THEN 1 ELSE 0 END) AS totalSessions,
             SUM(CASE WHEN cs.status = 'closed' THEN 1 ELSE 0 END) AS finishedSessions
         FROM class_session cs
         JOIN schedule sc ON cs.schedule_id = sc.id
         WHERE sc.semester_id = :semesterId
           AND sc.subject_id = :subjectId
           AND sc.admin_class_id = :adminClassId
-          AND cs.status != 'cancelled'
         """, nativeQuery = true)
     List<Object[]> getSessionStats(
             @Param("semesterId") Long semesterId,

@@ -83,11 +83,15 @@ public enum ErrorCode {
     STUDENT_EXISTED (1136, "Sinh viên đã tồn tại", HttpStatus.BAD_REQUEST),
     MAKEUP_DATE_BEFORE_ORIGINAL(1235, "Ngày dạy bù phải diễn ra từ ngày có buổi học gốc trở đi", HttpStatus.BAD_REQUEST),
     MAKEUP_DATE_AFTER_SEMESTER(1236, "Ngày dạy bù phải diễn ra trước ngày kết thúc học kỳ", HttpStatus.BAD_REQUEST),
+    MAKEUP_DATE_MUST_BE_FUTURE(1241, "Ngày dạy bù phải diễn ra từ ngày mai trở đi", HttpStatus.BAD_REQUEST),
     DUPLICATE_SESSION_DATE(1237, "Môn học này đã có buổi học diễn ra vào cùng ngày và tiết học được chọn", HttpStatus.CONFLICT),
     CANCEL_TOO_LATE(1238, "Chỉ được gửi yêu cầu hủy buổi học trước giờ học tối thiểu 15 phút", HttpStatus.BAD_REQUEST),
     SESSION_REQUEST_NOT_FOUND(1239, "Không tìm thấy yêu cầu phê duyệt", HttpStatus.NOT_FOUND),
     INVALID_REQUEST_STATUS(1240, "Trạng thái yêu cầu không hợp lệ để xử lý", HttpStatus.BAD_REQUEST),
-    SEMESTER_NOT_FOUND (1137, "Không tìm thấy học kỳ", HttpStatus.NOT_FOUND);
+    SEMESTER_NOT_FOUND (1137, "Không tìm thấy học kỳ", HttpStatus.NOT_FOUND),
+    SEMESTER_EXISTED (1138, "Tên học kỳ đã tồn tại", HttpStatus.CONFLICT),
+    SEMESTER_OVERLAP (1139, "Khoảng thời gian của học kỳ bị trùng lặp với học kỳ khác", HttpStatus.CONFLICT),
+    INVALID_START_DATE_PAST (1140, "Ngày bắt đầu học kỳ không được nằm trong quá khứ", HttpStatus.BAD_REQUEST);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus; // Thêm trường này

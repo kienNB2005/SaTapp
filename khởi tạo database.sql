@@ -5,6 +5,19 @@
 -- ============================================================
 create database HTDiemDanhSinhVien;
 use HTDiemDanhSinhVien;
+-- INSERT INTO attendance (class_session_id, student_id, status, is_late, left_early, created_at, scanned_at)
+-- SELECT cs.id, s.id, 'present', false, false, NOW(), NOW()
+-- FROM class_session cs
+-- JOIN schedule sc ON cs.schedule_id = sc.id
+-- JOIN student s ON s.admin_class_id = sc.admin_class_id
+-- WHERE cs.status = 'scheduled' AND cs.session_date < CURDATE()
+--   AND NOT EXISTS (
+--       SELECT 1 FROM attendance a2 WHERE a2.class_session_id = cs.id AND a2.student_id = s.id
+--   );
+--   
+-- UPDATE class_session
+-- SET status = 'closed', closed_at = NOW()
+-- WHERE status = 'scheduled' AND session_date < CURDATE();
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -230,6 +243,7 @@ CREATE TABLE semester (
     start_date  DATE            NOT NULL
                 COMMENT 'Ngày đầu tuần 1 (thứ Hai). Stored procedure dùng để tính ngày thực tế ClassSession',
     end_date    DATE            NOT NULL COMMENT 'Ngày cuối học kỳ',
+    start_week  TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Tuần bắt đầu của học kỳ so với năm học',
     is_active   Boolean     NOT NULL DEFAULT false
                 COMMENT 'Học kỳ đang diễn ra. Chỉ một học kỳ active = 1 tại một thời điểm',
     created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -544,6 +558,7 @@ DELIMITER $$
 CREATE PROCEDURE generate_sessions_for_schedule(IN p_schedule_id INT UNSIGNED)
 BEGIN
     DECLARE v_semester_start    DATE;
+    DECLARE v_semester_start_week TINYINT;
     DECLARE v_day_of_week       TINYINT;
     DECLARE v_week_start        TINYINT;
     DECLARE v_week_end          TINYINT;
@@ -561,6 +576,7 @@ BEGIN
     -- Lấy thông tin Schedule + Semester
     SELECT
         sem.start_date,
+        sem.start_week,
         sch.day_of_week,
         sch.week_start,
         sch.week_end,
@@ -570,6 +586,7 @@ BEGIN
         sch.period_end
     INTO
         v_semester_start,
+        v_semester_start_week,
         v_day_of_week,
         v_week_start,
         v_week_end,
@@ -596,10 +613,10 @@ SET v_anchor_monday = DATE_SUB(v_semester_start, INTERVAL WEEKDAY(v_semester_sta
     END;
 
     -- Tìm ra ngày đầu tiên của cái tuần mà môn học này bắt đầu.
-    -- lấy thời gian khai giảng làm mốc rồi cộng với công thức (tuần bắt đầu học môn (vd: tuần 1 hoắc 2, ...) - 1 ) * 7) day) 
+    -- lấy thời gian khai giảng làm mốc rồi cộng với công thức (tuần bắt đầu học môn - tuần bắt đầu của học kỳ) * 7) day) 
     -- để dịch chuyển biến đến ngày đầu tiên của tuần bắt đầu môn học nhưng lúc này vẫn chưa biết chính xác hôm bắt đầu buổi học là thứ mấy
     SET v_cur_date = DATE_ADD(v_anchor_monday,
-                              INTERVAL ((v_week_start - 1) * 7) DAY);
+                              INTERVAL ((v_week_start - v_semester_start_week) * 7) DAY);
 
     -- Dịch đến đúng thứ trong tuần đó
     SET v_first_day_dow = DAYOFWEEK(v_cur_date);
@@ -613,7 +630,7 @@ SET v_anchor_monday = DATE_SUB(v_semester_start, INTERVAL WEEKDAY(v_semester_sta
 
     -- Lặp: mỗi tuần từ week_start đến week_end
     WHILE v_cur_date <= DATE_ADD(v_anchor_monday,
-                                 INTERVAL ((v_week_end - 1) * 7 + 6) DAY) DO
+                                 INTERVAL ((v_week_end - v_semester_start_week) * 7 + 6) DAY) DO
         SET v_session_num = v_session_num + 1;
 
         INSERT INTO class_session
@@ -808,11 +825,13 @@ SELECT
     ac.name                                                         AS class_name,
     l.id                                                            AS lecturer_id,
     sc.total_sessions,
-    COUNT(CASE WHEN cs.status != 'cancelled' THEN 1 END)            AS generated_sessions,
+    COUNT(CASE WHEN cs.makeup_for_id IS NULL THEN 1 END)            AS generated_sessions,
     COUNT(CASE WHEN cs.status = 'closed'    THEN 1 END)            AS closed_sessions,
     COUNT(CASE WHEN cs.status = 'open'      THEN 1 END)            AS open_sessions,
-    COUNT(CASE WHEN cs.status = 'scheduled' THEN 1 END)            AS upcoming_sessions
-    -- Các buổi cancelled bị loại trừ khỏi generated_sessions để tránh phình to khi có buổi dạy bù
+    -- [ĐÃ FIX LỖI]
+    COUNT(CASE WHEN cs.makeup_for_id IS NULL THEN 1 END) - 
+    COUNT(CASE WHEN cs.status = 'closed' THEN 1 END) - 
+    COUNT(CASE WHEN cs.status = 'open' THEN 1 END)                 AS upcoming_sessions
 FROM schedule sc
 JOIN subject              sub ON sub.id = sc.subject_id
 JOIN administrative_class ac  ON ac.id  = sc.admin_class_id
@@ -872,6 +891,7 @@ SELECT
     COUNT(CASE WHEN a.status   = 'excused' THEN 1 END)             AS excused_count,
     COUNT(CASE WHEN a.is_late  = 1         THEN 1 END)             AS late_count,
     COUNT(CASE WHEN a.left_early = 1       THEN 1 END)             AS left_early_count,
+    COUNT(DISTINCT CASE WHEN cs2.status IN ('closed', 'open') THEN cs2.id END) AS finished_sessions,
     ROUND(
         COALESCE(
             SUM(CASE WHEN cs2.status IN ('closed', 'open') AND a.status IN ('present', 'excused') THEN 1.0 ELSE 0.0 END)
@@ -958,14 +978,20 @@ SELECT
             AND cs.status != 'cancelled'
         THEN sc.subject_id END)                 AS subjects_this_week,
         
-    -- "Học kỳ này": tổng buổi + đã xong / còn lại (ĐÃ SỬA LỖI ĐẾM TRÙNG)
-    COUNT(DISTINCT CASE WHEN cs.status != 'cancelled' THEN cs.id END) AS total_sessions_semester,
+    -- "Học kỳ này": tổng buổi + đã xong / còn lại (Cố định tổng buổi: 1 buổi gốc chỉ đếm 1 lần, bỏ qua buổi bù)
+    COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) AS total_sessions_semester,
     COUNT(DISTINCT CASE WHEN cs.status = 'closed'    THEN cs.id END) AS closed_sessions,
-    COUNT(DISTINCT CASE WHEN cs.status = 'scheduled' THEN cs.id END) AS remaining_sessions,
+    
+    -- [ĐÃ FIX LỖI] Còn lại = Tổng gốc - Đã chốt (bao hàm cả buổi đang mở, sắp tới, và buổi đã hủy chưa dạy bù)
+    COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) - 
+    COUNT(DISTINCT CASE WHEN cs.status = 'closed' THEN cs.id END) AS remaining_sessions,
     
     -- "Chuyên cần TB": trung bình tỉ lệ có mặt toàn lớp trong học kỳ
     ROUND(
-        AVG(CASE WHEN a.status IN ('present', 'excused') THEN 1.0 ELSE 0.0 END) * 100
+        COALESCE(
+            SUM(CASE WHEN a.status IN ('present', 'excused') THEN 1.0 ELSE 0.0 END)
+            / NULLIF(COUNT(a.id), 0) * 100
+        , 100.0)
     , 1)                                        AS avg_attendance_rate
 FROM lecturer l
 JOIN schedule           sc  ON sc.lecturer_id   = l.id
@@ -1183,11 +1209,14 @@ SELECT
     sub.credits,
     u_lec.full_name                             AS lecturer_name,
 
-    COUNT(DISTINCT cs.id)                       AS total_sessions,
+    -- [ĐÃ FIX LỖI] Cố định tổng buổi học (Bỏ qua buổi dạy bù)
+    COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) AS total_sessions,
     
     COUNT(DISTINCT CASE WHEN cs.status IN ('closed', 'open') THEN cs.id END) AS passed_sessions,
     
-    COUNT(DISTINCT CASE WHEN cs.status = 'scheduled' THEN cs.id END) AS remaining_sessions,
+    -- [ĐÃ FIX LỖI] Còn lại = Tổng gốc - Đã diễn ra
+    COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) - 
+    COUNT(DISTINCT CASE WHEN cs.status IN ('closed', 'open') THEN cs.id END) AS remaining_sessions,
 
     COUNT(CASE WHEN a.status = 'present' THEN 1 END) AS present_count,
     COUNT(CASE WHEN a.status = 'absent' THEN 1 END)  AS absent_count,
@@ -1203,12 +1232,12 @@ SELECT
         , 100.0)
     , 1)                                        AS attendance_rate_pct,
 
-    FLOOR(COUNT(DISTINCT cs.id) * 0.2)          AS max_absent_allowed,
+    FLOOR(COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) * 0.2) AS max_absent_allowed,
 
-    IF(COUNT(CASE WHEN a.status = 'absent' THEN 1 END) > FLOOR(COUNT(DISTINCT cs.id) * 0.2), 1, 0) AS is_danger,
+    IF(COUNT(CASE WHEN a.status = 'absent' THEN 1 END) > FLOOR(COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) * 0.2), 1, 0) AS is_danger,
 
     CASE
-        WHEN COUNT(CASE WHEN a.status = 'absent' THEN 1 END) > FLOOR(COUNT(DISTINCT cs.id) * 0.2)
+        WHEN COUNT(CASE WHEN a.status = 'absent' THEN 1 END) > FLOOR(COUNT(DISTINCT CASE WHEN cs.makeup_for_id IS NULL THEN cs.id END) * 0.2)
             THEN 'danger'
         WHEN ROUND(
                 COALESCE(
@@ -1236,8 +1265,8 @@ JOIN semester            sem   ON sem.id = sc.semester_id -- [ĐÃ SỬA: JOIN T
 JOIN subject             sub   ON sub.id = sc.subject_id
 JOIN lecturer            lec   ON lec.id = sc.lecturer_id
 JOIN user                u_lec ON u_lec.id = lec.user_id
+-- [ĐÃ FIX LỖI] Không loại trừ cancelled ở đây nữa để giữ nguyên Tổng số buổi
 JOIN class_session       cs    ON cs.schedule_id = sc.id
-                               AND cs.status != 'cancelled'
 LEFT JOIN attendance     a     ON a.class_session_id = cs.id
                                AND a.student_id       = s.id
 GROUP BY
@@ -1503,3 +1532,43 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- GROUP BY
 --     co.id, co.class_session_id, co.triggered_at, co.deadline_at,
 --     co.closed_at, co.note, sub.name, ac.name, u_gv.full_name;
+
+-- ============================================================
+-- V10: V_ADMIN_SCHOOL_REPORT — Báo cáo toàn trường cho Admin
+-- ============================================================
+CREATE OR REPLACE VIEW v_admin_school_report AS
+SELECT
+    sc.id AS schedule_id,
+    sc.semester_id,
+    sem.name AS semester_name,
+    f.id AS faculty_id,
+    f.name AS faculty_name,
+    d.id AS department_id,
+    d.name AS department_name,
+    ac.name AS class_name,
+    sub.name AS subject_name,
+    u_lec.full_name AS lecturer_name,
+    (SELECT COUNT(*) FROM student s WHERE s.admin_class_id = ac.id) AS total_students,
+    COUNT(DISTINCT CASE WHEN cs.status = 'closed' THEN cs.id END) AS completed_sessions,
+    sc.total_sessions AS total_sessions,
+    ROUND(
+        COALESCE(
+            SUM(CASE WHEN cs.status = 'closed' AND a.status IN ('present', 'excused') THEN 1.0 ELSE 0.0 END)
+            / NULLIF(
+                COUNT(DISTINCT CASE WHEN cs.status = 'closed' THEN cs.id END) * 
+                (SELECT COUNT(*) FROM student s WHERE s.admin_class_id = ac.id)
+            , 0) * 100
+        , 100.0)
+    , 1) AS attendance_rate
+FROM schedule sc
+JOIN semester sem ON sem.id = sc.semester_id
+JOIN subject sub ON sub.id = sc.subject_id
+JOIN administrative_class ac ON ac.id = sc.admin_class_id
+JOIN department d ON d.id = ac.department_id
+JOIN faculty f ON f.id = d.faculty_id
+JOIN lecturer l ON l.id = sc.lecturer_id
+JOIN user u_lec ON u_lec.id = l.user_id
+LEFT JOIN class_session cs ON cs.schedule_id = sc.id AND cs.status != 'cancelled'
+LEFT JOIN attendance a ON a.class_session_id = cs.id
+GROUP BY
+    sc.id, sc.semester_id, sem.name, f.id, f.name, d.id, d.name, ac.id, ac.name, sub.name, u_lec.full_name, sc.total_sessions;

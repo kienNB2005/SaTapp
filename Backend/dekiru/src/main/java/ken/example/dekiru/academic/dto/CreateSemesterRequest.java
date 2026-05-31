@@ -13,5 +13,6 @@ public class CreateSemesterRequest {
     String name;
     LocalDate startDate;
     LocalDate endDate;
+    Byte startWeek;
 }
 

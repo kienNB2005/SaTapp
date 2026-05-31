@@ -23,8 +23,8 @@ public interface HomeroomReportRepository extends JpaRepository<Student, Long> {
             COALESCE(SUM(vas.left_early_count), 0) AS leftEarlyCount,
             COALESCE(SUM(vas.total_sessions), 0) AS totalSessions,
             ROUND(
-                COALESCE(SUM(vas.present_count), 0) * 100.0 / 
-                NULLIF(SUM(vas.total_sessions), 0)
+                (COALESCE(SUM(vas.present_count), 0) + COALESCE(SUM(vas.excused_count), 0)) * 100.0 / 
+                NULLIF(SUM(vas.finished_sessions), 0)
             , 1) AS attendanceRate
         FROM student s
         JOIN user u ON s.user_id = u.id
@@ -43,14 +43,13 @@ public interface HomeroomReportRepository extends JpaRepository<Student, Long> {
 
     @Query(value = """
         SELECT 
-            COUNT(cs.id) AS totalSessions,
+            SUM(CASE WHEN cs.makeup_for_id IS NULL THEN 1 ELSE 0 END) AS totalSessions,
             SUM(CASE WHEN cs.status = 'closed' THEN 1 ELSE 0 END) AS finishedSessions
         FROM class_session cs
         JOIN schedule sc ON cs.schedule_id = sc.id
         WHERE sc.semester_id = :semesterId
           AND (:subjectId IS NULL OR sc.subject_id = :subjectId)
           AND sc.admin_class_id = :adminClassId
-          AND cs.status != 'cancelled'
         """, nativeQuery = true)
     List<Object[]> getSessionStats(
             @Param("semesterId") Long semesterId,
