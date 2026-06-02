@@ -239,7 +239,7 @@
   color: var(--gr);
   font-weight: 600;
   justify-content: left;
-  display: flex;
+  /* display: flex; */
 }
 
 .atk-pagination {
@@ -259,23 +259,13 @@
 
 .atk-pagination-actions {
   display: flex;
-  align-items: center;
   gap: 6px;
 }
 
-.atk-pagination-actions .btn {
-  min-width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px !important;
-}
-
 .atk-page-active {
-  background: var(--bl);
-  color: #fff;
-  border: 1px solid var(--bl) !important;
+  background: var(--bg3);
+  color: var(--tx);
+  border: 1px solid var(--bl);
 }
 
 /* =========================

@@ -30,9 +30,8 @@
 
   /* Text */
   --tx:   #1F2937;
-  --tx2:  #6B7280;
+  --tx2:  #000000;
   --tx3:  #6B7280;
-  --txW:  #FFFFFF;
   --color-blue-200: oklch(88.2% 0.059 254.128);
   --color-blue-300: oklch(80.9% 0.105 251.813);
 
@@ -123,7 +122,7 @@ body {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--txW);
+  color: var(--tx2);
 }
 
 .sb-logo-su {
@@ -157,7 +156,7 @@ body {
 .sb-un {
   font-size: 12px;
   font-weight: 600;
-  color: var(--txW);
+  color: var(--tx2);
 }
 
 .sb-ur {
@@ -208,7 +207,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
-  color: var(--txW);
+  color: var(--tx2);
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;

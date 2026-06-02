@@ -30,9 +30,9 @@
 
   /* Text */
   --tx:   #1F2937;
-  --tx2:  #6B7280;
-  --tx3:  #6B7280;
+  --tx2:  #1F2937B3; /* 70% opacity */
   --txW:  #FFFFFF;
+  --tx3:  #6B7280;
   --color-blue-200: oklch(88.2% 0.059 254.128);
   --color-blue-300: oklch(80.9% 0.105 251.813);
 

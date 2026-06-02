@@ -342,7 +342,7 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
   const gapBetweenBars = 15;
   const startX = 50;
   const topPadding = 20;
-  const bottomPadding = 80;
+  const bottomPadding = 50;
   const chartRightPadding = 20;
   const chartWidth = startX + data.length * (barWidth * 2 + gapBetweenBars) - gapBetweenBars;
   const viewBoxWidth = chartWidth + chartRightPadding + 10;
@@ -535,13 +535,13 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
           </div>
         )}
 
-        {/* ✅ Thanh Trung bình tháng - Chiều cao 18px */}
-        <div>
+        {/* ✅ Thanh Trung bình tháng - Chiều cao 28px */}
+        <div style={{ marginTop: '34px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ fontSize: '11px', color: 'var(--tx3)', fontWeight: 600 }}>Trung bình tháng</span>
             <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--tx)' }}>{avgRate}%</span>
           </div>
-          <div style={{ width: '100%', height: '18px', background: 'var(--bg3)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ width: '100%', height: '28px', background: 'var(--bg3)', borderRadius: '8px', overflow: 'hidden' }}>
             <div style={{
               width: `${avgRate}%`,
               height: '100%',

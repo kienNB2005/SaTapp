@@ -30,9 +30,9 @@
 
   /* Text */
   --tx:   #1F2937;
-  --tx2:  #6B7280;
-  --tx3:  #6B7280;
+  --tx2:  #1F2937B3; /* 70% opacity */
   --txW:  #FFFFFF;
+  --tx3:  #6B7280;
   --color-blue-200: oklch(88.2% 0.059 254.128);
   --color-blue-300: oklch(80.9% 0.105 251.813);
 
@@ -408,6 +408,36 @@ body {
 .tbl tr:last-child td { border-bottom: none; }
 .tbl tr:hover td {
   background: var(--primary-tint);
+}
+
+/* =========================
+   Responsive helpers (basic)
+   - stacks grids, collapses sidebar on small screens
+   ========================= */
+
+@media (max-width: 1000px) {
+  .sg { grid-template-columns: repeat(2, 1fr); }
+
+  /* Narrow sidebar: icons-only */
+  .sb { width: 64px; }
+  .sb-logo-tx, .sb-logo-su, .sb-un, .sb-ur, .sb-sec, .sb-foot, .sb-logo-ic img { display: none; }
+  .sb-av { width: 36px; height: 36px; }
+  .sb-it { justify-content: center; padding: 10px 6px; }
+  .sb-it span { display: none; }
+  .main { margin-left: 64px; }
+}
+
+@media (max-width: 640px) {
+  /* Mobile: hide sidebar, full-width content */
+  .sb { display: none; }
+  .main { margin-left: 0; }
+
+  .topbar { padding: 0 12px; }
+  .content { padding: 12px; }
+
+  .sg { grid-template-columns: 1fr; }
+  .card-h { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .tbl th, .tbl td { padding: 8px 10px; font-size: 13px; }
 }
 
 /* ── BADGES ── */

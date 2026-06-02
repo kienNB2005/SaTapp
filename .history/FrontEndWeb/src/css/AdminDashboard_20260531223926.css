@@ -81,8 +81,6 @@
 .sc-info {
   display: flex;
   flex-direction: column;
-  padding: 6px 0; /* add vertical breathing room to balance with right-side icon and badge */
-  justify-content: center;
 }
 
 .sc-label {
@@ -91,7 +89,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .sc-value {

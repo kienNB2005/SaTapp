@@ -535,7 +535,7 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
           </div>
         )}
 
-        {/* ✅ Thanh Trung bình tháng - Chiều cao 18px */}
+        {/* ✅ Thanh Trung bình tháng - Chiều cao 28px */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ fontSize: '11px', color: 'var(--tx3)', fontWeight: 600 }}>Trung bình tháng</span>

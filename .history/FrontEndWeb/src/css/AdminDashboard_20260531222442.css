@@ -58,8 +58,7 @@
   background: #ffffff;
   border: 1px solid var(--bd);
   border-radius: 16px;
-  padding: 22px 20px 20px 20px;
-  min-height: 96px;
+  padding: 20px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
@@ -68,9 +67,6 @@
   justify-content: space-between;
   align-items: center;
 }
-
-/* leave room at right for percent badge */
-.sc-premium { padding-right: 72px; }
 
 .sc-premium:hover {
   transform: translateY(-4px);
@@ -81,8 +77,6 @@
 .sc-info {
   display: flex;
   flex-direction: column;
-  padding: 6px 0; /* add vertical breathing room to balance with right-side icon and badge */
-  justify-content: center;
 }
 
 .sc-label {
@@ -91,7 +85,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .sc-value {
@@ -109,26 +103,22 @@
 }
 
 .sc-icon-wrapper {
-  position: absolute;
-  right: 12px;
-  top: 40px; /* place icon under the percent badge */
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  background: rgba(99,102,241,0.06); /* subtle indigo */
-  color: rgba(99,102,241,1);
-  transition: background 0.25s, transform 0.25s;
-  z-index: 4;
+  background: var(--primary-tint);
+  color: var(--primary);
+  transition: all 0.3s;
 }
 
 .sc-premium:hover .sc-icon-wrapper {
-  background: rgba(99,102,241,1);
+  background: var(--primary);
   color: #fff;
-  transform: rotate(6deg) scale(1.02);
+  transform: rotate(8deg) scale(1.05);
 }
 
 /* SVG Radial Attendance rate Ring */
@@ -401,5 +391,4 @@
   padding: 4px 8px;
   border-radius: 999px;
   box-shadow: 0 6px 18px rgba(16,185,129,0.06);
-  z-index: 6; /* keep badge above icon */
 }

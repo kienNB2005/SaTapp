@@ -81,8 +81,6 @@
 .sc-info {
   display: flex;
   flex-direction: column;
-  padding: 6px 0; /* add vertical breathing room to balance with right-side icon and badge */
-  justify-content: center;
 }
 
 .sc-label {
@@ -91,7 +89,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .sc-value {
@@ -109,9 +107,6 @@
 }
 
 .sc-icon-wrapper {
-  position: absolute;
-  right: 12px;
-  top: 40px; /* place icon under the percent badge */
   width: 48px;
   height: 48px;
   border-radius: 12px;
@@ -122,13 +117,14 @@
   background: rgba(99,102,241,0.06); /* subtle indigo */
   color: rgba(99,102,241,1);
   transition: background 0.25s, transform 0.25s;
-  z-index: 4;
+  z-index: 1;
+  transform: translateX(-8px); /* shift left so badge has space */
 }
 
 .sc-premium:hover .sc-icon-wrapper {
   background: rgba(99,102,241,1);
   color: #fff;
-  transform: rotate(6deg) scale(1.02);
+  transform: translateX(-8px) rotate(6deg) scale(1.02);
 }
 
 /* SVG Radial Attendance rate Ring */
@@ -401,5 +397,5 @@
   padding: 4px 8px;
   border-radius: 999px;
   box-shadow: 0 6px 18px rgba(16,185,129,0.06);
-  z-index: 6; /* keep badge above icon */
+  z-index: 3; /* keep badge above icon */
 }

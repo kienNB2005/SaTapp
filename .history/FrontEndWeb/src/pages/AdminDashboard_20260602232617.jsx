@@ -334,7 +334,6 @@ function AttendanceCharts() {
   );
 }
 
-// BIỂU ĐỒ TỶ LỆ ĐIỂM DANH TUẦN
 function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
   const maxTotal = Math.max(...data.map(d => d.total));
   const chartHeight = 280;
@@ -342,7 +341,7 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
   const gapBetweenBars = 15;
   const startX = 50;
   const topPadding = 20;
-  const bottomPadding = 80;
+  const bottomPadding = 50;
   const chartRightPadding = 20;
   const chartWidth = startX + data.length * (barWidth * 2 + gapBetweenBars) - gapBetweenBars;
   const viewBoxWidth = chartWidth + chartRightPadding + 10;
@@ -362,26 +361,65 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
 
       <div style={{ padding: '20px', position: 'relative' }}>
         <svg width="100%" height={chartHeight + topPadding + bottomPadding} viewBox={`0 0 ${viewBoxWidth} ${chartHeight + topPadding + bottomPadding}`} style={{ minWidth: '100%', overflow: 'visible' }}>
-          <rect x={chartAreaLeft} y={topPadding} width={chartAreaRight - chartAreaLeft} height={chartHeight} fill="transparent" stroke="#cbd5e1" strokeWidth="0.8" opacity="0.18" rx="10" />
+          <rect
+            x={chartAreaLeft}
+            y={topPadding}
+            width={chartAreaRight - chartAreaLeft}
+            height={chartHeight}
+            fill="transparent"
+            stroke="#cbd5e1"
+            strokeWidth="0.8"
+            opacity="0.18"
+            rx="10"
+          />
 
-          {/* Y-axis labels */}
+          {/* Y-axis labels and horizontal grid lines */}
           {[0, 25, 50, 75, 100].map((val) => {
             const y = topPadding + chartHeight - (val / 100) * chartHeight;
             return (
               <g key={`y-${val}`}>
-                <text x="18" y={y + 5} fontSize="11" fill="var(--tx3)" textAnchor="end" fontWeight="500">{val}</text>
-                <line x1={chartAreaLeft} y1={y} x2={chartAreaRight} y2={y} stroke="#cbd5e1" strokeWidth="0.75" strokeDasharray="4,4" opacity="0.45" />
+                <text x="18" y={y + 5} fontSize="11" fill="var(--tx3)" textAnchor="end" fontWeight="500">
+                  {val}
+                </text>
+                <line
+                  x1={chartAreaLeft}
+                  y1={y}
+                  x2={chartAreaRight}
+                  y2={y}
+                  stroke="#cbd5e1"
+                  strokeWidth="0.75"
+                  strokeDasharray="4,4"
+                  opacity="0.45"
+                />
               </g>
             );
           })}
 
-          <line x1={chartAreaLeft} y1={topPadding + chartHeight} x2={chartAreaRight} y2={topPadding + chartHeight} stroke="#9ca3af" strokeWidth="1" opacity="0.45" />
+          <line
+            x1={chartAreaLeft}
+            y1={topPadding + chartHeight}
+            x2={chartAreaRight}
+            y2={topPadding + chartHeight}
+            stroke="#9ca3af"
+            strokeWidth="1"
+            opacity="0.45"
+          />
 
           {/* Vertical grid lines */}
           {data.map((item, idx) => {
             const x = startX + idx * (barWidth * 2 + gapBetweenBars) + barWidth + 3;
             return (
-              <line key={`grid-v-${idx}`} x1={x} y1={topPadding} x2={x} y2={topPadding + chartHeight} stroke="#cbd5e1" strokeWidth="0.75" strokeDasharray="4,4" opacity="0.25" />
+              <line
+                key={`grid-v-${idx}`}
+                x1={x}
+                y1={topPadding}
+                x2={x}
+                y2={topPadding + chartHeight}
+                stroke="#cbd5e1"
+                strokeWidth="0.75"
+                strokeDasharray="4,4"
+                opacity="0.25"
+              />
             );
           })}
 
@@ -394,11 +432,33 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
 
             return (
               <g key={`bar-${idx}`}>
-                <rect x={x} y={topPadding + chartHeight - presentHeight} width={barWidth} height={presentHeight} fill={isHovered ? '#2563eb' : '#3b82f6'} rx="4" style={{ cursor: 'pointer', opacity: isHovered ? 1 : 0.95, transition: 'all 0.2s' }} onMouseEnter={() => setHoveredDay(idx)} onMouseLeave={() => setHoveredDay(null)} />
+                {/* Present bar (blue) */}
+                <rect
+                  x={x}
+                  y={topPadding + chartHeight - presentHeight}
+                  width={barWidth}
+                  height={presentHeight}
+                  fill={isHovered ? '#2563eb' : '#3b82f6'}
+                  rx="4"
+                  style={{ cursor: 'pointer', opacity: isHovered ? 1 : 0.95, transition: 'all 0.2s' }}
+                  onMouseEnter={() => setHoveredDay(idx)}
+                  onMouseLeave={() => setHoveredDay(null)}
+                />
 
-                <rect x={x + barWidth + 6} y={topPadding + chartHeight - absentHeight} width={barWidth} height={absentHeight} fill={isHovered ? '#dc2626' : '#ef4444'} rx="4" style={{ cursor: 'pointer', opacity: isHovered ? 1 : 0.95, transition: 'all 0.2s' }} onMouseEnter={() => setHoveredDay(idx)} onMouseLeave={() => setHoveredDay(null)} />
+                {/* Absent bar (red) */}
+                <rect
+                  x={x + barWidth + 6}
+                  y={topPadding + chartHeight - absentHeight}
+                  width={barWidth}
+                  height={absentHeight}
+                  fill={isHovered ? '#dc2626' : '#ef4444'}
+                  rx="4"
+                  style={{ cursor: 'pointer', opacity: isHovered ? 1 : 0.95, transition: 'all 0.2s' }}
+                  onMouseEnter={() => setHoveredDay(idx)}
+                  onMouseLeave={() => setHoveredDay(null)}
+                />
 
-                {/* ✅ Hiển thị T2-T7 thay vì "Thứ 2"-"Thứ 7" */}
+                {/* Day label */}
                 <text x={x + barWidth + 3} y={topPadding + chartHeight + 28} fontSize="12" fill="var(--tx2)" textAnchor="middle" fontWeight="600" dy="0.1em">
                   {item.day}
                 </text>
@@ -407,7 +467,7 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
           })}
         </svg>
 
-        {/* Tooltip & Legend */}
+        {/* Tooltip */}
         {hoveredDay !== null && (
           <div className="chart-tooltip" style={{
             position: 'absolute',
@@ -424,11 +484,16 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
             whiteSpace: 'nowrap'
           }}>
             <div style={{ fontWeight: 700, color: 'var(--tx)' }}>{data[hoveredDay].name}</div>
-            <div style={{ color: 'var(--tx2)', marginTop: '2px' }}>Có mặt: {((data[hoveredDay].present / data[hoveredDay].total) * 100).toFixed(0)}%</div>
-            <div style={{ color: 'var(--tx2)' }}>Vắng: {((data[hoveredDay].absent / data[hoveredDay].total) * 100).toFixed(0)}%</div>
+            <div style={{ color: 'var(--tx2)', marginTop: '2px' }}>
+              Có mặt: {((data[hoveredDay].present / data[hoveredDay].total) * 100).toFixed(0)}%
+            </div>
+            <div style={{ color: 'var(--tx2)' }}>
+              Vắng: {((data[hoveredDay].absent / data[hoveredDay].total) * 100).toFixed(0)}%
+            </div>
           </div>
         )}
 
+        {/* Legend */}
         <div style={{ display: 'flex', gap: '20px', marginTop: '16px', fontSize: '11px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '12px', height: '12px', background: '#3b82f6', borderRadius: '2px' }}></div>
@@ -444,7 +509,6 @@ function WeeklyAttendanceChart({ data, hoveredDay, setHoveredDay }) {
   );
 }
 
-// BIỂU ĐỒ XU HƯỚNG ĐIỂM DANH
 function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }) {
   const chartHeight = 280;
   const chartWidth = 560;
@@ -456,6 +520,7 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
   const chartAreaLeft = padding;
   const chartAreaRight = chartWidth;
 
+  // Normalize data points for line chart
   const maxRate = 100;
   const points = data.map((item, idx) => ({
     ...item,
@@ -463,6 +528,7 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
     y: topPadding + chartHeight - (item.rate / maxRate) * chartHeight,
   }));
 
+  // Create SVG path for line
   const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
   return (
@@ -478,24 +544,63 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
 
       <div style={{ padding: '20px', position: 'relative' }}>
         <svg width="100%" height={viewBoxHeight} viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} style={{ minWidth: '100%' }}>
-          <rect x={chartAreaLeft} y={topPadding} width={chartAreaRight - chartAreaLeft} height={chartHeight} fill="transparent" stroke="#cbd5e1" strokeWidth="0.8" opacity="0.18" rx="10" />
+          <rect
+            x={chartAreaLeft}
+            y={topPadding}
+            width={chartAreaRight - chartAreaLeft}
+            height={chartHeight}
+            fill="transparent"
+            stroke="#cbd5e1"
+            strokeWidth="0.8"
+            opacity="0.18"
+            rx="10"
+          />
 
-          {/* Y-axis labels */}
+          {/* Y-axis labels and horizontal grid lines */}
           {[0, 25, 50, 75, 100].map((val) => {
             const y = topPadding + chartHeight - (val / 100) * chartHeight;
             return (
               <g key={`grid-${val}`}>
-                <text x="18" y={y + 5} fontSize="11" fill="var(--tx3)" textAnchor="end" fontWeight="500">{val}</text>
-                <line x1={chartAreaLeft} y1={y} x2={chartAreaRight} y2={y} stroke="#cbd5e1" strokeWidth="0.75" strokeDasharray="4,4" opacity="0.45" />
+                <text x="18" y={y + 5} fontSize="11" fill="var(--tx3)" textAnchor="end" fontWeight="500">
+                  {val}
+                </text>
+                <line
+                  x1={chartAreaLeft}
+                  y1={y}
+                  x2={chartAreaRight}
+                  y2={y}
+                  stroke="#cbd5e1"
+                  strokeWidth="0.75"
+                  strokeDasharray="4,4"
+                  opacity="0.45"
+                />
               </g>
             );
           })}
 
-          <line x1={chartAreaLeft} y1={topPadding + chartHeight} x2={chartAreaRight} y2={topPadding + chartHeight} stroke="#9ca3af" strokeWidth="1" opacity="0.45" />
+          <line
+            x1={chartAreaLeft}
+            y1={topPadding + chartHeight}
+            x2={chartAreaRight}
+            y2={topPadding + chartHeight}
+            stroke="#9ca3af"
+            strokeWidth="1"
+            opacity="0.45"
+          />
 
           {/* Vertical grid lines */}
           {points.map((point, idx) => (
-            <line key={`grid-v-${idx}`} x1={point.x} y1={topPadding} x2={point.x} y2={topPadding + chartHeight} stroke="#cbd5e1" strokeWidth="0.75" strokeDasharray="4,4" opacity="0.25" />
+            <line
+              key={`grid-v-${idx}`}
+              x1={point.x}
+              y1={topPadding}
+              x2={point.x}
+              y2={topPadding + chartHeight}
+              stroke="#cbd5e1"
+              strokeWidth="0.75"
+              strokeDasharray="4,4"
+              opacity="0.25"
+            />
           ))}
 
           {/* Line */}
@@ -504,9 +609,15 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
           {/* Data points */}
           {points.map((point, idx) => (
             <g key={`point-${idx}`}>
-              <circle cx={point.x} cy={point.y} r={hoveredMonth === idx ? 5 : 4} fill={hoveredMonth === idx ? '#6366f1' : '#818cf8'} style={{ cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={() => setHoveredMonth(idx)} onMouseLeave={() => setHoveredMonth(null)} />
-              
-              {/* ✅ Hiển thị T1-T12 thay vì "Tháng 1"-"Tháng 12" */}
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r={hoveredMonth === idx ? 5 : 4}
+                fill={hoveredMonth === idx ? '#6366f1' : '#818cf8'}
+                style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={() => setHoveredMonth(idx)}
+                onMouseLeave={() => setHoveredMonth(null)}
+              />
               <text x={point.x} y={topPadding + chartHeight + 34} fontSize="11" fill="var(--tx2)" textAnchor="middle" fontWeight="600">
                 {point.month}
               </text>
@@ -531,17 +642,19 @@ function MonthlyAttendanceTrend({ data, hoveredMonth, setHoveredMonth, avgRate }
             whiteSpace: 'nowrap'
           }}>
             <div style={{ fontWeight: 700, color: 'var(--tx)' }}>{data[hoveredMonth].name}</div>
-            <div style={{ color: 'var(--tx2)', marginTop: '2px' }}>Điểm danh: {data[hoveredMonth].rate}%</div>
+            <div style={{ color: 'var(--tx2)', marginTop: '2px' }}>
+              Điểm danh: {data[hoveredMonth].rate}%
+            </div>
           </div>
         )}
 
-        {/* ✅ Thanh Trung bình tháng - Chiều cao 18px */}
-        <div>
+        {/* Progress bar */}
+        <div style={{ marginTop: '34px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ fontSize: '11px', color: 'var(--tx3)', fontWeight: 600 }}>Trung bình tháng</span>
             <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--tx)' }}>{avgRate}%</span>
           </div>
-          <div style={{ width: '100%', height: '18px', background: 'var(--bg3)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ width: '100%', height: '28px', background: 'var(--bg3)', borderRadius: '8px', overflow: 'hidden' }}>
             <div style={{
               width: `${avgRate}%`,
               height: '100%',
