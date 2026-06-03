@@ -38,6 +38,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+    private final JWTService jwtService;
 
     @GetMapping ("/students")
     public ApiResponse<Page<StudentResponse>> getAll(

@@ -486,39 +486,6 @@ public class UserService  {
         return userMapper.toLecturerResponse(lecturer);
     }
 
-    public UserResponse getUserInfo(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toUserResponse(user);
-    }
-
-    @Transactional
-    public void changePassword(Long userId, ChangePasswordRequest request) {
-        // Validate request
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new AppException(ErrorCode.PASSWORD_NOT_MATCH);
-        }
-
-        if (request.getNewPassword().length() < 6) {
-            throw new AppException(ErrorCode.PASSWORD_INVALID);
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        // If user has password field set (previously used password auth)
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            // Verify old password (if BCrypt available, use it; otherwise simple comparison)
-            if (!user.getPassword().equals(request.getOldPassword())) {
-                throw new AppException(ErrorCode.WRONG_PASSWORD);
-            }
-        }
-
-        // Set new password (in production, use BCrypt encoder)
-        user.setPassword(request.getNewPassword());
-        userRepository.save(user);
-    }
-
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
         if (cell.getCellType() == CellType.STRING) {

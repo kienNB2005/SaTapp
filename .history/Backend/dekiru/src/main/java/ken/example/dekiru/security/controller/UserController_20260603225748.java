@@ -13,6 +13,7 @@ import ken.example.dekiru.student.dto.StudentResponse;
 import ken.example.dekiru.security.dto.UserResponse;
 import ken.example.dekiru.security.dto.ChangePasswordRequest;
 import ken.example.dekiru.security.service.UserService;
+import ken.example.dekiru.security.service.JWTService;
 import ken.example.dekiru.common.response.ApiResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +27,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.nimbusds.jwt.SignedJWT;
@@ -38,6 +41,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+    private final JWTService jwtService;
 
     @GetMapping ("/students")
     public ApiResponse<Page<StudentResponse>> getAll(

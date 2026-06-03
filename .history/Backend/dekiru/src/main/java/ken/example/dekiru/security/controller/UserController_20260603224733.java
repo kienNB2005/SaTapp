@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.nimbusds.jwt.SignedJWT;
 
 import java.util.List;
 
@@ -152,51 +151,5 @@ public class UserController {
     public ApiResponse<LecturerResponse> updateLecturer(@PathVariable("id") Long id, @RequestBody UpdateLecturerRequest request) {
         LecturerResponse response = userService.updateLecturer(id, request);
         return ApiResponse.success(response, "Cập nhật giảng viên thành công");
-    }
-
-    @GetMapping("/me")
-    public ApiResponse<UserResponse> getCurrentUserInfo(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                throw new RuntimeException("Authorization header missing or invalid");
-            }
-
-            String token = authHeader.substring(7);
-            SignedJWT jwt = SignedJWT.parse(token);
-            Long userId = jwt.getJWTClaimsSet().getLongClaim("userId");
-
-            if (userId == null) {
-                throw new RuntimeException("userId not found in token");
-            }
-
-            UserResponse userInfo = userService.getUserInfo(userId);
-            return ApiResponse.success(userInfo, "Lấy thông tin người dùng thành công");
-        } catch (Exception e) {
-            throw new RuntimeException("Error getting user info: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/me/change-password")
-    public ApiResponse<Void> changePassword(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody ChangePasswordRequest request) {
-        try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                throw new RuntimeException("Authorization header missing or invalid");
-            }
-
-            String token = authHeader.substring(7);
-            SignedJWT jwt = SignedJWT.parse(token);
-            Long userId = jwt.getJWTClaimsSet().getLongClaim("userId");
-
-            if (userId == null) {
-                throw new RuntimeException("userId not found in token");
-            }
-
-            userService.changePassword(userId, request);
-            return ApiResponse.success(null, "Đổi mật khẩu thành công");
-        } catch (Exception e) {
-            throw new RuntimeException("Error changing password: " + e.getMessage());
-        }
     }
 }

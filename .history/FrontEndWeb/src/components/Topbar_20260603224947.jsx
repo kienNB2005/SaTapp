@@ -60,6 +60,13 @@ export default function Topbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleLogout = () => {
+    // TODO: Implement logout logic
+    console.log('Logging out...');
+    // localStorage.removeItem('token');
+    // navigate('/login');
+  };
+
   return (
     <div className="topbar">
       <div>
@@ -176,22 +183,6 @@ export default function Topbar() {
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      <AccountInfoModal 
-        isOpen={showAccountInfo} 
-        onClose={() => setShowAccountInfo(false)} 
-      />
-      
-      <ChangePasswordModal 
-        isOpen={showChangePassword} 
-        onClose={() => setShowChangePassword(false)} 
-      />
-      
-      <LogoutConfirmDialog 
-        isOpen={showLogoutConfirm} 
-        onClose={() => setShowLogoutConfirm(false)} 
-      />
     </div>
   );
 }

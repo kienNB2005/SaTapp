@@ -26,9 +26,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.nimbusds.jwt.SignedJWT;
 
 import java.util.List;
 
@@ -155,18 +156,29 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ApiResponse<UserResponse> getCurrentUserInfo(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ApiResponse<UserResponse> getCurrentUserInfo() {
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                throw new RuntimeException("Authorization header missing or invalid");
+            // Extract userId from JWT token in SecurityContext
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new RuntimeException("User not authenticated");
             }
 
-            String token = authHeader.substring(7);
-            SignedJWT jwt = SignedJWT.parse(token);
-            Long userId = jwt.getJWTClaimsSet().getLongClaim("userId");
-
-            if (userId == null) {
-                throw new RuntimeException("userId not found in token");
+            // Get userId from JWT claims (assuming it's stored in the token)
+            // The userId should be available in the authentication principal
+            String userIdStr = authentication.getName();
+            
+            // If it's an email (from Spring Security), try to get userId from there
+            // Otherwise, the userId should be in the token claims
+            Long userId = null;
+            
+            // Check if it's a numeric userId
+            try {
+                userId = Long.parseLong(userIdStr);
+            } catch (NumberFormatException e) {
+                // If not numeric, it might be email - query by email instead
+                // This is a fallback, ideally userId should be in JWT claims
+                throw new RuntimeException("Cannot extract userId from token");
             }
 
             UserResponse userInfo = userService.getUserInfo(userId);
@@ -177,20 +189,21 @@ public class UserController {
     }
 
     @PostMapping("/me/change-password")
-    public ApiResponse<Void> changePassword(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody ChangePasswordRequest request) {
+    public ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                throw new RuntimeException("Authorization header missing or invalid");
+            // Extract userId from JWT token in SecurityContext
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new RuntimeException("User not authenticated");
             }
 
-            String token = authHeader.substring(7);
-            SignedJWT jwt = SignedJWT.parse(token);
-            Long userId = jwt.getJWTClaimsSet().getLongClaim("userId");
-
-            if (userId == null) {
-                throw new RuntimeException("userId not found in token");
+            String userIdStr = authentication.getName();
+            Long userId = null;
+            
+            try {
+                userId = Long.parseLong(userIdStr);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Cannot extract userId from token");
             }
 
             userService.changePassword(userId, request);

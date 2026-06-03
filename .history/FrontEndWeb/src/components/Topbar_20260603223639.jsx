@@ -2,9 +2,6 @@
 import { useLocation } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { Bell, Settings, LogOut, Lock, User } from "lucide-react";
-import AccountInfoModal from './AccountInfoModal';
-import ChangePasswordModal from './ChangePasswordModal';
-import LogoutConfirmDialog from './LogoutConfirmDialog';
 
 const PAGE_INFO = [
   { path: '/', section: 'Tổng quan', title: 'Dashboard', sub: 'Thứ 3, 02/09/2025 · HK1-2024-2025', exact: true },
@@ -39,9 +36,6 @@ function getPageInfo(pathname) {
 export default function Topbar() {
   const location = useLocation();
   const [showMenu, setShowMenu] = useState(false);
-  const [showAccountInfo, setShowAccountInfo] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const menuRef = useRef(null);
 
   const { section, title, sub } = getPageInfo(location.pathname);
@@ -59,6 +53,13 @@ export default function Topbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    // TODO: Implement logout logic
+    console.log('Logging out...');
+    // localStorage.removeItem('token');
+    // navigate('/login');
+  };
 
   return (
     <div className="topbar">
@@ -95,10 +96,6 @@ export default function Topbar() {
             }}>
               <button
                 className="menu-item"
-                onClick={() => {
-                  setShowAccountInfo(true);
-                  setShowMenu(false);
-                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -122,10 +119,6 @@ export default function Topbar() {
 
               <button
                 className="menu-item"
-                onClick={() => {
-                  setShowChangePassword(true);
-                  setShowMenu(false);
-                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -149,10 +142,7 @@ export default function Topbar() {
 
               <button
                 className="menu-item"
-                onClick={() => {
-                  setShowLogoutConfirm(true);
-                  setShowMenu(false);
-                }}
+                onClick={handleLogout}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -176,22 +166,6 @@ export default function Topbar() {
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      <AccountInfoModal 
-        isOpen={showAccountInfo} 
-        onClose={() => setShowAccountInfo(false)} 
-      />
-      
-      <ChangePasswordModal 
-        isOpen={showChangePassword} 
-        onClose={() => setShowChangePassword(false)} 
-      />
-      
-      <LogoutConfirmDialog 
-        isOpen={showLogoutConfirm} 
-        onClose={() => setShowLogoutConfirm(false)} 
-      />
     </div>
   );
 }

@@ -265,7 +265,7 @@ body {
   overflow: hidden;
 }
 .topbar {
-  background:#FFFFFF;
+  background:var(--primary);
   border-bottom: 1px solid var(--bd);
   padding: 0 22px;
   height: 54px;
@@ -280,7 +280,7 @@ body {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--primary);
+  color: var(--txW);
 }
 
 .tb-sub {
