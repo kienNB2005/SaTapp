@@ -30,9 +30,14 @@
 
   /* Text */
   --tx:   #1F2937;
+<<<<<<< HEAD
   --tx2:  #1F2937B3; /* 70% opacity */
   --txW:  #FFFFFF;
+=======
+  --tx2:  #6B7280;
+>>>>>>> temp-save
   --tx3:  #6B7280;
+  --txW:  #FFFFFF;
   --color-blue-200: oklch(88.2% 0.059 254.128);
   --color-blue-300: oklch(80.9% 0.105 251.813);
 
@@ -265,7 +270,7 @@ body {
   overflow: hidden;
 }
 .topbar {
-  background: #FFFFFF;
+  background:#FFFFFF;
   border-bottom: 1px solid var(--bd);
   padding: 0 22px;
   height: 54px;
